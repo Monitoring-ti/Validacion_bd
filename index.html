@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Portal del Trabajador - Monitoring</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+    <!-- ======================================================
+         Contenedor de notificaciones (toasts)
+         ====================================================== -->
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+
+    <!-- ======================================================
+         Vista LOGIN
+         ====================================================== -->
+    <section id="vista-login" class="vista vista-login">
+        <div class="login-card">
+            <div class="login-logo">Monitoring</div>
+            <h1>Portal del Trabajador</h1>
+            <p class="login-sub">
+                Inicia sesion con tu cuenta corporativa Microsoft 365
+                para revisar y validar tus datos.
+            </p>
+            <button id="btn-login" class="btn btn-primary btn-microsoft" type="button">
+                <span class="ms-logo" aria-hidden="true">
+                    <span class="ms-sq sq1"></span>
+                    <span class="ms-sq sq2"></span>
+                    <span class="ms-sq sq3"></span>
+                    <span class="ms-sq sq4"></span>
+                </span>
+                Iniciar sesion con Microsoft 365
+            </button>
+            <p id="login-error" class="login-error" hidden></p>
+            <p class="login-foot">
+                Solo se permite acceso con cuentas <strong>@monitoring.cl</strong>.
+            </p>
+        </div>
+    </section>
+
+    <!-- ======================================================
+         Vista APP (formulario)
+         ====================================================== -->
+    <section id="vista-app" class="vista vista-app" hidden>
+
+        <header class="app-header">
+            <div class="brand">Monitoring</div>
+            <div class="user-box">
+                <div class="user-info">
+                    <span id="user-nombre" class="user-nombre"></span>
+                    <span id="user-email" class="user-email"></span>
+                </div>
+                <button id="btn-logout" class="btn btn-ghost" type="button">Cerrar sesion</button>
+            </div>
+        </header>
+
+        <main class="container">
+
+            <div class="page-intro">
+                <h1>Validacion de datos personales</h1>
+                <p>
+                    Revisa cuidadosamente la informacion. Los campos en gris son de
+                    solo lectura. Edita los campos habilitados, confirma al final y
+                    envia el formulario.
+                </p>
+            </div>
+
+            <!-- ============== 1. DATOS PERSONALES ============== -->
+            <article class="card" id="card-personales">
+                <header class="card-header">
+                    <h2>1. Datos personales</h2>
+                    <span class="card-sub">Solo lectura. Para corregir el documento usa el boton al pie.</span>
+                </header>
+                <div class="grid">
+                    <div class="field">
+                        <label>Nombre completo</label>
+                        <input id="f-nombre-completo" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Apellidos</label>
+                        <input id="f-apellidos" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Nacionalidad</label>
+                        <input id="f-nacionalidad" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Tipo de documento</label>
+                        <input id="f-tipo-identificacion" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Numero de documento</label>
+                        <input id="f-numero-identificacion" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Cargo</label>
+                        <input id="f-cargo" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Tipo de contrato</label>
+                        <input id="f-tipo-contrato" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Centro de costo</label>
+                        <input id="f-centro-costo" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Unidad</label>
+                        <input id="f-unidad" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Email corporativo</label>
+                        <input id="f-email-corporativo" type="text" readonly />
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button id="btn-solicitar-correccion" class="btn btn-secondary" type="button">
+                        Solicitar correccion de documento
+                    </button>
+                </div>
+            </article>
+
+            <!-- ============== 2. DATOS BANCARIOS ============== -->
+            <article class="card" id="card-bancarios">
+                <header class="card-header">
+                    <h2>2. Datos bancarios</h2>
+                    <span class="card-sub">Campos editables.</span>
+                </header>
+                <div class="grid">
+                    <div class="field">
+                        <label for="f-banco">Banco</label>
+                        <select id="f-banco" data-campo="banco" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-tipo-cuenta">Tipo de cuenta</label>
+                        <select id="f-tipo-cuenta" data-campo="tipo_cuenta" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-numero-cuenta">Numero de cuenta</label>
+                        <input id="f-numero-cuenta" type="text" data-campo="numero_cuenta" data-editable="1" inputmode="numeric" maxlength="40" />
+                    </div>
+                </div>
+            </article>
+
+            <!-- ============== 3. TALLAS EPP ============== -->
+            <article class="card" id="card-epp">
+                <header class="card-header">
+                    <h2>3. Tallas EPP</h2>
+                    <span class="card-sub">Campos editables.</span>
+                </header>
+                <div class="grid">
+                    <div class="field">
+                        <label for="f-talla-zapato">Talla zapato</label>
+                        <select id="f-talla-zapato" data-campo="talla_zapato" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-talla-pantalon">Talla pantalon</label>
+                        <select id="f-talla-pantalon" data-campo="talla_pantalon" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-talla-polera">Talla polera</label>
+                        <select id="f-talla-polera" data-campo="talla_polera" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-talla-camisa">Talla camisa</label>
+                        <select id="f-talla-camisa" data-campo="talla_camisa" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-talla-chaqueta">Talla chaqueta</label>
+                        <select id="f-talla-chaqueta" data-campo="talla_chaqueta" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-talla-guantes">Talla guantes</label>
+                        <select id="f-talla-guantes" data-campo="talla_guantes" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-talla-casco">Talla casco</label>
+                        <select id="f-talla-casco" data-campo="talla_casco" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-talla-chaleco">Talla chaleco</label>
+                        <select id="f-talla-chaleco" data-campo="talla_chaleco" data-editable="1"></select>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ============== 4. CONFIRMACION LEGAL ============== -->
+            <article class="card card-legal" id="card-legal">
+                <header class="card-header">
+                    <h2>4. Confirmacion legal</h2>
+                </header>
+
+                <p id="texto-legal" class="texto-legal"></p>
+
+                <p class="texto-legal-version">
+                    Version: <span id="legal-version"></span> -
+                    <a href="#" id="link-privacidad">Politica de privacidad</a>
+                </p>
+
+                <label class="check-legal">
+                    <input id="chk-legal" type="checkbox" />
+                    <span>He leido y acepto el texto anterior.</span>
+                </label>
+
+                <div class="card-actions">
+                    <button id="btn-confirmar" class="btn btn-primary" type="button" disabled>
+                        Confirmar y enviar
+                    </button>
+                </div>
+            </article>
+
+        </main>
+
+        <footer class="app-footer">
+            Monitoring SpA - Portal del Trabajador
+        </footer>
+
+    </section>
+
+    <!-- ======================================================
+         MODAL: solicitud de cambio de documento
+         ====================================================== -->
+    <dialog id="modal-documento" class="modal">
+        <form method="dialog" class="modal-content" id="form-doc">
+            <header class="modal-header">
+                <h3>Solicitar correccion de documento</h3>
+                <button type="button" class="modal-close" data-close-modal="modal-documento" aria-label="Cerrar">&times;</button>
+            </header>
+
+            <div class="modal-body">
+                <p class="warning-box">
+                    La correccion de documento sera revisada por RR.HH. o administrador.
+                    <strong>No se aplica de forma automatica.</strong>
+                </p>
+
+                <div class="grid">
+                    <div class="field">
+                        <label>Tipo de documento actual</label>
+                        <input id="doc-tipo-actual" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label>Numero actual</label>
+                        <input id="doc-numero-actual" type="text" readonly />
+                    </div>
+                    <div class="field">
+                        <label for="doc-tipo-solicitado">Tipo solicitado</label>
+                        <select id="doc-tipo-solicitado" required></select>
+                    </div>
+                    <div class="field">
+                        <label for="doc-numero-solicitado">Numero solicitado</label>
+                        <input id="doc-numero-solicitado" type="text" required maxlength="40" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="doc-motivo">Motivo</label>
+                    <textarea id="doc-motivo" rows="3" required placeholder="Explica brevemente el motivo de la correccion."></textarea>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button type="button" class="btn btn-ghost" data-close-modal="modal-documento">Cancelar</button>
+                <button type="button" id="btn-enviar-doc" class="btn btn-primary">Enviar solicitud</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <!-- ======================================================
+         MODAL: resumen previo a confirmar
+         ====================================================== -->
+    <dialog id="modal-resumen" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Resumen de cambios</h3>
+                <button type="button" class="modal-close" data-close-modal="modal-resumen" aria-label="Cerrar">&times;</button>
+            </header>
+            <div class="modal-body">
+                <p>Estos son los campos que se actualizaran. Revisa antes de confirmar.</p>
+                <div id="resumen-lista" class="resumen-lista"></div>
+            </div>
+            <footer class="modal-footer">
+                <button type="button" class="btn btn-ghost" data-close-modal="modal-resumen">Volver</button>
+                <button type="button" id="btn-confirmar-final" class="btn btn-primary">Confirmar y guardar</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <!-- ======================================================
+         MODAL: politica de privacidad (placeholder)
+         ====================================================== -->
+    <dialog id="modal-privacidad" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Politica de privacidad</h3>
+                <button type="button" class="modal-close" data-close-modal="modal-privacidad" aria-label="Cerrar">&times;</button>
+            </header>
+            <div class="modal-body">
+                <p>
+                    El detalle completo de la politica de tratamiento de datos personales
+                    de Monitoring estara disponible en este espacio. Por el momento, puedes
+                    solicitar una copia escribiendo a <strong id="privacidad-email"></strong>.
+                </p>
+            </div>
+            <footer class="modal-footer">
+                <button type="button" class="btn btn-primary" data-close-modal="modal-privacidad">Cerrar</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <!-- ======================================================
+         Overlay de carga
+         ====================================================== -->
+    <div id="loader" class="loader" hidden>
+        <div class="loader-spinner" aria-label="Cargando"></div>
+    </div>
+
+    <!-- ======================================================
+         Scripts
+         ====================================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+table_schema,table_name,ordinal_position,column_name,data_type,is_nullable,column_default
+public,trabajadores,1,id_trabajador,uuid,NO,gen_random_uuid()
+public,trabajadores,2,apellido_paterno,character varying,NO,null
+public,trabajadores,3,apellido_materno,character varying,YES,null
+public,trabajadores,4,nombre_1,character varying,NO,null
+public,trabajadores,5,nombre_2,character varying,YES,null
+public,trabajadores,6,sexo,character varying,YES,null
+public,trabajadores,7,fecha_nacimiento,date,NO,null
+public,trabajadores,8,ciudad_nacimiento,character varying,YES,null
+public,trabajadores,9,nacionalidad,character varying,YES,null
+public,trabajadores,10,tipo_identificacion,character varying,NO,null
+public,trabajadores,11,numero_identificacion,character varying,NO,null
+public,trabajadores,12,fecha_vencimiento_id,date,YES,null
+public,trabajadores,13,estado_civil,character varying,YES,null
+public,trabajadores,14,email_corporativo,character varying,YES,null
+public,trabajadores,15,email_personal,character varying,YES,null
+public,trabajadores,16,celular_personal,character varying,YES,null
+public,trabajadores,17,telefono_emergencia,character varying,YES,null
+public,trabajadores,18,nombre_contacto_emergencia,character varying,YES,null
+public,trabajadores,19,parentesco_emergencia,character varying,YES,null
+public,trabajadores,20,region,character varying,YES,null
+public,trabajadores,21,ciudad,character varying,YES,null
+public,trabajadores,22,comuna,character varying,YES,null
+public,trabajadores,23,calle,character varying,YES,null
+public,trabajadores,24,numero_domicilio,character varying,YES,null
+public,trabajadores,25,departamento_casa,character varying,YES,null
+public,trabajadores,26,afp,character varying,YES,null
+public,trabajadores,27,sistema_salud,character varying,YES,null
+public,trabajadores,28,nombre_isapre,character varying,YES,null
+public,trabajadores,29,valor_plan_uf,numeric,YES,null
+public,trabajadores,30,banco,character varying,YES,null
+public,trabajadores,31,tipo_cuenta,character varying,YES,null
+public,trabajadores,32,numero_cuenta,character varying,YES,null
+public,trabajadores,33,fecha_ingreso,date,NO,null
+public,trabajadores,34,tipo_contrato,character varying,NO,null
+public,trabajadores,35,fecha_vencimiento_contrato,date,YES,null
+public,trabajadores,36,cargo,character varying,YES,null
+public,trabajadores,37,area_departamento,character varying,YES,null
+public,trabajadores,38,modalidad_trabajo,character varying,YES,null
+public,trabajadores,39,talla_chaqueta,character varying,YES,null
+public,trabajadores,40,talla_polera,character varying,YES,null
+public,trabajadores,41,calzado_seguridad,character varying,YES,null
+public,trabajadores,42,chaleco_geologo,character varying,YES,null
+public,trabajadores,43,respirador,character varying,YES,null
+public,trabajadores,44,vencimiento_examen_ocupacional,date,YES,null
+public,trabajadores,45,vencimiento_altura_geo,date,YES,null
+public,trabajadores,46,vencimiento_psicosensometrico,date,YES,null
+public,trabajadores,47,vencimiento_licencia_conducir,date,YES,null
+public,trabajadores,48,titulo_profesional,character varying,YES,null
+public,trabajadores,49,mencion_titulo,character varying,YES,null
+public,trabajadores,50,universidad_titulo,character varying,YES,null
+public,trabajadores,51,cert_sap_lms,boolean,YES,false
+public,trabajadores,52,cert_soma_lms,boolean,YES,false
+public,trabajadores,53,cert_ti,boolean,YES,false
+public,trabajadores,54,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())"
