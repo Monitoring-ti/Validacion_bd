@@ -16,11 +16,32 @@ const STATE = {
     userAgent: navigator.userAgent || ''
 };
 
-// ---------- Campos editables: nombre del campo -> tipo de control -------
+// ---------- Campos editables -------------------------------------------
 const CAMPOS_EDITABLES = [
+    // Contacto personal
+    'email_personal',
+    'celular_personal',
+    // Contacto de emergencia
+    'nombre_contacto_emergencia',
+    'parentesco_emergencia',
+    'telefono_emergencia',
+    // Domicilio
+    'region',
+    'ciudad',
+    'comuna',
+    'calle',
+    'numero_domicilio',
+    'departamento_casa',
+    // Previsional
+    'afp',
+    'sistema_salud',
+    'nombre_isapre',
+    'valor_plan_uf',
+    // Bancarios
     'banco',
     'tipo_cuenta',
     'numero_cuenta',
+    // Tallas EPP
     'talla_zapato',
     'talla_pantalon',
     'talla_polera',
@@ -33,17 +54,32 @@ const CAMPOS_EDITABLES = [
 
 // Etiqueta legible por campo (para resumen y logs visuales)
 const ETIQUETAS = {
-    banco:           'Banco',
-    tipo_cuenta:     'Tipo de cuenta',
-    numero_cuenta:   'Numero de cuenta',
-    talla_zapato:    'Talla zapato',
-    talla_pantalon:  'Talla pantalon',
-    talla_polera:    'Talla polera',
-    talla_camisa:    'Talla camisa',
-    talla_chaqueta:  'Talla chaqueta',
-    talla_guantes:   'Talla guantes',
-    talla_casco:     'Talla casco',
-    talla_chaleco:   'Talla chaleco'
+    email_personal:             'Email personal',
+    celular_personal:           'Celular personal',
+    nombre_contacto_emergencia: 'Contacto de emergencia',
+    parentesco_emergencia:      'Parentesco emergencia',
+    telefono_emergencia:        'Telefono de emergencia',
+    region:                     'Region',
+    ciudad:                     'Ciudad',
+    comuna:                     'Comuna',
+    calle:                      'Calle',
+    numero_domicilio:           'Numero de domicilio',
+    departamento_casa:          'Departamento / casa',
+    afp:                        'AFP',
+    sistema_salud:              'Sistema de salud',
+    nombre_isapre:              'Nombre Isapre',
+    valor_plan_uf:              'Valor plan (UF)',
+    banco:                      'Banco',
+    tipo_cuenta:                'Tipo de cuenta',
+    numero_cuenta:              'Numero de cuenta',
+    talla_zapato:               'Talla zapato',
+    talla_pantalon:             'Talla pantalon',
+    talla_polera:               'Talla polera',
+    talla_camisa:               'Talla camisa',
+    talla_chaqueta:             'Talla chaqueta',
+    talla_guantes:              'Talla guantes',
+    talla_casco:                'Talla casco',
+    talla_chaleco:              'Talla chaleco'
 };
 
 // =======================================================================
@@ -96,7 +132,6 @@ function bindEventos() {
     document.getElementById('input-email').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') autenticar();
     });
-    document.getElementById('input-email').addEventListener('input', autocompletarDominio);
     document.getElementById('input-password').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') autenticar();
     });
@@ -149,26 +184,6 @@ function poblarTextoLegal() {
 // =======================================================================
 // Estado de login: 'signin' (default) o 'signup' (primera vez).
 let MODO_LOGIN = 'signin';
-
-function autocompletarDominio(e) {
-    // Solo cuando el usuario teclea literalmente "@"
-    if (e.inputType !== 'insertText' || e.data !== '@') return;
-
-    const input = e.target;
-    const valor = input.value;
-    const idxAt = valor.indexOf('@');
-
-    // Solo si el @ recien tecleado es el ultimo caracter del campo.
-    if (idxAt === -1 || idxAt !== valor.length - 1) return;
-
-    const dominio = String(CONFIG.ALLOWED_DOMAIN || '').replace(/^@/, '');
-    if (!dominio) return;
-
-    input.value = valor + dominio;
-    // Selecciona el dominio para que el usuario lo pueda sobreescribir
-    // facilmente si escribe otra cosa, o presionar Tab/Enter para aceptarlo.
-    input.setSelectionRange(idxAt + 1, input.value.length);
-}
 
 function cambiarModoLogin(modo) {
     MODO_LOGIN = (modo === 'signup') ? 'signup' : 'signin';
@@ -434,12 +449,35 @@ function renderFormulario(t) {
     setVal('f-unidad',                t.unidad || t.area_departamento);
     setVal('f-email-corporativo',     t.email_corporativo);
 
-    // 2. Datos bancarios (selects + input)
+    // 2. Contacto personal
+    setVal('f-email-personal',   t.email_personal);
+    setVal('f-celular-personal', t.celular_personal);
+
+    // 3. Contacto de emergencia
+    setVal('f-nombre-emergencia', t.nombre_contacto_emergencia);
+    poblarSelect('f-parentesco-emergencia', CONFIG.PARENTESCOS, t.parentesco_emergencia);
+    setVal('f-telefono-emergencia', t.telefono_emergencia);
+
+    // 4. Domicilio
+    poblarSelect('f-region', CONFIG.REGIONES_CHILE, t.region);
+    setVal('f-ciudad',            t.ciudad);
+    setVal('f-comuna',            t.comuna);
+    setVal('f-calle',             t.calle);
+    setVal('f-numero-domicilio',  t.numero_domicilio);
+    setVal('f-departamento-casa', t.departamento_casa);
+
+    // 5. Previsional
+    poblarSelect('f-afp',           CONFIG.AFPS,            t.afp);
+    poblarSelect('f-sistema-salud', CONFIG.SISTEMAS_SALUD,  t.sistema_salud);
+    setVal('f-nombre-isapre', t.nombre_isapre);
+    setVal('f-valor-plan-uf', t.valor_plan_uf);
+
+    // 6. Datos bancarios (selects + input)
     poblarSelect('f-banco',       CONFIG.BANCOS,       t.banco);
     poblarSelect('f-tipo-cuenta', CONFIG.TIPOS_CUENTA, t.tipo_cuenta);
     setVal('f-numero-cuenta', t.numero_cuenta);
 
-    // 3. Tallas EPP
+    // 7. Tallas EPP
     poblarSelect('f-talla-zapato',   CONFIG.TALLAS_ZAPATO, t.talla_zapato);
     poblarSelect('f-talla-pantalon', CONFIG.TALLAS_LETRA,  t.talla_pantalon);
     poblarSelect('f-talla-polera',   CONFIG.TALLAS_LETRA,  t.talla_polera);
@@ -449,7 +487,7 @@ function renderFormulario(t) {
     poblarSelect('f-talla-casco',    CONFIG.TALLAS_LETRA,  t.talla_casco);
     poblarSelect('f-talla-chaleco',  CONFIG.TALLAS_LETRA,  t.talla_chaleco);
 
-    // 4. Checkbox legal: nunca premarcado
+    // 8. Checkbox legal: nunca premarcado
     const chk = document.getElementById('chk-legal');
     chk.checked = false;
     document.getElementById('btn-confirmar').disabled = true;

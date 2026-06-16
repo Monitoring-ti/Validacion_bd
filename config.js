@@ -49,5 +49,46 @@ window.CONFIG = {
         'Banco Consorcio',
         'Banco Internacional',
         'Otro'
+    ],
+    // --- Catalogos para nuevas secciones editables ---
+    REGIONES_CHILE: [
+        'Arica y Parinacota',
+        'Tarapaca',
+        'Antofagasta',
+        'Atacama',
+        'Coquimbo',
+        'Valparaiso',
+        'Metropolitana',
+        'O\'Higgins',
+        'Maule',
+        '\u00d1uble',
+        'Biobio',
+        'La Araucania',
+        'Los Rios',
+        'Los Lagos',
+        'Aysen',
+        'Magallanes'
+    ],
+    SISTEMAS_SALUD: ['Fonasa', 'Isapre'],
+    AFPS: [
+        'AFP Capital',
+        'AFP Cuprum',
+        'AFP Habitat',
+        'AFP Modelo',
+        'AFP PlanVital',
+        'AFP Provida',
+        'AFP Uno'
+    ],
+    PARENTESCOS: [
+        'Conyuge',
+        'Conviviente',
+        'Padre',
+        'Madre',
+        'Hijo',
+        'Hija',
+        'Hermano',
+        'Hermana',
+        'Pareja',
+        'Otro'
     ]
 };

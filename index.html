@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=6" />
+    <link rel="stylesheet" href="styles.css?v=7" />
 </head>
 <body>
 
@@ -135,10 +135,110 @@
                 </div>
             </article>
 
-            <!-- ============== 2. DATOS BANCARIOS ============== -->
+            <!-- ============== 2. CONTACTO PERSONAL ============== -->
+            <article class="card" id="card-contacto">
+                <header class="card-header">
+                    <h2>2. Contacto personal</h2>
+                    <span class="card-sub">Campos editables.</span>
+                </header>
+                <div class="grid">
+                    <div class="field">
+                        <label for="f-email-personal">Email personal</label>
+                        <input id="f-email-personal" type="email" data-campo="email_personal" data-editable="1" placeholder="ejemplo@correo.com" maxlength="120" />
+                    </div>
+                    <div class="field">
+                        <label for="f-celular-personal">Celular personal</label>
+                        <input id="f-celular-personal" type="tel" data-campo="celular_personal" data-editable="1" placeholder="+56 9 ..." maxlength="40" />
+                    </div>
+                </div>
+            </article>
+
+            <!-- ============== 3. CONTACTO DE EMERGENCIA ============== -->
+            <article class="card" id="card-emergencia">
+                <header class="card-header">
+                    <h2>3. Contacto de emergencia</h2>
+                    <span class="card-sub">Campos editables.</span>
+                </header>
+                <div class="grid">
+                    <div class="field">
+                        <label for="f-nombre-emergencia">Nombre del contacto</label>
+                        <input id="f-nombre-emergencia" type="text" data-campo="nombre_contacto_emergencia" data-editable="1" maxlength="120" />
+                    </div>
+                    <div class="field">
+                        <label for="f-parentesco-emergencia">Parentesco</label>
+                        <select id="f-parentesco-emergencia" data-campo="parentesco_emergencia" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-telefono-emergencia">Telefono de emergencia</label>
+                        <input id="f-telefono-emergencia" type="tel" data-campo="telefono_emergencia" data-editable="1" placeholder="+56 9 ..." maxlength="40" />
+                    </div>
+                </div>
+            </article>
+
+            <!-- ============== 4. DOMICILIO ============== -->
+            <article class="card" id="card-domicilio">
+                <header class="card-header">
+                    <h2>4. Domicilio</h2>
+                    <span class="card-sub">Campos editables.</span>
+                </header>
+                <div class="grid">
+                    <div class="field">
+                        <label for="f-region">Region</label>
+                        <select id="f-region" data-campo="region" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-ciudad">Ciudad</label>
+                        <input id="f-ciudad" type="text" data-campo="ciudad" data-editable="1" maxlength="80" />
+                    </div>
+                    <div class="field">
+                        <label for="f-comuna">Comuna</label>
+                        <input id="f-comuna" type="text" data-campo="comuna" data-editable="1" maxlength="80" />
+                    </div>
+                    <div class="field">
+                        <label for="f-calle">Calle</label>
+                        <input id="f-calle" type="text" data-campo="calle" data-editable="1" maxlength="120" />
+                    </div>
+                    <div class="field">
+                        <label for="f-numero-domicilio">Numero</label>
+                        <input id="f-numero-domicilio" type="text" data-campo="numero_domicilio" data-editable="1" maxlength="20" />
+                    </div>
+                    <div class="field">
+                        <label for="f-departamento-casa">Departamento / casa</label>
+                        <input id="f-departamento-casa" type="text" data-campo="departamento_casa" data-editable="1" maxlength="40" placeholder="Depto 301 / Casa B" />
+                    </div>
+                </div>
+            </article>
+
+            <!-- ============== 5. PREVISIONAL ============== -->
+            <article class="card" id="card-previsional">
+                <header class="card-header">
+                    <h2>5. Datos previsionales</h2>
+                    <span class="card-sub">Campos editables.</span>
+                </header>
+                <div class="grid">
+                    <div class="field">
+                        <label for="f-afp">AFP</label>
+                        <select id="f-afp" data-campo="afp" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-sistema-salud">Sistema de salud</label>
+                        <select id="f-sistema-salud" data-campo="sistema_salud" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-nombre-isapre">Nombre Isapre</label>
+                        <input id="f-nombre-isapre" type="text" data-campo="nombre_isapre" data-editable="1" maxlength="80" placeholder="Solo si pertenece a Isapre" />
+                    </div>
+                    <div class="field">
+                        <label for="f-valor-plan-uf">Valor plan (UF)</label>
+                        <input id="f-valor-plan-uf" type="number" step="0.01" min="0" data-campo="valor_plan_uf" data-editable="1" placeholder="0.00" />
+                    </div>
+                </div>
+            </article>
+
+            <!-- ============== 6. DATOS BANCARIOS ============== -->
             <article class="card" id="card-bancarios">
                 <header class="card-header">
-                    <h2>2. Datos bancarios</h2>
+                    <h2>6. Datos bancarios</h2>
                     <span class="card-sub">Campos editables.</span>
                 </header>
                 <div class="grid">
@@ -157,10 +257,10 @@
                 </div>
             </article>
 
-            <!-- ============== 3. TALLAS EPP ============== -->
+            <!-- ============== 7. TALLAS EPP ============== -->
             <article class="card" id="card-epp">
                 <header class="card-header">
-                    <h2>3. Tallas EPP</h2>
+                    <h2>7. Tallas EPP</h2>
                     <span class="card-sub">Campos editables.</span>
                 </header>
                 <div class="grid">
@@ -199,10 +299,10 @@
                 </div>
             </article>
 
-            <!-- ============== 4. CONFIRMACION LEGAL ============== -->
+            <!-- ============== 8. CONFIRMACION LEGAL ============== -->
             <article class="card card-legal" id="card-legal">
                 <header class="card-header">
-                    <h2>4. Confirmacion legal</h2>
+                    <h2>8. Confirmacion legal</h2>
                 </header>
 
                 <p id="texto-legal" class="texto-legal"></p>
@@ -333,8 +433,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=6"></script>
-    <script src="app.js?v=6"></script>
+    <script src="config.js?v=7"></script>
+    <script src="app.js?v=7"></script>
 
 </body>
 </html>
