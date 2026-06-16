@@ -14,37 +14,36 @@
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <!-- ======================================================
-         Vista LOGIN (Magic Link por email)
+         Vista LOGIN (Email + Password)
          ====================================================== -->
     <section id="vista-login" class="vista vista-login">
         <div class="login-card">
             <div class="login-logo">Monitoring</div>
-            <h1>Portal del Trabajador</h1>
-            <p class="login-sub">
-                Ingresa tu correo corporativo. Te enviaremos un enlace de
-                acceso seguro para entrar al portal.
+            <h1 id="login-titulo">Portal del Trabajador</h1>
+            <p class="login-sub" id="login-sub">
+                Ingresa tu correo corporativo y tu contrasena.
             </p>
 
-            <!-- Estado 1: pedir email -->
+            <div class="login-tabs">
+                <button id="tab-signin" class="login-tab active" type="button">Iniciar sesion</button>
+                <button id="tab-signup" class="login-tab" type="button">Primera vez</button>
+            </div>
+
             <div id="login-form-box">
                 <div class="field" style="text-align:left; margin-bottom: 10px;">
                     <label for="input-email">Correo corporativo</label>
                     <input id="input-email" type="email" placeholder="nombre.apellido@monitoring.cl" autocomplete="email" />
                 </div>
-                <button id="btn-enviar-link" class="btn btn-primary btn-microsoft" type="button">
-                    Enviar enlace de acceso
+                <div class="field" style="text-align:left; margin-bottom: 14px;">
+                    <label for="input-password" id="label-password">Contrasena</label>
+                    <input id="input-password" type="password" placeholder="Ingresa tu contrasena" autocomplete="current-password" minlength="8" />
+                </div>
+                <button id="btn-login" class="btn btn-primary btn-microsoft" type="button">
+                    Iniciar sesion
                 </button>
-            </div>
-
-            <!-- Estado 2: link enviado -->
-            <div id="login-enviado-box" hidden>
-                <p class="success-box">
-                    Listo. Te enviamos un enlace a <strong id="login-enviado-email"></strong>.
-                    Revisa tu bandeja de entrada (y la carpeta de spam por si acaso).
+                <p id="hint-password" class="login-hint" hidden>
+                    Minimo 8 caracteres. Esta sera tu contrasena para entrar al portal.
                 </p>
-                <button id="btn-reenviar" class="btn btn-secondary" type="button">
-                    Enviar a otra cuenta
-                </button>
             </div>
 
             <p id="login-error" class="login-error" hidden></p>

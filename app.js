@@ -91,12 +91,16 @@ function initSupabase() {
 // EVENTOS DE UI
 // =======================================================================
 function bindEventos() {
-    // Login passwordless (Magic Link) / logout
-    document.getElementById('btn-enviar-link').addEventListener('click', enviarMagicLink);
+    // Login email + password / logout
+    document.getElementById('btn-login').addEventListener('click', autenticar);
     document.getElementById('input-email').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') enviarMagicLink();
+        if (e.key === 'Enter') autenticar();
     });
-    document.getElementById('btn-reenviar').addEventListener('click', resetVistaLogin);
+    document.getElementById('input-password').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') autenticar();
+    });
+    document.getElementById('tab-signin').addEventListener('click', () => cambiarModoLogin('signin'));
+    document.getElementById('tab-signup').addEventListener('click', () => cambiarModoLogin('signup'));
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
 
     // Modal documento
@@ -140,20 +144,49 @@ function poblarTextoLegal() {
 }
 
 // =======================================================================
-// AUTENTICACION (Magic Link)
+// AUTENTICACION (Email + Password)
 // =======================================================================
-async function enviarMagicLink() {
-    const input = document.getElementById('input-email');
-    const email = (input.value || '').trim().toLowerCase();
+// Estado de login: 'signin' (default) o 'signup' (primera vez).
+let MODO_LOGIN = 'signin';
+
+function cambiarModoLogin(modo) {
+    MODO_LOGIN = (modo === 'signup') ? 'signup' : 'signin';
+
+    document.getElementById('tab-signin').classList.toggle('active', MODO_LOGIN === 'signin');
+    document.getElementById('tab-signup').classList.toggle('active', MODO_LOGIN === 'signup');
+
+    const btn = document.getElementById('btn-login');
+    const pwd = document.getElementById('input-password');
+    const hint = document.getElementById('hint-password');
+    const sub = document.getElementById('login-sub');
+
+    if (MODO_LOGIN === 'signup') {
+        btn.textContent = 'Crear contrasena y entrar';
+        pwd.setAttribute('autocomplete', 'new-password');
+        pwd.placeholder = 'Define una contrasena (minimo 8 caracteres)';
+        hint.hidden = false;
+        sub.textContent = 'Es tu primera vez? Define una contrasena para tu cuenta corporativa.';
+    } else {
+        btn.textContent = 'Iniciar sesion';
+        pwd.setAttribute('autocomplete', 'current-password');
+        pwd.placeholder = 'Ingresa tu contrasena';
+        hint.hidden = true;
+        sub.textContent = 'Ingresa tu correo corporativo y tu contrasena.';
+    }
+
+    document.getElementById('login-error').hidden = true;
+}
+
+async function autenticar() {
+    const email = (document.getElementById('input-email').value || '').trim().toLowerCase();
+    const password = document.getElementById('input-password').value || '';
 
     document.getElementById('login-error').hidden = true;
 
-    if (!email) {
-        mostrarErrorLogin('Ingresa tu correo corporativo.');
-        return;
-    }
+    if (!email) { mostrarErrorLogin('Ingresa tu correo corporativo.'); return; }
+    if (!password) { mostrarErrorLogin('Ingresa tu contrasena.'); return; }
 
-    // Validacion de dominio antes de enviar el link.
+    // Validacion de dominio.
     if (!validarDominio(email)) {
         mostrarErrorLogin(
             'Solo cuentas que terminen en ' + CONFIG.ALLOWED_DOMAIN + ' pueden acceder.'
@@ -161,34 +194,46 @@ async function enviarMagicLink() {
         return;
     }
 
+    if (MODO_LOGIN === 'signup' && password.length < 8) {
+        mostrarErrorLogin('La contrasena debe tener al menos 8 caracteres.');
+        return;
+    }
+
     showLoader();
     try {
-        const { error } = await STATE.sb.auth.signInWithOtp({
-            email,
-            options: {
-                shouldCreateUser: true,
-                emailRedirectTo: window.location.origin + window.location.pathname
-            }
-        });
-        if (error) throw error;
-
-        document.getElementById('login-form-box').hidden = true;
-        const box = document.getElementById('login-enviado-box');
-        document.getElementById('login-enviado-email').textContent = email;
-        box.hidden = false;
+        if (MODO_LOGIN === 'signup') {
+            const { error } = await STATE.sb.auth.signUp({
+                email, password,
+                options: { emailRedirectTo: window.location.origin + window.location.pathname }
+            });
+            if (error) throw error;
+        } else {
+            const { error } = await STATE.sb.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+        }
+        // onAuthStateChange se encarga de cargar el trabajador.
     } catch (err) {
-        console.error('Error enviando magic link:', err);
-        mostrarErrorLogin('No se pudo enviar el enlace. ' + (err.message || ''));
+        console.error('Error autenticando:', err);
+        const detalle = (err && (err.message || err.error_description || err.error)) ||
+                        (function () { try { return JSON.stringify(err); } catch (_) { return String(err); } })();
+        mostrarErrorLogin(traducirErrorAuth(detalle));
     } finally {
         hideLoader();
     }
 }
 
-function resetVistaLogin() {
-    document.getElementById('login-form-box').hidden = false;
-    document.getElementById('login-enviado-box').hidden = true;
-    document.getElementById('login-error').hidden = true;
-    document.getElementById('input-email').value = '';
+function traducirErrorAuth(msg) {
+    if (!msg) return 'No se pudo autenticar.';
+    const lc = String(msg).toLowerCase();
+    if (lc.includes('invalid login credentials'))
+        return 'Correo o contrasena incorrectos. Si es tu primera vez, usa "Primera vez".';
+    if (lc.includes('user already registered'))
+        return 'Esa cuenta ya esta registrada. Usa "Iniciar sesion".';
+    if (lc.includes('email not confirmed'))
+        return 'La cuenta existe pero el email no esta confirmado. Contacta a RR.HH.';
+    if (lc.includes('password should be at least'))
+        return 'La contrasena es demasiado corta. Usa al menos 8 caracteres.';
+    return msg;
 }
 
 async function procesarSesionActual() {
@@ -663,11 +708,9 @@ async function cerrarSesionValidacion() {
 function mostrarVistaLogin() {
     document.getElementById('vista-login').hidden = false;
     document.getElementById('vista-app').hidden   = true;
-    // Restaurar el formulario por si veniamos del estado "link enviado".
-    const box1 = document.getElementById('login-form-box');
-    const box2 = document.getElementById('login-enviado-box');
-    if (box1) box1.hidden = false;
-    if (box2) box2.hidden = true;
+    const pwd = document.getElementById('input-password');
+    if (pwd) pwd.value = '';
+    cambiarModoLogin('signin');
 }
 function mostrarVistaApp() {
     document.getElementById('vista-login').hidden = true;
