@@ -627,7 +627,9 @@ async function confirmarYEnviar() {
         );
     } catch (err) {
         console.error('Error al confirmar:', err);
-        mostrarMensaje('error', 'No se pudo guardar la confirmacion. Intenta nuevamente.');
+        const detalle = (err && (err.message || err.error_description || err.details || err.hint)) ||
+                        (function () { try { return JSON.stringify(err); } catch (_) { return String(err); } })();
+        mostrarMensaje('error', 'No se pudo guardar: ' + detalle);
     } finally {
         hideLoader();
     }
