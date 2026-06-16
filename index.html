@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=14" />
+    <link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body>
 
@@ -22,16 +22,21 @@
         <div class="login-card">
             <div class="monitoring-logo login-logo" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.1</span>
+                <span class="logo-version" data-app-version>v1.0.2</span>
             </div>
-            <h1 id="login-titulo">Portal del Trabajador</h1>
+            <h1 id="login-titulo">Validacion de datos personales</h1>
             <p class="login-sub" id="login-sub">
-                Ingresa tu correo corporativo y tu contrasena.
+                Ingresa con tu correo corporativo y una contrasena de verificacion para este portal.
             </p>
 
-            <div class="login-tabs">
-                <button id="tab-signin" class="login-tab active" type="button">Iniciar sesion</button>
-                <button id="tab-signup" class="login-tab" type="button">Primera vez</button>
+            <div class="login-instructions" role="note" aria-label="Instrucciones de acceso">
+                <p class="login-instructions-title">Como ingresar</p>
+                <ol class="login-steps">
+                    <li>Usa tu correo <strong>@monitoring.cl</strong> (el mismo con el que trabajas en Monitoring).</li>
+                    <li>Crea una <strong>contrasena de verificacion</strong> de al menos 8 caracteres. <em>No es la de Microsoft 365 ni la de tu PC.</em></li>
+                    <li><strong>Primera vez:</strong> al entrar, el sistema crea esa contrasena. <strong>Siguientes veces:</strong> usa la misma para volver.</li>
+                    <li>Revisa tus datos, actualiza lo necesario y confirma al final del formulario.</li>
+                </ol>
             </div>
 
             <div id="login-form-box">
@@ -40,20 +45,17 @@
                     <input id="input-email" type="email" placeholder="nombre.apellido@monitoring.cl" autocomplete="email" />
                 </div>
                 <div class="field" style="text-align:left; margin-bottom: 14px;">
-                    <label for="input-password" id="label-password">Contrasena</label>
-                    <input id="input-password" type="password" placeholder="Ingresa tu contrasena" autocomplete="current-password" minlength="8" />
+                    <label for="input-password" id="label-password">Contrasena de verificacion</label>
+                    <input id="input-password" type="password" placeholder="Minimo 8 caracteres (solo para este portal)" autocomplete="current-password" minlength="8" />
                 </div>
                 <button id="btn-login" class="btn btn-primary btn-microsoft" type="button">
-                    Iniciar sesion
+                    Entrar al portal
                 </button>
-                <p id="hint-password" class="login-hint" hidden>
-                    Minimo 8 caracteres. Esta sera tu contrasena para entrar al portal.
-                </p>
             </div>
 
             <p id="login-error" class="login-error" hidden></p>
             <p class="login-foot">
-                Solo se permite acceso con cuentas <strong>@monitoring.cl</strong>.
+                Acceso exclusivo <strong>@monitoring.cl</strong>. La contrasena sirve solo para esta verificacion de datos.
             </p>
         </div>
     </section>
@@ -66,7 +68,7 @@
         <header class="app-header">
             <div class="monitoring-logo brand" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.1</span>
+                <span class="logo-version" data-app-version>v1.0.2</span>
             </div>
             <div class="user-box">
                 <div class="user-info">
@@ -441,7 +443,7 @@
         </main>
 
         <footer class="app-footer">
-            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.1</span>
+            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.2</span>
         </footer>
 
     </section>
@@ -547,8 +549,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=14"></script>
-    <script src="app.js?v=14"></script>
+    <script src="config.js?v=15"></script>
+    <script src="app.js?v=15"></script>
 
 </body>
 </html>

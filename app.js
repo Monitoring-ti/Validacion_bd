@@ -166,8 +166,6 @@ function bindEventos() {
     document.getElementById('input-password').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') autenticar();
     });
-    document.getElementById('tab-signin').addEventListener('click', () => cambiarModoLogin('signin'));
-    document.getElementById('tab-signup').addEventListener('click', () => cambiarModoLogin('signup'));
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
 
     // Toggle on/off: pase Codelco. Si apagado, oculta numero y limpia.
@@ -223,7 +221,7 @@ function poblarTextoLegal() {
 }
 
 function aplicarVersionApp() {
-    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.1';
+    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.2';
     const label = raw.startsWith('v') ? raw : ('v' + raw);
     document.querySelectorAll('[data-app-version]').forEach((el) => {
         el.textContent = label;
@@ -231,37 +229,61 @@ function aplicarVersionApp() {
 }
 
 // =======================================================================
-// AUTENTICACION (Email + Password)
+// AUTENTICACION (Email + contrasena de verificacion, flujo unificado)
 // =======================================================================
-// Estado de login: 'signin' (default) o 'signup' (primera vez).
-let MODO_LOGIN = 'signin';
+// Un solo boton: intenta crear cuenta (primera vez) o iniciar sesion si ya existe.
 
-function cambiarModoLogin(modo) {
-    MODO_LOGIN = (modo === 'signup') ? 'signup' : 'signin';
-
-    document.getElementById('tab-signin').classList.toggle('active', MODO_LOGIN === 'signin');
-    document.getElementById('tab-signup').classList.toggle('active', MODO_LOGIN === 'signup');
-
-    const btn = document.getElementById('btn-login');
+function prepararVistaLogin() {
+    document.getElementById('login-error').hidden = true;
     const pwd = document.getElementById('input-password');
-    const hint = document.getElementById('hint-password');
-    const sub = document.getElementById('login-sub');
-
-    if (MODO_LOGIN === 'signup') {
-        btn.textContent = 'Crear contrasena y entrar';
-        pwd.setAttribute('autocomplete', 'new-password');
-        pwd.placeholder = 'Define una contrasena (minimo 8 caracteres)';
-        hint.hidden = false;
-        sub.textContent = 'Es tu primera vez? Define una contrasena para tu cuenta corporativa.';
-    } else {
-        btn.textContent = 'Iniciar sesion';
+    if (pwd) {
+        pwd.value = '';
         pwd.setAttribute('autocomplete', 'current-password');
-        pwd.placeholder = 'Ingresa tu contrasena';
-        hint.hidden = true;
-        sub.textContent = 'Ingresa tu correo corporativo y tu contrasena.';
+    }
+}
+
+function esErrorCuentaYaRegistrada(msg) {
+    const lc = String(msg || '').toLowerCase();
+    return lc.includes('already registered') ||
+           lc.includes('already been registered') ||
+           lc.includes('user already exists');
+}
+
+async function autenticarUnificado(email, password) {
+    const redirectTo = window.location.origin + window.location.pathname;
+
+    const { data: signUpData, error: signUpError } = await STATE.sb.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: redirectTo }
+    });
+
+    if (!signUpError) {
+        if (signUpData && signUpData.session) {
+            return {
+                info: 'Contrasena de verificacion creada. Revisa y confirma tus datos.'
+            };
+        }
+        const { error: signInAfterSignUp } = await STATE.sb.auth.signInWithPassword({ email, password });
+        if (!signInAfterSignUp) {
+            return {
+                info: 'Contrasena de verificacion creada. Revisa y confirma tus datos.'
+            };
+        }
+        throw signInAfterSignUp;
     }
 
-    document.getElementById('login-error').hidden = true;
+    if (esErrorCuentaYaRegistrada(signUpError.message)) {
+        const { error: signInError } = await STATE.sb.auth.signInWithPassword({ email, password });
+        if (!signInError) return {};
+        const lc2 = String(signInError.message || '').toLowerCase();
+        if (lc2.includes('invalid login credentials')) {
+            throw new Error('UNIFIED_WRONG_PASSWORD');
+        }
+        throw signInError;
+    }
+
+    throw signUpError;
 }
 
 async function autenticar() {
@@ -275,7 +297,7 @@ async function autenticar() {
         return;
     }
     if (!password) {
-        mostrarErrorLogin('Ingresa tu contrasena.', { titulo: 'Contrasena requerida', tipo: 'warn' });
+        mostrarErrorLogin('Ingresa tu contrasena de verificacion.', { titulo: 'Contrasena requerida', tipo: 'warn' });
         return;
     }
 
@@ -291,53 +313,28 @@ async function autenticar() {
         return;
     }
 
-    if (MODO_LOGIN === 'signup' && password.length < 8) {
-        mostrarErrorLogin('La contrasena debe tener al menos 8 caracteres.', { titulo: 'Contrasena muy corta', tipo: 'warn' });
+    if (password.length < 8) {
+        mostrarErrorLogin(
+            'La contrasena de verificacion debe tener al menos 8 caracteres. No uses la de Microsoft ni la del PC.',
+            { titulo: 'Contrasena muy corta', tipo: 'warn' }
+        );
         return;
     }
 
     showLoader();
     try {
-        if (MODO_LOGIN === 'signup') {
-            const { error } = await STATE.sb.auth.signUp({
-                email, password,
-                options: { emailRedirectTo: window.location.origin + window.location.pathname }
-            });
-            if (error) {
-                // Si la cuenta ya existe, intentamos iniciar sesion con esa misma password.
-                const lc = String(error.message || '').toLowerCase();
-                const yaRegistrado = lc.includes('already registered') ||
-                                     lc.includes('already been registered') ||
-                                     lc.includes('user already exists');
-                if (yaRegistrado) {
-                    const { error: signInError } = await STATE.sb.auth.signInWithPassword({ email, password });
-                    if (signInError) {
-                        const lc2 = String(signInError.message || '').toLowerCase();
-                        if (lc2.includes('invalid login credentials')) {
-                            mostrarErrorLogin(
-                                'Esa cuenta ya esta registrada y la contrasena que ingresaste no coincide. ' +
-                                'Cambia a la pestana "Iniciar sesion" e ingresa tu contrasena actual.',
-                                { titulo: 'Contrasena no coincide', tipo: 'warn' }
-                            );
-                            return;
-                        }
-                        throw signInError;
-                    }
-                    mostrarMensaje('info', 'Esta cuenta ya estaba registrada. Iniciamos tu sesion.');
-                } else {
-                    throw error;
-                }
-            }
-        } else {
-            const { error } = await STATE.sb.auth.signInWithPassword({ email, password });
-            if (error) throw error;
+        const resultado = await autenticarUnificado(email, password);
+        if (resultado && resultado.info) {
+            mostrarMensaje('info', resultado.info);
         }
         // onAuthStateChange se encarga de cargar el trabajador.
     } catch (err) {
         console.error('Error autenticando:', err);
-        const detalle = (err && (err.message || err.error_description || err.error)) ||
-                        (function () { try { return JSON.stringify(err); } catch (_) { return String(err); } })();
-        const tr = traducirErrorAuth(detalle, MODO_LOGIN);
+        const detalle = (err && err.message === 'UNIFIED_WRONG_PASSWORD')
+            ? 'UNIFIED_WRONG_PASSWORD'
+            : ((err && (err.message || err.error_description || err.error)) ||
+               (function () { try { return JSON.stringify(err); } catch (_) { return String(err); } })());
+        const tr = traducirErrorAuth(detalle);
         mostrarErrorLogin(tr.mensaje, { titulo: tr.titulo, tipo: tr.tipo });
         if (tr.tipo === 'error') mostrarMensaje('error', tr.titulo || 'No se pudo iniciar sesion');
     } finally {
@@ -345,8 +342,8 @@ async function autenticar() {
     }
 }
 
-// Devuelve { titulo, mensaje, tipo } segun el error y el modo de login.
-function traducirErrorAuth(msg, modo) {
+// Devuelve { titulo, mensaje, tipo } segun el error de autenticacion.
+function traducirErrorAuth(msg) {
     const dominio = CONFIG.ALLOWED_DOMAIN || '@monitoring.cl';
     const adminEmail = CONFIG.RRHH_NOTIFY_EMAIL || 'administrador de correos';
 
@@ -354,30 +351,32 @@ function traducirErrorAuth(msg, modo) {
         return { titulo: 'No se pudo autenticar', mensaje: 'Intenta nuevamente en unos segundos.', tipo: 'error' };
     }
 
+    if (msg === 'UNIFIED_WRONG_PASSWORD') {
+        return {
+            titulo: 'Contrasena incorrecta',
+            mensaje: 'Esa contrasena no coincide con la que creaste en tu primera visita a este portal. ' +
+                     'Recuerda: es solo para esta verificacion, no la de Microsoft. ' +
+                     'Si la olvidaste, contacta al administrador de correos: ' + adminEmail + '.',
+            tipo: 'error'
+        };
+    }
+
     const lc = String(msg).toLowerCase();
 
     if (lc.includes('invalid login credentials')) {
-        if (modo === 'signup') {
-            return {
-                titulo: 'Cuenta no creada',
-                mensaje: 'No pudimos crear la cuenta. Verifica que tu correo termine en ' + dominio + '. ' +
-                         'Si el problema persiste, contacta al administrador de correos: ' + adminEmail + '.',
-                tipo: 'error'
-            };
-        }
         return {
-            titulo: 'Cuenta no encontrada',
-            mensaje: 'No encontramos esa cuenta o la contrasena es incorrecta. ' +
-                     'Verifica que tu correo ' + dominio + ' este bien escrito. ' +
-                     'Si es tu primera vez, usa la pestana "Primera vez". ' +
-                     'Si no puedes acceder, contacta al administrador de correos: ' + adminEmail + '.',
+            titulo: 'No se pudo ingresar',
+            mensaje: 'No pudimos validar tu acceso. Verifica tu correo ' + dominio + ' y tu contrasena de verificacion. ' +
+                     'Si es tu primera vez, crea una contrasena nueva (minimo 8 caracteres). ' +
+                     'Si ya entraste antes, usa la misma contrasena. ' +
+                     'Si el problema continua, contacta al administrador de correos: ' + adminEmail + '.',
             tipo: 'error'
         };
     }
     if (lc.includes('user already registered') || lc.includes('already been registered') || lc.includes('user already exists')) {
         return {
             titulo: 'Cuenta ya registrada',
-            mensaje: 'Esa cuenta ya esta registrada. Usa la pestana "Iniciar sesion" con tu contrasena habitual.',
+            mensaje: 'Tu cuenta ya existe. Usa la misma contrasena de verificacion que definiste la primera vez.',
             tipo: 'warn'
         };
     }
@@ -391,7 +390,7 @@ function traducirErrorAuth(msg, modo) {
     if (lc.includes('password should be at least')) {
         return {
             titulo: 'Contrasena demasiado corta',
-            mensaje: 'La contrasena debe tener al menos 8 caracteres.',
+            mensaje: 'La contrasena de verificacion debe tener al menos 8 caracteres.',
             tipo: 'warn'
         };
     }
@@ -1030,9 +1029,7 @@ async function cerrarSesionValidacion() {
 function mostrarVistaLogin() {
     document.getElementById('vista-login').hidden = false;
     document.getElementById('vista-app').hidden   = true;
-    const pwd = document.getElementById('input-password');
-    if (pwd) pwd.value = '';
-    cambiarModoLogin('signin');
+    prepararVistaLogin();
 }
 function mostrarVistaApp() {
     document.getElementById('vista-login').hidden = true;
