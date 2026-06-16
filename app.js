@@ -123,6 +123,7 @@ async function initApp() {
         bindEventos();
         poblarTextoLegal();
         aplicarVersionApp();
+        prepararVistaLogin();
         await detectarIp();
         await procesarSesionActual();
     } catch (err) {
@@ -166,6 +167,7 @@ function bindEventos() {
     document.getElementById('input-password').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') autenticar();
     });
+    bindTogglePassword();
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
 
     // Toggle on/off: pase Codelco. Si apagado, oculta numero y limpia.
@@ -209,7 +211,7 @@ function bindEventos() {
             window.open(CONFIG.POLITICA_PRIVACIDAD_URL, '_blank', 'noopener');
         } else {
             const dlg = document.getElementById('modal-privacidad');
-            document.getElementById('privacidad-email').textContent = CONFIG.RRHH_NOTIFY_EMAIL;
+            document.getElementById('privacidad-email').textContent = emailSoporte();
             dlg.showModal();
         }
     });
@@ -220,12 +222,38 @@ function poblarTextoLegal() {
     document.getElementById('legal-version').textContent = CONFIG.LEGAL_TEXT_VERSION;
 }
 
+function emailSoporte() {
+    return (CONFIG && (CONFIG.SUPPORT_EMAIL || CONFIG.RRHH_NOTIFY_EMAIL)) ||
+           'ti.soporte@monitoring.cl';
+}
+
+function bindTogglePassword() {
+    const btn = document.getElementById('btn-toggle-password');
+    const input = document.getElementById('input-password');
+    if (!btn || !input) return;
+
+    btn.addEventListener('click', () => {
+        const mostrar = input.type === 'password';
+        input.type = mostrar ? 'text' : 'password';
+        btn.classList.toggle('is-revealed', mostrar);
+        btn.setAttribute('aria-pressed', mostrar ? 'true' : 'false');
+        btn.setAttribute('aria-label', mostrar ? 'Ocultar contrasena' : 'Mostrar contrasena');
+        btn.title = mostrar ? 'Ocultar contrasena' : 'Mostrar contrasena';
+    });
+}
+
 function aplicarVersionApp() {
-    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.2';
+    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.3';
     const label = raw.startsWith('v') ? raw : ('v' + raw);
     document.querySelectorAll('[data-app-version]').forEach((el) => {
         el.textContent = label;
     });
+    const soporte = emailSoporte();
+    const linkSoporte = document.getElementById('login-support-email');
+    if (linkSoporte) {
+        linkSoporte.textContent = soporte;
+        linkSoporte.href = 'mailto:' + soporte;
+    }
 }
 
 // =======================================================================
@@ -233,12 +261,29 @@ function aplicarVersionApp() {
 // =======================================================================
 // Un solo boton: intenta crear cuenta (primera vez) o iniciar sesion si ya existe.
 
+function ocultarErrorLogin() {
+    const el = document.getElementById('login-error');
+    if (!el) return;
+    el.hidden = true;
+    el.innerHTML = '';
+    el.classList.remove('alert-error', 'alert-warn', 'alert-info');
+    el.removeAttribute('role');
+}
+
 function prepararVistaLogin() {
-    document.getElementById('login-error').hidden = true;
+    ocultarErrorLogin();
     const pwd = document.getElementById('input-password');
+    const toggle = document.getElementById('btn-toggle-password');
     if (pwd) {
         pwd.value = '';
+        pwd.type = 'password';
         pwd.setAttribute('autocomplete', 'current-password');
+    }
+    if (toggle) {
+        toggle.classList.remove('is-revealed');
+        toggle.setAttribute('aria-pressed', 'false');
+        toggle.setAttribute('aria-label', 'Mostrar contrasena');
+        toggle.title = 'Mostrar contrasena';
     }
 }
 
@@ -290,7 +335,7 @@ async function autenticar() {
     const email = (document.getElementById('input-email').value || '').trim().toLowerCase();
     const password = document.getElementById('input-password').value || '';
 
-    document.getElementById('login-error').hidden = true;
+    ocultarErrorLogin();
 
     if (!email) {
         mostrarErrorLogin('Ingresa tu correo corporativo.', { titulo: 'Correo requerido', tipo: 'warn' });
@@ -302,11 +347,11 @@ async function autenticar() {
     }
 
     if (!validarDominio(email)) {
-        const adminEmail = CONFIG.RRHH_NOTIFY_EMAIL || 'administrador de correos';
+        const soporte = emailSoporte();
         mostrarErrorLogin(
             'El correo ' + email + ' no pertenece a Monitoring. ' +
             'Verifica que termine en ' + CONFIG.ALLOWED_DOMAIN + '. ' +
-            'Si crees que es un error, contacta al administrador de correos: ' + adminEmail + '.',
+            'Si crees que es un error, escribe a ' + soporte + '.',
             { titulo: 'Dominio no permitido', tipo: 'error' }
         );
         mostrarMensaje('error', 'Solo se permiten cuentas ' + CONFIG.ALLOWED_DOMAIN);
@@ -345,7 +390,7 @@ async function autenticar() {
 // Devuelve { titulo, mensaje, tipo } segun el error de autenticacion.
 function traducirErrorAuth(msg) {
     const dominio = CONFIG.ALLOWED_DOMAIN || '@monitoring.cl';
-    const adminEmail = CONFIG.RRHH_NOTIFY_EMAIL || 'administrador de correos';
+    const soporte = emailSoporte();
 
     if (!msg) {
         return { titulo: 'No se pudo autenticar', mensaje: 'Intenta nuevamente en unos segundos.', tipo: 'error' };
@@ -356,7 +401,7 @@ function traducirErrorAuth(msg) {
             titulo: 'Contrasena incorrecta',
             mensaje: 'Esa contrasena no coincide con la que creaste en tu primera visita a este portal. ' +
                      'Recuerda: es solo para esta verificacion, no la de Microsoft. ' +
-                     'Si la olvidaste, contacta al administrador de correos: ' + adminEmail + '.',
+                     'Si la olvidaste, escribe a ' + soporte + '.',
             tipo: 'error'
         };
     }
@@ -369,7 +414,7 @@ function traducirErrorAuth(msg) {
             mensaje: 'No pudimos validar tu acceso. Verifica tu correo ' + dominio + ' y tu contrasena de verificacion. ' +
                      'Si es tu primera vez, crea una contrasena nueva (minimo 8 caracteres). ' +
                      'Si ya entraste antes, usa la misma contrasena. ' +
-                     'Si el problema continua, contacta al administrador de correos: ' + adminEmail + '.',
+                     'Si el problema continua, escribe a ' + soporte + '.',
             tipo: 'error'
         };
     }
@@ -383,7 +428,7 @@ function traducirErrorAuth(msg) {
     if (lc.includes('email not confirmed')) {
         return {
             titulo: 'Correo sin confirmar',
-            mensaje: 'La cuenta existe pero el correo aun no esta confirmado. Contacta al administrador de correos: ' + adminEmail + '.',
+            mensaje: 'La cuenta existe pero el correo aun no esta confirmado. Escribe a ' + soporte + '.',
             tipo: 'warn'
         };
     }
@@ -429,11 +474,11 @@ async function manejarSesion(session) {
         const trabajador = await cargarTrabajador(email);
         if (!trabajador) {
             const dominio = CONFIG.ALLOWED_DOMAIN || '@monitoring.cl';
-            const adminEmail = CONFIG.RRHH_NOTIFY_EMAIL || 'administrador de correos';
+            const soporte = emailSoporte();
             mostrarErrorLogin(
                 'Tu correo ' + email + ' no figura en la base de trabajadores. ' +
                 'Verifica que esta bien escrito y que termine en ' + dominio + '. ' +
-                'Si esta correcto, contacta al administrador de correos: ' + adminEmail + '.',
+                'Si esta correcto, escribe a ' + soporte + '.',
                 { titulo: 'Cuenta no encontrada', tipo: 'error' }
             );
             mostrarMensaje('error', 'Cuenta no encontrada en la base de trabajadores');
@@ -1034,7 +1079,7 @@ function mostrarVistaLogin() {
 function mostrarVistaApp() {
     document.getElementById('vista-login').hidden = true;
     document.getElementById('vista-app').hidden   = false;
-    document.getElementById('login-error').hidden = true;
+    ocultarErrorLogin();
 }
 
 // opts: { titulo, tipo: 'error'|'warn'|'info' }

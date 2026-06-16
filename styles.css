@@ -42,7 +42,7 @@ html, body {
     background: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font);
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.45;
     min-height: 100vh;
 }
@@ -70,7 +70,7 @@ a:hover { text-decoration: underline; }
 
 .login-card {
     width: 100%;
-    max-width: 420px;
+    max-width: 460px;
     background: var(--color-surface);
     border-radius: 14px;
     box-shadow: var(--shadow-md);
@@ -169,14 +169,14 @@ a:hover { text-decoration: underline; }
 
 .login-card h1 {
     margin: 0 0 8px;
-    font-size: 22px;
+    font-size: 24px;
     color: var(--color-primary);
 }
 
 .login-sub {
     margin: 0 0 16px;
     color: var(--color-muted);
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .login-instructions {
@@ -191,7 +191,7 @@ a:hover { text-decoration: underline; }
 
 .login-instructions-title {
     margin: 0 0 10px;
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 700;
     color: var(--color-primary);
 }
@@ -200,8 +200,8 @@ a:hover { text-decoration: underline; }
     margin: 0;
     padding-left: 1.15rem;
     color: var(--color-text);
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.55;
 }
 
 .login-steps li {
@@ -215,13 +215,26 @@ a:hover { text-decoration: underline; }
 .login-steps em {
     color: var(--color-muted);
     font-style: normal;
-    font-size: 12.5px;
+    font-size: 13.5px;
 }
 
 .login-foot {
     margin: 18px 0 0;
     color: var(--color-muted);
-    font-size: 12.5px;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.login-error[hidden] {
+    display: none !important;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.login-error[hidden]::before {
+    display: none;
 }
 
 .login-error {
@@ -232,7 +245,7 @@ a:hover { text-decoration: underline; }
     border: 1px solid #fecaca;
     border-left: 4px solid var(--color-error);
     border-radius: var(--radius-sm);
-    font-size: 13.5px;
+    font-size: 14px;
     text-align: left;
     line-height: 1.45;
     position: relative;
@@ -354,7 +367,7 @@ a:hover { text-decoration: underline; }
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     font-family: inherit;
-    font-size: 14px;
+    font-size: 16px;
     background: #fff;
 }
 #vista-login .field input:focus {
@@ -363,9 +376,65 @@ a:hover { text-decoration: underline; }
     box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
 }
 #vista-login .field label {
-    font-size: 12.5px;
+    font-size: 14px;
     color: var(--color-muted);
     font-weight: 600;
+}
+
+.password-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrap input {
+    width: 100%;
+    padding-right: 44px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color .15s ease, background .15s ease;
+}
+
+.password-toggle:hover {
+    color: var(--color-primary);
+    background: rgba(10, 37, 64, 0.06);
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid rgba(37, 99, 235, 0.45);
+    outline-offset: 1px;
+}
+
+.password-toggle.is-revealed {
+    color: var(--color-orange);
+}
+
+.password-toggle .icon-eye-off {
+    display: none;
+}
+
+.password-toggle.is-revealed .icon-eye {
+    display: none;
+}
+
+.password-toggle.is-revealed .icon-eye-off {
+    display: block;
 }
 
 /* Logo Microsoft (4 cuadrados) */
@@ -456,6 +525,7 @@ a:hover { text-decoration: underline; }
 .page-intro p {
     margin: 0;
     color: var(--color-muted);
+    font-size: 15px;
 }
 
 /* ===== CARDS ============================================== */
@@ -473,12 +543,12 @@ a:hover { text-decoration: underline; }
 }
 .card-header h2 {
     margin: 0 0 2px;
-    font-size: 17px;
+    font-size: 18px;
     color: var(--color-primary);
 }
 .card-sub {
     color: var(--color-muted);
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .card-actions {
@@ -509,7 +579,7 @@ a:hover { text-decoration: underline; }
 }
 
 .field label {
-    font-size: 12.5px;
+    font-size: 13.5px;
     color: var(--color-muted);
     font-weight: 600;
     letter-spacing: 0.01em;
@@ -523,7 +593,7 @@ a:hover { text-decoration: underline; }
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     font-family: inherit;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--color-text);
     background: #fff;
     transition: border-color .15s, box-shadow .15s, background .15s;
@@ -561,9 +631,9 @@ a:hover { text-decoration: underline; }
     background: #fff;
     color: var(--color-text);
     font-family: inherit;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
-    padding: 10px 18px;
+    padding: 11px 18px;
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background .15s, color .15s, border-color .15s, box-shadow .15s, transform .05s;

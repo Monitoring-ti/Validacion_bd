@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=15" />
+    <link rel="stylesheet" href="styles.css?v=16" />
 </head>
 <body>
 
@@ -22,7 +22,7 @@
         <div class="login-card">
             <div class="monitoring-logo login-logo" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.2</span>
+                <span class="logo-version" data-app-version>v1.0.3</span>
             </div>
             <h1 id="login-titulo">Validacion de datos personales</h1>
             <p class="login-sub" id="login-sub">
@@ -46,7 +46,17 @@
                 </div>
                 <div class="field" style="text-align:left; margin-bottom: 14px;">
                     <label for="input-password" id="label-password">Contrasena de verificacion</label>
-                    <input id="input-password" type="password" placeholder="Minimo 8 caracteres (solo para este portal)" autocomplete="current-password" minlength="8" />
+                    <div class="password-wrap">
+                        <input id="input-password" type="password" placeholder="Minimo 8 caracteres (solo para este portal)" autocomplete="current-password" minlength="8" />
+                        <button type="button" id="btn-toggle-password" class="password-toggle" aria-label="Mostrar contrasena" aria-pressed="false" title="Mostrar contrasena">
+                            <svg class="icon-eye" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12.5c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                            </svg>
+                            <svg class="icon-eye-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M3.27 3.27 2 4.54l2.89 2.89C3.53 8.47 2.38 10.3 1 12.5 2.73 16.89 7 20 12 20c2.04 0 3.92-.52 5.57-1.43l2.36 2.36 1.27-1.27L3.27 3.27zM12 17.5c-3.04 0-5.64-1.88-6.82-4.53l1.56-1.56A4.97 4.97 0 0 0 12 15.5c.68 0 1.33-.14 1.92-.39l1.56 1.56A7.9 7.9 0 0 1 12 17.5zm6.82-4.53-1.45-1.45a8.03 8.03 0 0 0 .23-2.02l2.06-2.06C20.62 10.3 21.77 12.13 23 14.33c-1.73 4.39-6 7.5-11 7.5-1.45 0-2.84-.26-4.13-.73l1.67-1.67c.78.2 1.6.3 2.46.3 3.04 0 5.64-1.88 6.82-4.53zM12 7.5c.68 0 1.33.14 1.92.39l-1.56 1.56A4.97 4.97 0 0 0 12 9.5a4.97 4.97 0 0 0-1.92.39L8.52 8.33A7.9 7.9 0 0 1 12 7.5z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <button id="btn-login" class="btn btn-primary btn-microsoft" type="button">
                     Entrar al portal
@@ -55,7 +65,8 @@
 
             <p id="login-error" class="login-error" hidden></p>
             <p class="login-foot">
-                Acceso exclusivo <strong>@monitoring.cl</strong>. La contrasena sirve solo para esta verificacion de datos.
+                Acceso exclusivo <strong>@monitoring.cl</strong>. La contrasena sirve solo para esta verificacion de datos.<br />
+                Problemas con tu cuenta: <a id="login-support-email" href="mailto:ti.soporte@monitoring.cl">ti.soporte@monitoring.cl</a>
             </p>
         </div>
     </section>
@@ -68,7 +79,7 @@
         <header class="app-header">
             <div class="monitoring-logo brand" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.2</span>
+                <span class="logo-version" data-app-version>v1.0.3</span>
             </div>
             <div class="user-box">
                 <div class="user-info">
@@ -443,7 +454,7 @@
         </main>
 
         <footer class="app-footer">
-            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.2</span>
+            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.3</span>
         </footer>
 
     </section>
@@ -549,8 +560,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=15"></script>
-    <script src="app.js?v=15"></script>
+    <script src="config.js?v=16"></script>
+    <script src="app.js?v=16"></script>
 
 </body>
 </html>

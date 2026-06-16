@@ -8,7 +8,7 @@
 
 window.CONFIG = {
     // --- Version del portal ---
-    APP_VERSION: '1.0.2',
+    APP_VERSION: '1.0.3',
 
     // --- Supabase ---
     SUPABASE_URL: 'https://wjzdqcttuiixrybxoaqi.supabase.co',
@@ -27,8 +27,11 @@ window.CONFIG = {
         'cumplimiento, de acuerdo con la normativa aplicable y su politica interna ' +
         'de tratamiento de datos personales.',
 
-    // --- Email de notificacion a RR.HH. (uso futuro / referencia visual) ---
-    RRHH_NOTIFY_EMAIL: 'rrhh@monitoring.cl',
+    // --- Contacto soporte (problemas de cuenta / acceso) ---
+    SUPPORT_EMAIL: 'ti.soporte@monitoring.cl',
+
+    // --- Email de notificacion (referencia visual / privacidad) ---
+    RRHH_NOTIFY_EMAIL: 'ti.soporte@monitoring.cl',
 
     // --- Politica de privacidad (placeholder para link futuro) ---
     POLITICA_PRIVACIDAD_URL: '',
