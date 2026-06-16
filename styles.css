@@ -476,6 +476,18 @@ a:hover { text-decoration: underline; }
 }
 .check-toggle input { transform: scale(1.15); }
 
+.subseccion-titulo {
+    margin: 8px 22px 0;
+    padding: 8px 12px;
+    background: #eef2f7;
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border-left: 3px solid var(--color-accent);
+    border-radius: 4px;
+}
+
 /* ===== MODALES ============================================ */
 .modal {
     border: none;

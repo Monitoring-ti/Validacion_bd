@@ -25,13 +25,21 @@ const CAMPOS_EDITABLES = [
     'nombre_contacto_emergencia',
     'parentesco_emergencia',
     'telefono_emergencia',
-    // Domicilio
+    // Domicilio (vivienda)
     'region',
     'ciudad',
     'comuna',
     'calle',
     'numero_domicilio',
     'departamento_casa',
+    // Domicilio (teletrabajo)
+    'teletrabajo_misma_direccion',
+    'teletrabajo_region',
+    'teletrabajo_ciudad',
+    'teletrabajo_comuna',
+    'teletrabajo_calle',
+    'teletrabajo_numero',
+    'teletrabajo_departamento',
     // Previsional
     'afp',
     'sistema_salud',
@@ -67,12 +75,19 @@ const ETIQUETAS = {
     nombre_contacto_emergencia: 'Contacto de emergencia',
     parentesco_emergencia:      'Parentesco emergencia',
     telefono_emergencia:        'Telefono de emergencia',
-    region:                     'Region',
-    ciudad:                     'Ciudad',
-    comuna:                     'Comuna',
-    calle:                      'Calle',
-    numero_domicilio:           'Numero de domicilio',
-    departamento_casa:          'Departamento / casa',
+    region:                     'Region (vivienda)',
+    ciudad:                     'Ciudad (vivienda)',
+    comuna:                     'Comuna (vivienda)',
+    calle:                      'Calle (vivienda)',
+    numero_domicilio:           'Numero (vivienda)',
+    departamento_casa:          'Departamento (vivienda)',
+    teletrabajo_misma_direccion:'Teletrabajo misma direccion',
+    teletrabajo_region:         'Region (teletrabajo)',
+    teletrabajo_ciudad:         'Ciudad (teletrabajo)',
+    teletrabajo_comuna:         'Comuna (teletrabajo)',
+    teletrabajo_calle:          'Calle (teletrabajo)',
+    teletrabajo_numero:         'Numero (teletrabajo)',
+    teletrabajo_departamento:   'Departamento (teletrabajo)',
     afp:                        'AFP',
     sistema_salud:              'Sistema de salud',
     nombre_isapre:              'Nombre Isapre',
@@ -163,6 +178,15 @@ function bindEventos() {
             if (!chkPase.checked) {
                 document.getElementById('f-pase-numero').value = '';
             }
+        });
+    }
+
+    // Toggle: si destilda "misma direccion", se revela el bloque teletrabajo;
+    // si la tilda nuevamente, se ocultan y limpian esos campos.
+    const chkTele = document.getElementById('f-teletrabajo-misma');
+    if (chkTele) {
+        chkTele.addEventListener('change', () => {
+            aplicarVisibilidadTeletrabajo();
         });
     }
 
@@ -485,13 +509,30 @@ function renderFormulario(t) {
     poblarSelect('f-parentesco-emergencia', CONFIG.PARENTESCOS, t.parentesco_emergencia);
     setVal('f-telefono-emergencia', t.telefono_emergencia);
 
-    // 4. Domicilio
+    // 4. Domicilio - Vivienda
     poblarSelect('f-region', CONFIG.REGIONES_CHILE, t.region);
     setVal('f-ciudad',            t.ciudad);
     setVal('f-comuna',            t.comuna);
     setVal('f-calle',             t.calle);
     setVal('f-numero-domicilio',  t.numero_domicilio);
     setVal('f-departamento-casa', t.departamento_casa);
+
+    // 4. Domicilio - Teletrabajo (toggle + bloque condicional)
+    const chkTele = document.getElementById('f-teletrabajo-misma');
+    // Si nunca se ha definido en BD, asumimos true (misma direccion).
+    const mismaTele = (t.teletrabajo_misma_direccion === undefined || t.teletrabajo_misma_direccion === null)
+        ? true
+        : !!t.teletrabajo_misma_direccion;
+    chkTele.checked = mismaTele;
+
+    poblarSelect('f-teletrabajo-region', CONFIG.REGIONES_CHILE, t.teletrabajo_region);
+    setVal('f-teletrabajo-ciudad',       t.teletrabajo_ciudad);
+    setVal('f-teletrabajo-comuna',       t.teletrabajo_comuna);
+    setVal('f-teletrabajo-calle',        t.teletrabajo_calle);
+    setVal('f-teletrabajo-numero',       t.teletrabajo_numero);
+    setVal('f-teletrabajo-departamento', t.teletrabajo_departamento);
+
+    aplicarVisibilidadTeletrabajo();
 
     // 5. Previsional
     poblarSelect('f-afp',           CONFIG.AFPS,            t.afp);
@@ -540,6 +581,22 @@ function formatearFechaInput(v) {
     const s = String(v);
     if (s.length >= 10) return s.substring(0, 10);
     return s;
+}
+
+// Muestra u oculta el bloque de teletrabajo segun el checkbox.
+// Si se vuelve a marcar como "misma direccion", limpia los inputs para
+// que al guardar queden en null en BD.
+function aplicarVisibilidadTeletrabajo() {
+    const chk = document.getElementById('f-teletrabajo-misma');
+    const bloque = document.getElementById('bloque-teletrabajo');
+    if (!chk || !bloque) return;
+
+    bloque.hidden = chk.checked;
+    if (chk.checked) {
+        ['f-teletrabajo-region', 'f-teletrabajo-ciudad', 'f-teletrabajo-comuna',
+         'f-teletrabajo-calle',  'f-teletrabajo-numero', 'f-teletrabajo-departamento']
+            .forEach((id) => { const e = document.getElementById(id); if (e) e.value = ''; });
+    }
 }
 
 function formatNombreCompleto(t) {
@@ -679,6 +736,16 @@ function leerValoresActuales() {
     // alguien lo hubiera tipeado antes.
     if (out.pase_codelco === false) {
         out.pase_codelco_numero = '';
+    }
+    // Si la direccion de teletrabajo es la misma que la de vivienda, los
+    // campos especificos se guardan vacios (null en BD).
+    if (out.teletrabajo_misma_direccion === true) {
+        out.teletrabajo_region = '';
+        out.teletrabajo_ciudad = '';
+        out.teletrabajo_comuna = '';
+        out.teletrabajo_calle = '';
+        out.teletrabajo_numero = '';
+        out.teletrabajo_departamento = '';
     }
     return out;
 }

@@ -42,7 +42,15 @@ ALTER TABLE public.trabajadores
     ADD COLUMN IF NOT EXISTS licencia_conducir_numero          varchar,
     ADD COLUMN IF NOT EXISTS pase_codelco                      boolean DEFAULT false,
     ADD COLUMN IF NOT EXISTS pase_codelco_numero               varchar,
-    ADD COLUMN IF NOT EXISTS enfermedades_cronicas             text;
+    ADD COLUMN IF NOT EXISTS enfermedades_cronicas             text,
+    -- Direccion de teletrabajo (separada de domicilio si difiere)
+    ADD COLUMN IF NOT EXISTS teletrabajo_misma_direccion       boolean DEFAULT true,
+    ADD COLUMN IF NOT EXISTS teletrabajo_region                varchar,
+    ADD COLUMN IF NOT EXISTS teletrabajo_ciudad                varchar,
+    ADD COLUMN IF NOT EXISTS teletrabajo_comuna                varchar,
+    ADD COLUMN IF NOT EXISTS teletrabajo_calle                 varchar,
+    ADD COLUMN IF NOT EXISTS teletrabajo_numero                varchar,
+    ADD COLUMN IF NOT EXISTS teletrabajo_departamento          varchar;
 
 CREATE INDEX IF NOT EXISTS idx_trabajadores_email_corporativo
     ON public.trabajadores (lower(email_corporativo));

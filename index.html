@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=8" />
+    <link rel="stylesheet" href="styles.css?v=9" />
 </head>
 <body>
 
@@ -179,8 +179,11 @@
             <article class="card" id="card-domicilio">
                 <header class="card-header">
                     <h2>4. Domicilio</h2>
-                    <span class="card-sub">Campos editables.</span>
+                    <span class="card-sub">Direccion de vivienda y, si corresponde, direccion de teletrabajo.</span>
                 </header>
+
+                <!-- 4.1 Direccion de vivienda -->
+                <div class="subseccion-titulo">Direccion de vivienda</div>
                 <div class="grid">
                     <div class="field">
                         <label for="f-region">Region</label>
@@ -205,6 +208,47 @@
                     <div class="field">
                         <label for="f-departamento-casa">Departamento / casa</label>
                         <input id="f-departamento-casa" type="text" data-campo="departamento_casa" data-editable="1" maxlength="40" placeholder="Depto 301 / Casa B" />
+                    </div>
+                </div>
+
+                <!-- 4.2 Toggle teletrabajo -->
+                <div class="grid">
+                    <div class="field" style="grid-column: 1 / -1;">
+                        <label class="check-toggle">
+                            <input id="f-teletrabajo-misma" type="checkbox" data-campo="teletrabajo_misma_direccion" data-editable="1" checked />
+                            <span>Mi direccion de teletrabajo es la misma que mi direccion de vivienda</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 4.3 Direccion de teletrabajo (solo visible si toggle OFF) -->
+                <div id="bloque-teletrabajo" hidden>
+                    <div class="subseccion-titulo">Direccion de teletrabajo</div>
+                    <div class="grid">
+                        <div class="field">
+                            <label for="f-teletrabajo-region">Region</label>
+                            <select id="f-teletrabajo-region" data-campo="teletrabajo_region" data-editable="1"></select>
+                        </div>
+                        <div class="field">
+                            <label for="f-teletrabajo-ciudad">Ciudad</label>
+                            <input id="f-teletrabajo-ciudad" type="text" data-campo="teletrabajo_ciudad" data-editable="1" maxlength="80" />
+                        </div>
+                        <div class="field">
+                            <label for="f-teletrabajo-comuna">Comuna</label>
+                            <input id="f-teletrabajo-comuna" type="text" data-campo="teletrabajo_comuna" data-editable="1" maxlength="80" />
+                        </div>
+                        <div class="field">
+                            <label for="f-teletrabajo-calle">Calle</label>
+                            <input id="f-teletrabajo-calle" type="text" data-campo="teletrabajo_calle" data-editable="1" maxlength="120" />
+                        </div>
+                        <div class="field">
+                            <label for="f-teletrabajo-numero">Numero</label>
+                            <input id="f-teletrabajo-numero" type="text" data-campo="teletrabajo_numero" data-editable="1" maxlength="20" />
+                        </div>
+                        <div class="field">
+                            <label for="f-teletrabajo-departamento">Departamento / casa</label>
+                            <input id="f-teletrabajo-departamento" type="text" data-campo="teletrabajo_departamento" data-editable="1" maxlength="40" placeholder="Depto 301 / Casa B" />
+                        </div>
                     </div>
                 </div>
             </article>
@@ -483,8 +527,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=8"></script>
-    <script src="app.js?v=8"></script>
+    <script src="config.js?v=9"></script>
+    <script src="app.js?v=9"></script>
 
 </body>
 </html>
