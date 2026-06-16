@@ -206,7 +206,29 @@ async function autenticar() {
                 email, password,
                 options: { emailRedirectTo: window.location.origin + window.location.pathname }
             });
-            if (error) throw error;
+            if (error) {
+                // Si la cuenta ya existe, intentamos iniciar sesion con esa misma password.
+                const lc = String(error.message || '').toLowerCase();
+                const yaRegistrado = lc.includes('already registered') ||
+                                     lc.includes('already been registered') ||
+                                     lc.includes('user already exists');
+                if (yaRegistrado) {
+                    const { error: signInError } = await STATE.sb.auth.signInWithPassword({ email, password });
+                    if (signInError) {
+                        const lc2 = String(signInError.message || '').toLowerCase();
+                        if (lc2.includes('invalid login credentials')) {
+                            throw new Error(
+                                'Esa cuenta ya existe pero la contrasena no coincide. ' +
+                                'Ve a "Iniciar sesion" e ingresa tu contrasena actual.'
+                            );
+                        }
+                        throw signInError;
+                    }
+                    mostrarMensaje('info', 'Esta cuenta ya estaba registrada. Iniciamos tu sesion.');
+                } else {
+                    throw error;
+                }
+            }
         } else {
             const { error } = await STATE.sb.auth.signInWithPassword({ email, password });
             if (error) throw error;
