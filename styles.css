@@ -117,6 +117,38 @@ a:hover { text-decoration: underline; }
     text-align: left;
 }
 
+.success-box {
+    margin: 4px 0 14px;
+    padding: 12px 14px;
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid #a7f3d0;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    text-align: left;
+    line-height: 1.5;
+}
+
+#vista-login .field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    background: #fff;
+}
+#vista-login .field input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+}
+#vista-login .field label {
+    font-size: 12.5px;
+    color: var(--color-muted);
+    font-weight: 600;
+}
+
 /* Logo Microsoft (4 cuadrados) */
 .ms-logo {
     display: inline-grid;

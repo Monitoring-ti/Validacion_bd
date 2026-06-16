@@ -8,8 +8,8 @@
 
 window.CONFIG = {
     // --- Supabase ---
-    SUPABASE_URL: 'https://TU-PROYECTO.supabase.co',
-    SUPABASE_ANON_KEY: 'TU-ANON-KEY',
+    SUPABASE_URL: 'https://wjzdqcttuiixrybxoaqi.supabase.co',
+    SUPABASE_ANON_KEY: 'sb_publishable_Vd8reHQz6C18PAcKvNF36g_eemMHc9p',
 
     // --- Dominio corporativo permitido (validacion estricta) ---
     ALLOWED_DOMAIN: '@monitoring.cl',

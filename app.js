@@ -91,8 +91,12 @@ function initSupabase() {
 // EVENTOS DE UI
 // =======================================================================
 function bindEventos() {
-    // Login / logout
-    document.getElementById('btn-login').addEventListener('click', loginConMicrosoft);
+    // Login passwordless (Magic Link) / logout
+    document.getElementById('btn-enviar-link').addEventListener('click', enviarMagicLink);
+    document.getElementById('input-email').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') enviarMagicLink();
+    });
+    document.getElementById('btn-reenviar').addEventListener('click', resetVistaLogin);
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
 
     // Modal documento
@@ -136,22 +140,55 @@ function poblarTextoLegal() {
 }
 
 // =======================================================================
-// AUTENTICACION
+// AUTENTICACION (Magic Link)
 // =======================================================================
-async function loginConMicrosoft() {
+async function enviarMagicLink() {
+    const input = document.getElementById('input-email');
+    const email = (input.value || '').trim().toLowerCase();
+
+    document.getElementById('login-error').hidden = true;
+
+    if (!email) {
+        mostrarErrorLogin('Ingresa tu correo corporativo.');
+        return;
+    }
+
+    // Validacion de dominio antes de enviar el link.
+    if (!validarDominio(email)) {
+        mostrarErrorLogin(
+            'Solo cuentas que terminen en ' + CONFIG.ALLOWED_DOMAIN + ' pueden acceder.'
+        );
+        return;
+    }
+
+    showLoader();
     try {
-        const { error } = await STATE.sb.auth.signInWithOAuth({
-            provider: 'azure',
+        const { error } = await STATE.sb.auth.signInWithOtp({
+            email,
             options: {
-                scopes: 'openid email profile offline_access',
-                redirectTo: window.location.origin + window.location.pathname
+                shouldCreateUser: true,
+                emailRedirectTo: window.location.origin + window.location.pathname
             }
         });
         if (error) throw error;
+
+        document.getElementById('login-form-box').hidden = true;
+        const box = document.getElementById('login-enviado-box');
+        document.getElementById('login-enviado-email').textContent = email;
+        box.hidden = false;
     } catch (err) {
-        console.error('Error de login:', err);
-        mostrarErrorLogin('No se pudo iniciar sesion con Microsoft. ' + (err.message || ''));
+        console.error('Error enviando magic link:', err);
+        mostrarErrorLogin('No se pudo enviar el enlace. ' + (err.message || ''));
+    } finally {
+        hideLoader();
     }
+}
+
+function resetVistaLogin() {
+    document.getElementById('login-form-box').hidden = false;
+    document.getElementById('login-enviado-box').hidden = true;
+    document.getElementById('login-error').hidden = true;
+    document.getElementById('input-email').value = '';
 }
 
 async function procesarSesionActual() {
@@ -626,6 +663,11 @@ async function cerrarSesionValidacion() {
 function mostrarVistaLogin() {
     document.getElementById('vista-login').hidden = false;
     document.getElementById('vista-app').hidden   = true;
+    // Restaurar el formulario por si veniamos del estado "link enviado".
+    const box1 = document.getElementById('login-form-box');
+    const box2 = document.getElementById('login-enviado-box');
+    if (box1) box1.hidden = false;
+    if (box2) box2.hidden = true;
 }
 function mostrarVistaApp() {
     document.getElementById('vista-login').hidden = true;

@@ -14,25 +14,39 @@
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <!-- ======================================================
-         Vista LOGIN
+         Vista LOGIN (Magic Link por email)
          ====================================================== -->
     <section id="vista-login" class="vista vista-login">
         <div class="login-card">
             <div class="login-logo">Monitoring</div>
             <h1>Portal del Trabajador</h1>
             <p class="login-sub">
-                Inicia sesion con tu cuenta corporativa Microsoft 365
-                para revisar y validar tus datos.
+                Ingresa tu correo corporativo. Te enviaremos un enlace de
+                acceso seguro para entrar al portal.
             </p>
-            <button id="btn-login" class="btn btn-primary btn-microsoft" type="button">
-                <span class="ms-logo" aria-hidden="true">
-                    <span class="ms-sq sq1"></span>
-                    <span class="ms-sq sq2"></span>
-                    <span class="ms-sq sq3"></span>
-                    <span class="ms-sq sq4"></span>
-                </span>
-                Iniciar sesion con Microsoft 365
-            </button>
+
+            <!-- Estado 1: pedir email -->
+            <div id="login-form-box">
+                <div class="field" style="text-align:left; margin-bottom: 10px;">
+                    <label for="input-email">Correo corporativo</label>
+                    <input id="input-email" type="email" placeholder="nombre.apellido@monitoring.cl" autocomplete="email" />
+                </div>
+                <button id="btn-enviar-link" class="btn btn-primary btn-microsoft" type="button">
+                    Enviar enlace de acceso
+                </button>
+            </div>
+
+            <!-- Estado 2: link enviado -->
+            <div id="login-enviado-box" hidden>
+                <p class="success-box">
+                    Listo. Te enviamos un enlace a <strong id="login-enviado-email"></strong>.
+                    Revisa tu bandeja de entrada (y la carpeta de spam por si acaso).
+                </p>
+                <button id="btn-reenviar" class="btn btn-secondary" type="button">
+                    Enviar a otra cuenta
+                </button>
+            </div>
+
             <p id="login-error" class="login-error" hidden></p>
             <p class="login-foot">
                 Solo se permite acceso con cuentas <strong>@monitoring.cl</strong>.
