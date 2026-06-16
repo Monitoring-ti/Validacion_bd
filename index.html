@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=10" />
+    <link rel="stylesheet" href="styles.css?v=12" />
 </head>
 <body>
 
@@ -213,13 +213,20 @@
                     </div>
                 </div>
 
-                <!-- 4.2 Toggle teletrabajo -->
+                <!-- 4.2 Toggle teletrabajo (radio Si/No) -->
                 <div class="grid">
                     <div class="field" style="grid-column: 1 / -1;">
-                        <label class="check-toggle">
-                            <input id="f-teletrabajo-misma" type="checkbox" data-campo="teletrabajo_misma_direccion" data-editable="1" checked />
-                            <span>Mi direccion de teletrabajo es la misma que mi direccion de vivienda</span>
-                        </label>
+                        <span class="radio-label">Direccion de teletrabajo</span>
+                        <div class="radio-toggle" role="radiogroup" aria-label="Direccion de teletrabajo">
+                            <label class="radio-pill">
+                                <input id="f-teletrabajo-misma" type="radio" name="teletrabajo_misma_rg" value="si" data-campo="teletrabajo_misma_direccion" data-editable="1" checked />
+                                <span>Misma direccion que mi vivienda</span>
+                            </label>
+                            <label class="radio-pill">
+                                <input id="f-teletrabajo-diferente" type="radio" name="teletrabajo_misma_rg" value="no" />
+                                <span>Direccion diferente</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -376,10 +383,17 @@
 
                 <div class="grid">
                     <div class="field" style="grid-column: 1 / -1;">
-                        <label class="check-toggle">
-                            <input id="f-pase-codelco" type="checkbox" data-campo="pase_codelco" data-editable="1" />
-                            <span>Tengo pase interno de Codelco</span>
-                        </label>
+                        <span class="radio-label">Pase interno de Codelco</span>
+                        <div class="radio-toggle" role="radiogroup" aria-label="Pase interno de Codelco">
+                            <label class="radio-pill">
+                                <input id="f-pase-codelco-no" type="radio" name="pase_codelco_rg" value="no" checked />
+                                <span>No tengo</span>
+                            </label>
+                            <label class="radio-pill">
+                                <input id="f-pase-codelco" type="radio" name="pase_codelco_rg" value="si" data-campo="pase_codelco" data-editable="1" />
+                                <span>Si tengo</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="field" id="campo-pase-numero" hidden>
                         <label for="f-pase-numero">Numero de pase Codelco</label>
@@ -530,7 +544,7 @@
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js?v=10"></script>
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=12"></script>
 
 </body>
 </html>

@@ -169,26 +169,15 @@ function bindEventos() {
     document.getElementById('tab-signup').addEventListener('click', () => cambiarModoLogin('signup'));
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
 
-    // Toggle: si destilda el pase Codelco, se oculta el numero y se limpia.
-    const chkPase = document.getElementById('f-pase-codelco');
-    if (chkPase) {
-        chkPase.addEventListener('change', () => {
-            const campoNumero = document.getElementById('campo-pase-numero');
-            campoNumero.hidden = !chkPase.checked;
-            if (!chkPase.checked) {
-                document.getElementById('f-pase-numero').value = '';
-            }
-        });
-    }
+    // Radio group: pase Codelco (Si/No). Si "No", oculta numero y limpia.
+    document.querySelectorAll('input[name="pase_codelco_rg"]').forEach((r) => {
+        r.addEventListener('change', aplicarVisibilidadPaseCodelco);
+    });
 
-    // Toggle: si destilda "misma direccion", se revela el bloque teletrabajo;
-    // si la tilda nuevamente, se ocultan y limpian esos campos.
-    const chkTele = document.getElementById('f-teletrabajo-misma');
-    if (chkTele) {
-        chkTele.addEventListener('change', () => {
-            aplicarVisibilidadTeletrabajo();
-        });
-    }
+    // Radio group: teletrabajo (Misma / Diferente). Si "Misma", oculta bloque y limpia.
+    document.querySelectorAll('input[name="teletrabajo_misma_rg"]').forEach((r) => {
+        r.addEventListener('change', aplicarVisibilidadTeletrabajo);
+    });
 
     // Modal documento
     document.getElementById('btn-solicitar-correccion')
@@ -270,19 +259,29 @@ async function autenticar() {
 
     document.getElementById('login-error').hidden = true;
 
-    if (!email) { mostrarErrorLogin('Ingresa tu correo corporativo.'); return; }
-    if (!password) { mostrarErrorLogin('Ingresa tu contrasena.'); return; }
+    if (!email) {
+        mostrarErrorLogin('Ingresa tu correo corporativo.', { titulo: 'Correo requerido', tipo: 'warn' });
+        return;
+    }
+    if (!password) {
+        mostrarErrorLogin('Ingresa tu contrasena.', { titulo: 'Contrasena requerida', tipo: 'warn' });
+        return;
+    }
 
-    // Validacion de dominio.
     if (!validarDominio(email)) {
+        const adminEmail = CONFIG.RRHH_NOTIFY_EMAIL || 'administrador de correos';
         mostrarErrorLogin(
-            'Solo cuentas que terminen en ' + CONFIG.ALLOWED_DOMAIN + ' pueden acceder.'
+            'El correo ' + email + ' no pertenece a Monitoring. ' +
+            'Verifica que termine en ' + CONFIG.ALLOWED_DOMAIN + '. ' +
+            'Si crees que es un error, contacta al administrador de correos: ' + adminEmail + '.',
+            { titulo: 'Dominio no permitido', tipo: 'error' }
         );
+        mostrarMensaje('error', 'Solo se permiten cuentas ' + CONFIG.ALLOWED_DOMAIN);
         return;
     }
 
     if (MODO_LOGIN === 'signup' && password.length < 8) {
-        mostrarErrorLogin('La contrasena debe tener al menos 8 caracteres.');
+        mostrarErrorLogin('La contrasena debe tener al menos 8 caracteres.', { titulo: 'Contrasena muy corta', tipo: 'warn' });
         return;
     }
 
@@ -304,10 +303,12 @@ async function autenticar() {
                     if (signInError) {
                         const lc2 = String(signInError.message || '').toLowerCase();
                         if (lc2.includes('invalid login credentials')) {
-                            throw new Error(
-                                'Esa cuenta ya existe pero la contrasena no coincide. ' +
-                                'Ve a "Iniciar sesion" e ingresa tu contrasena actual.'
+                            mostrarErrorLogin(
+                                'Esa cuenta ya esta registrada y la contrasena que ingresaste no coincide. ' +
+                                'Cambia a la pestana "Iniciar sesion" e ingresa tu contrasena actual.',
+                                { titulo: 'Contrasena no coincide', tipo: 'warn' }
                             );
+                            return;
                         }
                         throw signInError;
                     }
@@ -325,24 +326,72 @@ async function autenticar() {
         console.error('Error autenticando:', err);
         const detalle = (err && (err.message || err.error_description || err.error)) ||
                         (function () { try { return JSON.stringify(err); } catch (_) { return String(err); } })();
-        mostrarErrorLogin(traducirErrorAuth(detalle));
+        const tr = traducirErrorAuth(detalle, MODO_LOGIN);
+        mostrarErrorLogin(tr.mensaje, { titulo: tr.titulo, tipo: tr.tipo });
+        if (tr.tipo === 'error') mostrarMensaje('error', tr.titulo || 'No se pudo iniciar sesion');
     } finally {
         hideLoader();
     }
 }
 
-function traducirErrorAuth(msg) {
-    if (!msg) return 'No se pudo autenticar.';
+// Devuelve { titulo, mensaje, tipo } segun el error y el modo de login.
+function traducirErrorAuth(msg, modo) {
+    const dominio = CONFIG.ALLOWED_DOMAIN || '@monitoring.cl';
+    const adminEmail = CONFIG.RRHH_NOTIFY_EMAIL || 'administrador de correos';
+
+    if (!msg) {
+        return { titulo: 'No se pudo autenticar', mensaje: 'Intenta nuevamente en unos segundos.', tipo: 'error' };
+    }
+
     const lc = String(msg).toLowerCase();
-    if (lc.includes('invalid login credentials'))
-        return 'Correo o contrasena incorrectos. Si es tu primera vez, usa "Primera vez".';
-    if (lc.includes('user already registered'))
-        return 'Esa cuenta ya esta registrada. Usa "Iniciar sesion".';
-    if (lc.includes('email not confirmed'))
-        return 'La cuenta existe pero el email no esta confirmado. Contacta a RR.HH.';
-    if (lc.includes('password should be at least'))
-        return 'La contrasena es demasiado corta. Usa al menos 8 caracteres.';
-    return msg;
+
+    if (lc.includes('invalid login credentials')) {
+        if (modo === 'signup') {
+            return {
+                titulo: 'Cuenta no creada',
+                mensaje: 'No pudimos crear la cuenta. Verifica que tu correo termine en ' + dominio + '. ' +
+                         'Si el problema persiste, contacta al administrador de correos: ' + adminEmail + '.',
+                tipo: 'error'
+            };
+        }
+        return {
+            titulo: 'Cuenta no encontrada',
+            mensaje: 'No encontramos esa cuenta o la contrasena es incorrecta. ' +
+                     'Verifica que tu correo ' + dominio + ' este bien escrito. ' +
+                     'Si es tu primera vez, usa la pestana "Primera vez". ' +
+                     'Si no puedes acceder, contacta al administrador de correos: ' + adminEmail + '.',
+            tipo: 'error'
+        };
+    }
+    if (lc.includes('user already registered') || lc.includes('already been registered') || lc.includes('user already exists')) {
+        return {
+            titulo: 'Cuenta ya registrada',
+            mensaje: 'Esa cuenta ya esta registrada. Usa la pestana "Iniciar sesion" con tu contrasena habitual.',
+            tipo: 'warn'
+        };
+    }
+    if (lc.includes('email not confirmed')) {
+        return {
+            titulo: 'Correo sin confirmar',
+            mensaje: 'La cuenta existe pero el correo aun no esta confirmado. Contacta al administrador de correos: ' + adminEmail + '.',
+            tipo: 'warn'
+        };
+    }
+    if (lc.includes('password should be at least')) {
+        return {
+            titulo: 'Contrasena demasiado corta',
+            mensaje: 'La contrasena debe tener al menos 8 caracteres.',
+            tipo: 'warn'
+        };
+    }
+    if (lc.includes('rate limit') || lc.includes('too many requests')) {
+        return {
+            titulo: 'Demasiados intentos',
+            mensaje: 'Hubo demasiados intentos seguidos. Espera unos minutos y vuelve a intentar.',
+            tipo: 'warn'
+        };
+    }
+    return { titulo: 'No se pudo autenticar', mensaje: msg, tipo: 'error' };
 }
 
 async function procesarSesionActual() {
@@ -369,10 +418,15 @@ async function manejarSesion(session) {
     try {
         const trabajador = await cargarTrabajador(email);
         if (!trabajador) {
+            const dominio = CONFIG.ALLOWED_DOMAIN || '@monitoring.cl';
+            const adminEmail = CONFIG.RRHH_NOTIFY_EMAIL || 'administrador de correos';
             mostrarErrorLogin(
-                'Tu cuenta esta autenticada pero no se encontro tu registro de trabajador. ' +
-                'Contacta a RR.HH. (' + CONFIG.RRHH_NOTIFY_EMAIL + ').'
+                'Tu correo ' + email + ' no figura en la base de trabajadores. ' +
+                'Verifica que esta bien escrito y que termine en ' + dominio + '. ' +
+                'Si esta correcto, contacta al administrador de correos: ' + adminEmail + '.',
+                { titulo: 'Cuenta no encontrada', tipo: 'error' }
             );
+            mostrarMensaje('error', 'Cuenta no encontrada en la base de trabajadores');
             await STATE.sb.auth.signOut();
             return;
         }
@@ -517,13 +571,13 @@ function renderFormulario(t) {
     setVal('f-numero-domicilio',  t.numero_domicilio);
     setVal('f-departamento-casa', t.departamento_casa);
 
-    // 4. Domicilio - Teletrabajo (toggle + bloque condicional)
-    const chkTele = document.getElementById('f-teletrabajo-misma');
+    // 4. Domicilio - Teletrabajo (radio Si/No + bloque condicional)
     // Si nunca se ha definido en BD, asumimos true (misma direccion).
     const mismaTele = (t.teletrabajo_misma_direccion === undefined || t.teletrabajo_misma_direccion === null)
         ? true
         : !!t.teletrabajo_misma_direccion;
-    chkTele.checked = mismaTele;
+    document.getElementById('f-teletrabajo-misma').checked = mismaTele;
+    document.getElementById('f-teletrabajo-diferente').checked = !mismaTele;
 
     poblarSelect('f-teletrabajo-region', CONFIG.REGIONES_CHILE, t.teletrabajo_region);
     setVal('f-teletrabajo-ciudad',       t.teletrabajo_ciudad);
@@ -561,10 +615,11 @@ function renderFormulario(t) {
     setVal('f-licencia-numero',     t.licencia_conducir_numero);
     setVal('f-licencia-vencimiento', formatearFechaInput(t.vencimiento_licencia_conducir));
 
-    const chkPase = document.getElementById('f-pase-codelco');
-    chkPase.checked = !!t.pase_codelco;
-    document.getElementById('campo-pase-numero').hidden = !chkPase.checked;
+    const tienePase = !!t.pase_codelco;
+    document.getElementById('f-pase-codelco').checked = tienePase;
+    document.getElementById('f-pase-codelco-no').checked = !tienePase;
     setVal('f-pase-numero', t.pase_codelco_numero);
+    aplicarVisibilidadPaseCodelco();
 
     setVal('f-enfermedades-cronicas', t.enfermedades_cronicas);
 
@@ -583,19 +638,32 @@ function formatearFechaInput(v) {
     return s;
 }
 
-// Muestra u oculta el bloque de teletrabajo segun el checkbox.
-// Si se vuelve a marcar como "misma direccion", limpia los inputs para
-// que al guardar queden en null en BD.
+// Muestra u oculta el bloque de teletrabajo segun el radio "misma direccion".
+// Si esta marcado "misma", limpia los campos del bloque (para que en BD queden null).
 function aplicarVisibilidadTeletrabajo() {
-    const chk = document.getElementById('f-teletrabajo-misma');
+    const radioMisma = document.getElementById('f-teletrabajo-misma');
     const bloque = document.getElementById('bloque-teletrabajo');
-    if (!chk || !bloque) return;
+    if (!radioMisma || !bloque) return;
 
-    bloque.hidden = chk.checked;
-    if (chk.checked) {
+    bloque.hidden = radioMisma.checked;
+    if (radioMisma.checked) {
         ['f-teletrabajo-region', 'f-teletrabajo-ciudad', 'f-teletrabajo-comuna',
          'f-teletrabajo-calle',  'f-teletrabajo-numero', 'f-teletrabajo-departamento']
             .forEach((id) => { const e = document.getElementById(id); if (e) e.value = ''; });
+    }
+}
+
+// Muestra u oculta el campo de numero de pase segun el radio "Si tengo".
+// Si no se tiene pase, limpia el numero.
+function aplicarVisibilidadPaseCodelco() {
+    const radioSi = document.getElementById('f-pase-codelco');
+    const campoNumero = document.getElementById('campo-pase-numero');
+    if (!radioSi || !campoNumero) return;
+
+    campoNumero.hidden = !radioSi.checked;
+    if (!radioSi.checked) {
+        const num = document.getElementById('f-pase-numero');
+        if (num) num.value = '';
     }
 }
 
@@ -726,7 +794,7 @@ function leerValoresActuales() {
     CAMPOS_EDITABLES.forEach((campo) => {
         const el = document.querySelector('[data-campo="' + campo + '"]');
         if (!el) return;
-        if (el.type === 'checkbox') {
+        if (el.type === 'checkbox' || el.type === 'radio') {
             out[campo] = !!el.checked;
         } else {
             out[campo] = el.value != null ? String(el.value) : '';
@@ -963,12 +1031,32 @@ function mostrarVistaApp() {
     document.getElementById('login-error').hidden = true;
 }
 
-function mostrarErrorLogin(texto) {
+// opts: { titulo, tipo: 'error'|'warn'|'info' }
+function mostrarErrorLogin(texto, opts) {
     const el = document.getElementById('login-error');
-    el.textContent = texto;
+    const titulo = (opts && opts.titulo) ? opts.titulo : '';
+    const tipo = (opts && opts.tipo) ? opts.tipo : 'error';
+
+    el.classList.remove('alert-error', 'alert-warn', 'alert-info');
+    el.classList.add('alert-' + tipo);
+    el.setAttribute('role', 'alert');
+
+    el.innerHTML = '';
+    if (titulo) {
+        const h = document.createElement('strong');
+        h.className = 'alert-title';
+        h.textContent = titulo;
+        el.appendChild(h);
+    }
+    const p = document.createElement('span');
+    p.className = 'alert-msg';
+    p.textContent = texto || '';
+    el.appendChild(p);
+
     el.hidden = false;
     document.getElementById('vista-login').hidden = false;
     document.getElementById('vista-app').hidden   = true;
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
 }
 
 function mostrarMensaje(tipo, texto) {

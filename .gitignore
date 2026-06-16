@@ -32,3 +32,6 @@ build/
 .env.*
 secrets.json
 config.local.js
+
+# ===== Vercel =====
+.vercel/
