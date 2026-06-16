@@ -33,8 +33,8 @@ window.CONFIG = {
     // --- Opciones de UI ---
     TALLAS_LETRA: ['S', 'M', 'L', 'XL', 'XXL'],
     TALLAS_ZAPATO: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47'],
-    TIPOS_DOCUMENTO: ['RUT', 'DNI', 'Pasaporte'],
-    TIPOS_CUENTA: ['Cuenta Corriente', 'Cuenta Vista', 'Cuenta de Ahorro', 'Chequera Electronica', 'RUT'],
+    TIPOS_DOCUMENTO: ['RUT', 'DNI', 'PASAPORTE'],
+    TIPOS_CUENTA: ['Corriente', 'Vista', 'CuentaRUT', 'Ahorro'],
     BANCOS: [
         'Banco de Chile',
         'Banco Estado',
