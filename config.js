@@ -7,6 +7,9 @@
 // =====================================================================
 
 window.CONFIG = {
+    // --- Version del portal ---
+    APP_VERSION: '1.0.1',
+
     // --- Supabase ---
     SUPABASE_URL: 'https://wjzdqcttuiixrybxoaqi.supabase.co',
     SUPABASE_ANON_KEY: 'sb_publishable_Vd8reHQz6C18PAcKvNF36g_eemMHc9p',

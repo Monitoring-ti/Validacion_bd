@@ -122,6 +122,7 @@ async function initApp() {
         initSupabase();
         bindEventos();
         poblarTextoLegal();
+        aplicarVersionApp();
         await detectarIp();
         await procesarSesionActual();
     } catch (err) {
@@ -169,15 +170,17 @@ function bindEventos() {
     document.getElementById('tab-signup').addEventListener('click', () => cambiarModoLogin('signup'));
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
 
-    // Radio group: pase Codelco (Si/No). Si "No", oculta numero y limpia.
-    document.querySelectorAll('input[name="pase_codelco_rg"]').forEach((r) => {
-        r.addEventListener('change', aplicarVisibilidadPaseCodelco);
-    });
+    // Toggle on/off: pase Codelco. Si apagado, oculta numero y limpia.
+    const chkPase = document.getElementById('f-pase-codelco');
+    if (chkPase) {
+        chkPase.addEventListener('change', aplicarVisibilidadPaseCodelco);
+    }
 
-    // Radio group: teletrabajo (Misma / Diferente). Si "Misma", oculta bloque y limpia.
-    document.querySelectorAll('input[name="teletrabajo_misma_rg"]').forEach((r) => {
-        r.addEventListener('change', aplicarVisibilidadTeletrabajo);
-    });
+    // Toggle on/off: teletrabajo misma direccion. Si apagado, muestra bloque distinto.
+    const chkTele = document.getElementById('f-teletrabajo-misma');
+    if (chkTele) {
+        chkTele.addEventListener('change', aplicarVisibilidadTeletrabajo);
+    }
 
     // Modal documento
     document.getElementById('btn-solicitar-correccion')
@@ -217,6 +220,14 @@ function bindEventos() {
 function poblarTextoLegal() {
     document.getElementById('texto-legal').textContent = CONFIG.LEGAL_TEXT;
     document.getElementById('legal-version').textContent = CONFIG.LEGAL_TEXT_VERSION;
+}
+
+function aplicarVersionApp() {
+    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.1';
+    const label = raw.startsWith('v') ? raw : ('v' + raw);
+    document.querySelectorAll('[data-app-version]').forEach((el) => {
+        el.textContent = label;
+    });
 }
 
 // =======================================================================
@@ -571,13 +582,12 @@ function renderFormulario(t) {
     setVal('f-numero-domicilio',  t.numero_domicilio);
     setVal('f-departamento-casa', t.departamento_casa);
 
-    // 4. Domicilio - Teletrabajo (radio Si/No + bloque condicional)
+    // 4. Domicilio - Teletrabajo (toggle on/off + bloque condicional)
     // Si nunca se ha definido en BD, asumimos true (misma direccion).
     const mismaTele = (t.teletrabajo_misma_direccion === undefined || t.teletrabajo_misma_direccion === null)
         ? true
         : !!t.teletrabajo_misma_direccion;
     document.getElementById('f-teletrabajo-misma').checked = mismaTele;
-    document.getElementById('f-teletrabajo-diferente').checked = !mismaTele;
 
     poblarSelect('f-teletrabajo-region', CONFIG.REGIONES_CHILE, t.teletrabajo_region);
     setVal('f-teletrabajo-ciudad',       t.teletrabajo_ciudad);
@@ -617,7 +627,6 @@ function renderFormulario(t) {
 
     const tienePase = !!t.pase_codelco;
     document.getElementById('f-pase-codelco').checked = tienePase;
-    document.getElementById('f-pase-codelco-no').checked = !tienePase;
     setVal('f-pase-numero', t.pase_codelco_numero);
     aplicarVisibilidadPaseCodelco();
 
@@ -638,30 +647,30 @@ function formatearFechaInput(v) {
     return s;
 }
 
-// Muestra u oculta el bloque de teletrabajo segun el radio "misma direccion".
-// Si esta marcado "misma", limpia los campos del bloque (para que en BD queden null).
+// Muestra u oculta el bloque de teletrabajo segun el toggle "misma direccion".
+// Si esta encendido (misma), limpia los campos del bloque (para que en BD queden null).
 function aplicarVisibilidadTeletrabajo() {
-    const radioMisma = document.getElementById('f-teletrabajo-misma');
+    const chk = document.getElementById('f-teletrabajo-misma');
     const bloque = document.getElementById('bloque-teletrabajo');
-    if (!radioMisma || !bloque) return;
+    if (!chk || !bloque) return;
 
-    bloque.hidden = radioMisma.checked;
-    if (radioMisma.checked) {
+    bloque.hidden = chk.checked;
+    if (chk.checked) {
         ['f-teletrabajo-region', 'f-teletrabajo-ciudad', 'f-teletrabajo-comuna',
          'f-teletrabajo-calle',  'f-teletrabajo-numero', 'f-teletrabajo-departamento']
             .forEach((id) => { const e = document.getElementById(id); if (e) e.value = ''; });
     }
 }
 
-// Muestra u oculta el campo de numero de pase segun el radio "Si tengo".
-// Si no se tiene pase, limpia el numero.
+// Muestra u oculta el campo de numero de pase segun el toggle "tengo pase".
+// Si esta apagado, limpia el numero.
 function aplicarVisibilidadPaseCodelco() {
-    const radioSi = document.getElementById('f-pase-codelco');
+    const chk = document.getElementById('f-pase-codelco');
     const campoNumero = document.getElementById('campo-pase-numero');
-    if (!radioSi || !campoNumero) return;
+    if (!chk || !campoNumero) return;
 
-    campoNumero.hidden = !radioSi.checked;
-    if (!radioSi.checked) {
+    campoNumero.hidden = !chk.checked;
+    if (!chk.checked) {
         const num = document.getElementById('f-pase-numero');
         if (num) num.value = '';
     }
@@ -794,7 +803,7 @@ function leerValoresActuales() {
     CAMPOS_EDITABLES.forEach((campo) => {
         const el = document.querySelector('[data-campo="' + campo + '"]');
         if (!el) return;
-        if (el.type === 'checkbox' || el.type === 'radio') {
+        if (el.type === 'checkbox') {
             out[campo] = !!el.checked;
         } else {
             out[campo] = el.value != null ? String(el.value) : '';

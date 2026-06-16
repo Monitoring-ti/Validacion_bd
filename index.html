@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=12" />
+    <link rel="stylesheet" href="styles.css?v=14" />
 </head>
 <body>
 
@@ -20,7 +20,10 @@
          ====================================================== -->
     <section id="vista-login" class="vista vista-login">
         <div class="login-card">
-            <div class="login-logo">Monitoring</div>
+            <div class="monitoring-logo login-logo" title="Monitoring">
+                <span class="logo-word">Monitoring</span>
+                <span class="logo-version" data-app-version>v1.0.1</span>
+            </div>
             <h1 id="login-titulo">Portal del Trabajador</h1>
             <p class="login-sub" id="login-sub">
                 Ingresa tu correo corporativo y tu contrasena.
@@ -61,7 +64,10 @@
     <section id="vista-app" class="vista vista-app" hidden>
 
         <header class="app-header">
-            <div class="brand">Monitoring</div>
+            <div class="monitoring-logo brand" title="Monitoring">
+                <span class="logo-word">Monitoring</span>
+                <span class="logo-version" data-app-version>v1.0.1</span>
+            </div>
             <div class="user-box">
                 <div class="user-info">
                     <span id="user-nombre" class="user-nombre"></span>
@@ -213,20 +219,19 @@
                     </div>
                 </div>
 
-                <!-- 4.2 Toggle teletrabajo (radio Si/No) -->
+                <!-- 4.2 Toggle teletrabajo (on/off) -->
                 <div class="grid">
-                    <div class="field" style="grid-column: 1 / -1;">
-                        <span class="radio-label">Direccion de teletrabajo</span>
-                        <div class="radio-toggle" role="radiogroup" aria-label="Direccion de teletrabajo">
-                            <label class="radio-pill">
-                                <input id="f-teletrabajo-misma" type="radio" name="teletrabajo_misma_rg" value="si" data-campo="teletrabajo_misma_direccion" data-editable="1" checked />
-                                <span>Misma direccion que mi vivienda</span>
-                            </label>
-                            <label class="radio-pill">
-                                <input id="f-teletrabajo-diferente" type="radio" name="teletrabajo_misma_rg" value="no" />
-                                <span>Direccion diferente</span>
-                            </label>
-                        </div>
+                    <div class="field switch-field" style="grid-column: 1 / -1;">
+                        <label class="switch-row" for="f-teletrabajo-misma">
+                            <span class="switch-copy">
+                                <span class="switch-title">Misma direccion que mi vivienda</span>
+                                <span class="switch-desc">Desactiva para ingresar una direccion de teletrabajo distinta</span>
+                            </span>
+                            <span class="switch-control">
+                                <input id="f-teletrabajo-misma" class="switch-input" type="checkbox" data-campo="teletrabajo_misma_direccion" data-editable="1" checked />
+                                <span class="switch-ui" aria-hidden="true"><span class="switch-knob"></span></span>
+                            </span>
+                        </label>
                     </div>
                 </div>
 
@@ -382,18 +387,17 @@
                 </div>
 
                 <div class="grid">
-                    <div class="field" style="grid-column: 1 / -1;">
-                        <span class="radio-label">Pase interno de Codelco</span>
-                        <div class="radio-toggle" role="radiogroup" aria-label="Pase interno de Codelco">
-                            <label class="radio-pill">
-                                <input id="f-pase-codelco-no" type="radio" name="pase_codelco_rg" value="no" checked />
-                                <span>No tengo</span>
-                            </label>
-                            <label class="radio-pill">
-                                <input id="f-pase-codelco" type="radio" name="pase_codelco_rg" value="si" data-campo="pase_codelco" data-editable="1" />
-                                <span>Si tengo</span>
-                            </label>
-                        </div>
+                    <div class="field switch-field" style="grid-column: 1 / -1;">
+                        <label class="switch-row" for="f-pase-codelco">
+                            <span class="switch-copy">
+                                <span class="switch-title">Tengo pase interno de Codelco</span>
+                                <span class="switch-desc">Activa para ingresar el numero de pase</span>
+                            </span>
+                            <span class="switch-control">
+                                <input id="f-pase-codelco" class="switch-input" type="checkbox" data-campo="pase_codelco" data-editable="1" />
+                                <span class="switch-ui" aria-hidden="true"><span class="switch-knob"></span></span>
+                            </span>
+                        </label>
                     </div>
                     <div class="field" id="campo-pase-numero" hidden>
                         <label for="f-pase-numero">Numero de pase Codelco</label>
@@ -437,7 +441,7 @@
         </main>
 
         <footer class="app-footer">
-            Monitoring SpA - Portal del Trabajador
+            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.1</span>
         </footer>
 
     </section>
@@ -543,8 +547,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=10"></script>
-    <script src="app.js?v=12"></script>
+    <script src="config.js?v=14"></script>
+    <script src="app.js?v=14"></script>
 
 </body>
 </html>

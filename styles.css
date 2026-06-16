@@ -14,6 +14,8 @@
     --color-primary-2:   #143a66;
     --color-accent:      #2563eb;
     --color-accent-2:    #1d4ed8;
+    --color-orange:      #ea580c;
+    --color-orange-light:#fb923c;
     --color-success:     #047857;
     --color-success-bg:  #ecfdf5;
     --color-error:       #b91c1c;
@@ -77,7 +79,6 @@ a:hover { text-decoration: underline; }
 }
 
 .login-logo {
-    display: inline-block;
     font-weight: 700;
     letter-spacing: 0.18em;
     color: var(--color-primary);
@@ -86,6 +87,84 @@ a:hover { text-decoration: underline; }
     border: 1px solid var(--color-primary);
     border-radius: 999px;
     margin-bottom: 18px;
+}
+
+/* Logo Monitoring: reflejo anaranjado al pasar el mouse */
+.monitoring-logo {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35em;
+    overflow: hidden;
+    cursor: default;
+    isolation: isolate;
+    transition: color .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
+.monitoring-logo .logo-word {
+    position: relative;
+    z-index: 1;
+}
+
+.monitoring-logo .logo-version {
+    position: relative;
+    z-index: 1;
+    font-size: 0.62em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    opacity: 0.72;
+    transition: color .25s ease, opacity .25s ease;
+}
+
+.monitoring-logo::after {
+    content: "";
+    position: absolute;
+    top: -10%;
+    left: -130%;
+    width: 55%;
+    height: 120%;
+    background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(234, 88, 12, 0.12) 38%,
+        rgba(251, 146, 60, 0.72) 50%,
+        rgba(234, 88, 12, 0.12) 62%,
+        transparent 100%
+    );
+    transform: skewX(-22deg);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: left 0.6s ease, opacity 0.2s ease;
+}
+
+.monitoring-logo:hover::after {
+    left: 130%;
+    opacity: 1;
+}
+
+.monitoring-logo:hover {
+    box-shadow: 0 0 18px rgba(234, 88, 12, 0.22);
+}
+
+.monitoring-logo.login-logo:hover {
+    color: var(--color-orange);
+    border-color: var(--color-orange);
+}
+
+.monitoring-logo.login-logo:hover .logo-version {
+    color: var(--color-orange-light);
+    opacity: 1;
+}
+
+.monitoring-logo.brand:hover .logo-word {
+    color: #fff;
+    text-shadow: 0 0 14px rgba(251, 146, 60, 0.55);
+}
+
+.monitoring-logo.brand:hover .logo-version {
+    color: var(--color-orange-light);
+    opacity: 1;
 }
 
 .login-card h1 {
@@ -284,6 +363,12 @@ a:hover { text-decoration: underline; }
     font-weight: 700;
     letter-spacing: 0.16em;
     font-size: 14px;
+}
+
+.footer-version {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
 }
 
 .user-box {
@@ -537,60 +622,94 @@ a:hover { text-decoration: underline; }
 }
 .check-toggle input { transform: scale(1.15); }
 
-/* Radio toggle (Si/No tipo pill) */
-.radio-label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: 6px;
+/* Toggle on/off (switch) */
+.switch-field {
+    margin-bottom: 0;
 }
-.radio-toggle {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    background: #f8fafc;
-    padding: 6px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-}
-.radio-pill {
-    flex: 1 1 auto;
-    min-width: 0;
+.switch-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    background: #fff;
-    border: 1px solid transparent;
-    border-radius: 6px;
+    justify-content: space-between;
+    gap: 14px;
+    width: 100%;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 14px;
-    color: var(--color-text);
-    transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
     user-select: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
 }
-.radio-pill input[type="radio"] {
-    accent-color: var(--color-primary);
-    margin: 0;
-    transform: scale(1.15);
+.switch-row:hover {
+    border-color: #cbd5e1;
+}
+.switch-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.switch-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.3;
+}
+.switch-desc {
+    font-size: 12.5px;
+    color: var(--color-muted);
+    line-height: 1.35;
+}
+.switch-control {
+    position: relative;
     flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
 }
-.radio-pill:hover {
-    border-color: var(--color-primary);
+.switch-input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    pointer-events: none;
 }
-.radio-pill:has(input[type="radio"]:checked) {
-    background: var(--color-primary);
-    color: #fff;
-    border-color: var(--color-primary);
-    box-shadow: 0 1px 3px rgba(10, 37, 64, .25);
+.switch-ui {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 26px;
+    background: #cbd5e1;
+    border-radius: 999px;
+    transition: background .22s ease, box-shadow .22s ease;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.12);
 }
-.radio-pill:has(input[type="radio"]:checked) input[type="radio"] {
-    accent-color: #fff;
+.switch-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.22);
+    transition: transform .22s ease;
 }
-.radio-pill:focus-within {
-    outline: 2px solid rgba(10, 37, 64, .35);
-    outline-offset: 1px;
+.switch-input:checked + .switch-ui {
+    background: var(--color-orange);
+    box-shadow: inset 0 1px 2px rgba(154, 52, 18, 0.2);
+}
+.switch-input:checked + .switch-ui .switch-knob {
+    transform: translateX(20px);
+}
+.switch-input:focus-visible + .switch-ui {
+    outline: 2px solid rgba(234, 88, 12, 0.45);
+    outline-offset: 2px;
+}
+.switch-row:has(.switch-input:checked) {
+    border-color: rgba(234, 88, 12, 0.35);
+    box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.08);
 }
 
 .subseccion-titulo {
@@ -867,12 +986,12 @@ a:hover { text-decoration: underline; }
 @media (max-width: 480px) {
     body { font-size: 14px; }
 
-    .radio-toggle {
-        flex-direction: column;
-        gap: 6px;
+    .switch-row {
+        align-items: flex-start;
+        gap: 12px;
     }
-    .radio-pill {
-        padding: 11px 12px;
+    .switch-control {
+        margin-top: 2px;
     }
 
     /* Login: layout mas compacto */
