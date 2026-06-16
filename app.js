@@ -605,11 +605,11 @@ async function confirmarYEnviar() {
     showLoader();
     try {
         if (cambios.length > 0) {
-            await guardarCambiosTrabajador(actuales);
-            await registrarLogValidacion(cambios);
+            await ejecutarPaso('guardarCambiosTrabajador', () => guardarCambiosTrabajador(actuales));
+            await ejecutarPaso('registrarLogValidacion',   () => registrarLogValidacion(cambios));
         }
-        await marcarConfirmacionLegal();
-        await cerrarSesionValidacion();
+        await ejecutarPaso('marcarConfirmacionLegal', () => marcarConfirmacionLegal());
+        await ejecutarPaso('cerrarSesionValidacion', () => cerrarSesionValidacion());
 
         // refrescar snapshot
         STATE.trabajadorOriginal = Object.assign({}, STATE.trabajadorOriginal, actuales);
@@ -632,6 +632,17 @@ async function confirmarYEnviar() {
         mostrarMensaje('error', 'No se pudo guardar: ' + detalle);
     } finally {
         hideLoader();
+    }
+}
+
+async function ejecutarPaso(nombre, fn) {
+    try {
+        return await fn();
+    } catch (err) {
+        console.error('Fallo en paso [' + nombre + ']:', err);
+        const e = new Error('[' + nombre + '] ' + (err && (err.message || err.error_description || err.details) || JSON.stringify(err)));
+        e.original = err;
+        throw e;
     }
 }
 
