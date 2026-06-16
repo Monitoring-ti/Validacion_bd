@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=17" />
+    <link rel="stylesheet" href="styles.css?v=18" />
 </head>
 <body>
 
@@ -20,9 +20,13 @@
          ====================================================== -->
     <section id="vista-login" class="vista vista-login">
         <div class="login-card">
+            <div id="login-banner-reingreso" class="login-banner-info" hidden role="status">
+                Ya registraste tu validacion. Puedes ingresar de nuevo para revisar o actualizar tus datos con la misma contrasena de verificacion.
+            </div>
+
             <div class="monitoring-logo login-logo" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.3</span>
+                <span class="logo-version" data-app-version>v1.0.4</span>
             </div>
             <h1 id="login-titulo">Validacion de datos personales</h1>
             <p class="login-sub" id="login-sub">
@@ -79,7 +83,7 @@
         <header class="app-header">
             <div class="monitoring-logo brand" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.3</span>
+                <span class="logo-version" data-app-version>v1.0.4</span>
             </div>
             <div class="user-box">
                 <div class="user-info">
@@ -94,11 +98,20 @@
 
             <div class="page-intro">
                 <h1>Validacion de datos personales</h1>
-                <p>
+                <p id="page-intro-texto">
                     Revisa cuidadosamente la informacion. Los campos en gris son de
                     solo lectura. Edita los campos habilitados, confirma al final y
                     envia el formulario.
                 </p>
+            </div>
+
+            <div id="panel-ya-confirmado" class="panel-confirmado" hidden role="status">
+                <div class="panel-confirmado-icon" aria-hidden="true">&#10003;</div>
+                <div class="panel-confirmado-copy">
+                    <strong>Tu validacion ya fue registrada</strong>
+                    <p id="confirmado-fecha-texto"></p>
+                    <p class="panel-confirmado-sub">Puedes revisar tus datos o actualizarlos si algo cambio. Si editas, deberas confirmar nuevamente al final.</p>
+                </div>
             </div>
 
             <!-- ============== 1. DATOS PERSONALES ============== -->
@@ -439,6 +452,8 @@
                     <a href="#" id="link-privacidad">Politica de privacidad</a>
                 </p>
 
+                <p id="legal-ya-confirmado" class="legal-ya-confirmado" hidden></p>
+
                 <label class="check-legal">
                     <input id="chk-legal" type="checkbox" />
                     <span>He leido y acepto el texto anterior.</span>
@@ -454,7 +469,7 @@
         </main>
 
         <footer class="app-footer">
-            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.3</span>
+            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.4</span>
         </footer>
 
     </section>
@@ -528,6 +543,25 @@
     </dialog>
 
     <!-- ======================================================
+         MODAL: ingreso con validacion ya registrada
+         ====================================================== -->
+    <dialog id="modal-ingreso-confirmado" class="modal modal-exito">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Validacion ya registrada</h3>
+            </header>
+            <div class="modal-body modal-exito-body">
+                <p id="ingreso-confirmado-mensaje" class="exito-mensaje"></p>
+                <p class="exito-sub">Puedes revisar tus datos o actualizarlos si algo cambio.</p>
+            </div>
+            <footer class="modal-footer modal-exito-footer">
+                <button type="button" id="btn-ingreso-revisar" class="btn btn-primary">Revisar mis datos</button>
+                <button type="button" id="btn-ingreso-salir" class="btn btn-ghost">Cerrar sesion</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <!-- ======================================================
          MODAL: exito tras confirmar
          ====================================================== -->
     <dialog id="modal-exito" class="modal modal-exito">
@@ -579,8 +613,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=16"></script>
-    <script src="app.js?v=17"></script>
+    <script src="config.js?v=18"></script>
+    <script src="app.js?v=18"></script>
 
 </body>
 </html>

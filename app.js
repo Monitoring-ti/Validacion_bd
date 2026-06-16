@@ -196,6 +196,8 @@ function bindEventos() {
     document.getElementById('btn-confirmar-final').addEventListener('click', confirmarYEnviar);
     document.getElementById('btn-exito-seguir').addEventListener('click', onSeguirEditando);
     document.getElementById('btn-exito-logout').addEventListener('click', onCerrarSesionTrasExito);
+    document.getElementById('btn-ingreso-revisar').addEventListener('click', onRevisarDatosTrasIngreso);
+    document.getElementById('btn-ingreso-salir').addEventListener('click', onCerrarSesionTrasIngreso);
 
     // Cerradores generales de modales
     document.querySelectorAll('[data-close-modal]').forEach((btn) => {
@@ -245,7 +247,7 @@ function bindTogglePassword() {
 }
 
 function aplicarVersionApp() {
-    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.3';
+    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.4';
     const label = raw.startsWith('v') ? raw : ('v' + raw);
     document.querySelectorAll('[data-app-version]').forEach((el) => {
         el.textContent = label;
@@ -287,6 +289,37 @@ function prepararVistaLogin() {
         toggle.setAttribute('aria-label', 'Mostrar contrasena');
         toggle.title = 'Mostrar contrasena';
     }
+    const banner = document.getElementById('login-banner-reingreso');
+    if (banner) {
+        try {
+            const flag = sessionStorage.getItem('valida_bd_reingreso_confirmado');
+            banner.hidden = flag !== '1';
+            if (flag === '1') sessionStorage.removeItem('valida_bd_reingreso_confirmado');
+        } catch (_) {
+            banner.hidden = true;
+        }
+    }
+}
+
+function trabajadorYaConfirmado(t) {
+    if (!t) return false;
+    return t.datos_confirmados === true || t.datos_confirmados === 'true' || t.datos_confirmados === 1;
+}
+
+function formatearFechaLegible(iso) {
+    if (!iso) return '';
+    try {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return String(iso).substring(0, 10);
+        return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' });
+    } catch (_) {
+        return String(iso).substring(0, 10);
+    }
+}
+
+function textoFechaConfirmacion(t) {
+    const f = formatearFechaLegible(t && t.fecha_confirmacion);
+    return f ? ('Confirmaste el ' + f + '.') : 'Tu confirmacion ya esta registrada en el sistema.';
 }
 
 function esErrorCuentaYaRegistrada(msg) {
@@ -492,9 +525,16 @@ async function manejarSesion(session) {
         STATE.trabajadorOriginal = JSON.parse(JSON.stringify(trabajador));
 
         await actualizarUltimoLoginMicrosoft(trabajador.id_trabajador);
-        await crearSesionValidacion(trabajador);
+        if (!trabajadorYaConfirmado(trabajador)) {
+            await crearSesionValidacion(trabajador);
+        } else {
+            STATE.sesionId = null;
+        }
         mostrarVistaApp();
         renderFormulario(trabajador);
+        if (trabajadorYaConfirmado(trabajador)) {
+            mostrarModalIngresoConfirmado(trabajador);
+        }
     } catch (err) {
         console.error('Error al manejar sesion:', err);
         mostrarMensaje('error', 'No se pudieron cargar tus datos. Intenta nuevamente.');
@@ -520,13 +560,21 @@ async function cerrarSesionPorDominio(email) {
 }
 
 async function cerrarSesion() {
+    const estabaConfirmado = STATE.trabajador && trabajadorYaConfirmado(STATE.trabajador);
     try {
         await STATE.sb.auth.signOut();
     } catch (_) {}
+    if (estabaConfirmado) {
+        try { sessionStorage.setItem('valida_bd_reingreso_confirmado', '1'); } catch (_) {}
+    }
     STATE.user = null;
     STATE.trabajador = null;
     STATE.trabajadorOriginal = null;
     STATE.sesionId = null;
+    const dlgIngreso = document.getElementById('modal-ingreso-confirmado');
+    const dlgExito = document.getElementById('modal-exito');
+    if (dlgIngreso && dlgIngreso.open) dlgIngreso.close();
+    if (dlgExito && dlgExito.open) dlgExito.close();
     mostrarVistaLogin();
 }
 
@@ -682,6 +730,37 @@ function renderFormulario(t) {
     const chk = document.getElementById('chk-legal');
     chk.checked = false;
     document.getElementById('btn-confirmar').disabled = true;
+
+    aplicarEstadoConfirmacion(t);
+}
+
+function aplicarEstadoConfirmacion(t) {
+    const confirmado = trabajadorYaConfirmado(t);
+    const panel = document.getElementById('panel-ya-confirmado');
+    const intro = document.getElementById('page-intro-texto');
+    const legalNota = document.getElementById('legal-ya-confirmado');
+
+    if (confirmado) {
+        const fechaTxt = textoFechaConfirmacion(t);
+        if (panel) {
+            panel.hidden = false;
+            const fechaEl = document.getElementById('confirmado-fecha-texto');
+            if (fechaEl) fechaEl.textContent = fechaTxt;
+        }
+        if (intro) {
+            intro.textContent = 'Tu informacion ya fue validada. Revisa los datos y, si necesitas corregir algo, editalo y confirma nuevamente al final.';
+        }
+        if (legalNota) {
+            legalNota.hidden = false;
+            legalNota.textContent = fechaTxt + ' Si realizas cambios, marca el checkbox y confirma otra vez para registrar la actualizacion.';
+        }
+    } else {
+        if (panel) panel.hidden = true;
+        if (intro) {
+            intro.textContent = 'Revisa cuidadosamente la informacion. Los campos en gris son de solo lectura. Edita los campos habilitados, confirma al final y envia el formulario.';
+        }
+        if (legalNota) legalNota.hidden = true;
+    }
 }
 
 // Convierte un valor de fecha de Supabase (ISO o YYYY-MM-DD) al formato
@@ -962,9 +1041,16 @@ async function confirmarYEnviar() {
         await ejecutarPaso('marcarConfirmacionLegal', () => marcarConfirmacionLegal());
         await ejecutarPaso('cerrarSesionValidacion', () => cerrarSesionValidacion());
 
-        // refrescar snapshot
-        STATE.trabajadorOriginal = Object.assign({}, STATE.trabajadorOriginal, actuales);
-        STATE.trabajador         = Object.assign({}, STATE.trabajador,         actuales);
+        const ahora = new Date().toISOString();
+        STATE.trabajadorOriginal = Object.assign({}, STATE.trabajadorOriginal, actuales, {
+            datos_confirmados: true,
+            fecha_confirmacion: ahora
+        });
+        STATE.trabajador = Object.assign({}, STATE.trabajador, actuales, {
+            datos_confirmados: true,
+            fecha_confirmacion: ahora
+        });
+        aplicarEstadoConfirmacion(STATE.trabajador);
 
         document.getElementById('modal-resumen').close();
         document.getElementById('btn-confirmar').disabled = true;
@@ -1080,9 +1166,37 @@ function mostrarModalExito(mensaje) {
     if (dlg) dlg.showModal();
 }
 
+function mostrarModalIngresoConfirmado(trabajador) {
+    const dlg = document.getElementById('modal-ingreso-confirmado');
+    const msg = document.getElementById('ingreso-confirmado-mensaje');
+    const nombre = trabajador ? (formatNombreCompleto(trabajador) || trabajador.email_corporativo || '') : '';
+    const saludo = nombre ? ('Hola ' + nombre + '. ') : '';
+    if (msg) {
+        msg.textContent = saludo + textoFechaConfirmacion(trabajador) +
+            ' Puedes revisar tu informacion o actualizarla si algo cambio.';
+    }
+    if (dlg) dlg.showModal();
+}
+
+function onRevisarDatosTrasIngreso() {
+    const dlg = document.getElementById('modal-ingreso-confirmado');
+    if (dlg) dlg.close();
+    const panel = document.getElementById('panel-ya-confirmado');
+    if (panel && !panel.hidden) {
+        try { panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
+    }
+}
+
+function onCerrarSesionTrasIngreso() {
+    const dlg = document.getElementById('modal-ingreso-confirmado');
+    if (dlg) dlg.close();
+    cerrarSesion();
+}
+
 function onSeguirEditando() {
     const dlg = document.getElementById('modal-exito');
     if (dlg) dlg.close();
+    aplicarEstadoConfirmacion(STATE.trabajador);
     mostrarMensaje('info', 'Puedes seguir editando. Vuelve a marcar la confirmacion legal si deseas guardar nuevos cambios.');
     const intro = document.querySelector('.page-intro');
     if (intro) {
