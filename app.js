@@ -49,20 +49,22 @@ const CAMPOS_EDITABLES = [
     'afp',
     'sistema_salud',
     'nombre_isapre',
-    'valor_plan_uf',
+    'seguro_falp',
+    'cargas_familiares_seguro_complementario',
     // Bancarios
     'banco',
     'tipo_cuenta',
     'numero_cuenta',
     // Tallas EPP
     'talla_zapato',
-    'talla_pantalon',
     'talla_polera',
     'talla_camisa',
     'talla_chaqueta',
     'talla_guantes',
     'talla_casco',
     'talla_chaleco',
+    'talla_buzo',
+    'respirador',
     // Informacion adicional
     'fecha_vencimiento_id',
     'licencia_conducir_tipo',
@@ -96,18 +98,20 @@ const ETIQUETAS = {
     afp:                        'AFP',
     sistema_salud:              'Sistema de salud',
     nombre_isapre:              'Nombre Isapre',
-    valor_plan_uf:              'Valor plan (UF)',
+    seguro_falp:                'Seguro FALP',
+    cargas_familiares_seguro_complementario: 'Cargas familiares seguro complementario',
     banco:                      'Banco',
     tipo_cuenta:                'Tipo de cuenta',
     numero_cuenta:              'Numero de cuenta',
     talla_zapato:               'Talla zapato',
-    talla_pantalon:             'Talla pantalon',
     talla_polera:               'Talla polera',
     talla_camisa:               'Talla camisa',
     talla_chaqueta:             'Talla chaqueta',
     talla_guantes:              'Talla guantes',
     talla_casco:                'Talla casco',
     talla_chaleco:              'Talla chaleco',
+    talla_buzo:                 'Talla buzo',
+    respirador:                 'Talla respirador',
     fecha_vencimiento_id:           'Vigencia carnet de identidad',
     licencia_conducir_tipo:         'Tipo de licencia',
     licencia_conducir_numero:       'Numero de licencia',
@@ -251,13 +255,13 @@ function bindTogglePassword() {
         input.type = mostrar ? 'text' : 'password';
         btn.classList.toggle('is-revealed', mostrar);
         btn.setAttribute('aria-pressed', mostrar ? 'true' : 'false');
-        btn.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
-        btn.title = mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña';
+        btn.setAttribute('aria-label', mostrar ? 'Ocultar contrase?a' : 'Mostrar contrase?a');
+        btn.title = mostrar ? 'Ocultar contrase?a' : 'Mostrar contrase?a';
     });
 }
 
 function aplicarVersionApp() {
-    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.5';
+    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.6';
     const label = raw.startsWith('v') ? raw : ('v' + raw);
     document.querySelectorAll('[data-app-version]').forEach((el) => {
         el.textContent = label;
@@ -271,7 +275,7 @@ function aplicarVersionApp() {
 }
 
 // =======================================================================
-// AUTENTICACION (Email + contraseña de verificacion, flujo unificado)
+// AUTENTICACION (Email + contrase?a de verificacion, flujo unificado)
 // =======================================================================
 // Un solo boton: intenta crear cuenta (primera vez) o iniciar sesion si ya existe.
 
@@ -296,8 +300,8 @@ function prepararVistaLogin() {
     if (toggle) {
         toggle.classList.remove('is-revealed');
         toggle.setAttribute('aria-pressed', 'false');
-        toggle.setAttribute('aria-label', 'Mostrar contraseña');
-        toggle.title = 'Mostrar contraseña';
+        toggle.setAttribute('aria-label', 'Mostrar contrase?a');
+        toggle.title = 'Mostrar contrase?a';
     }
     const banner = document.getElementById('login-banner-reingreso');
     if (banner) {
@@ -351,13 +355,13 @@ async function autenticarUnificado(email, password) {
     if (!signUpError) {
         if (signUpData && signUpData.session) {
             return {
-                info: 'Contraseña de verificacion creada. Revisa y confirma tus datos.'
+                info: 'Contrase?a de verificacion creada. Revisa y confirma tus datos.'
             };
         }
         const { error: signInAfterSignUp } = await STATE.sb.auth.signInWithPassword({ email, password });
         if (!signInAfterSignUp) {
             return {
-                info: 'Contraseña de verificacion creada. Revisa y confirma tus datos.'
+                info: 'Contrase?a de verificacion creada. Revisa y confirma tus datos.'
             };
         }
         throw signInAfterSignUp;
@@ -387,7 +391,7 @@ async function autenticar() {
         return;
     }
     if (!password) {
-        mostrarErrorLogin('Ingresa tu contraseña de verificacion.', { titulo: 'Contraseña requerida', tipo: 'warn' });
+        mostrarErrorLogin('Ingresa tu contrase?a de verificacion.', { titulo: 'Contrase?a requerida', tipo: 'warn' });
         return;
     }
 
@@ -405,8 +409,8 @@ async function autenticar() {
 
     if (password.length < 8) {
         mostrarErrorLogin(
-            'La contrase�a de verificacion debe tener al menos 8 caracteres. No uses la de Microsoft ni la del PC.',
-            { titulo: 'Contraseña muy corta', tipo: 'warn' }
+            'La contrase?a de verificacion debe tener al menos 8 caracteres. No uses la de Microsoft ni la del PC.',
+            { titulo: 'Contrase?a muy corta', tipo: 'warn' }
         );
         return;
     }
@@ -443,8 +447,8 @@ function traducirErrorAuth(msg) {
 
     if (msg === 'UNIFIED_WRONG_PASSWORD') {
         return {
-            titulo: 'Contraseña incorrecta',
-            mensaje: 'Esa contraseña no coincide con la que creaste en tu primera visita a este portal. ' +
+            titulo: 'Contrase?a incorrecta',
+            mensaje: 'Esa contrase?a no coincide con la que creaste en tu primera visita a este portal. ' +
                      'Recuerda: es solo para esta verificacion, no la de Microsoft. ' +
                      'Si la olvidaste, escribe a ' + soporte + '.',
             tipo: 'error'
@@ -456,9 +460,9 @@ function traducirErrorAuth(msg) {
     if (lc.includes('invalid login credentials')) {
         return {
             titulo: 'No se pudo ingresar',
-            mensaje: 'No pudimos validar tu acceso. Verifica tu correo ' + dominio + ' y tu contraseña de verificacion. ' +
-                     'Si es tu primera vez, crea una contraseña nueva (minimo 8 caracteres). ' +
-                     'Si ya entraste antes, usa la misma contraseña. ' +
+            mensaje: 'No pudimos validar tu acceso. Verifica tu correo ' + dominio + ' y tu contrase?a de verificacion. ' +
+                     'Si es tu primera vez, crea una contrase?a nueva (minimo 8 caracteres). ' +
+                     'Si ya entraste antes, usa la misma contrase?a. ' +
                      'Si el problema continua, escribe a ' + soporte + '.',
             tipo: 'error'
         };
@@ -466,7 +470,7 @@ function traducirErrorAuth(msg) {
     if (lc.includes('user already registered') || lc.includes('already been registered') || lc.includes('user already exists')) {
         return {
             titulo: 'Cuenta ya registrada',
-            mensaje: 'Tu cuenta ya existe. Usa la misma contraseña de verificacion que definiste la primera vez.',
+            mensaje: 'Tu cuenta ya existe. Usa la misma contrase?a de verificacion que definiste la primera vez.',
             tipo: 'warn'
         };
     }
@@ -479,8 +483,8 @@ function traducirErrorAuth(msg) {
     }
     if (lc.includes('password should be at least')) {
         return {
-            titulo: 'Contraseña demasiado corta',
-            mensaje: 'La contraseña de verificacion debe tener al menos 8 caracteres.',
+            titulo: 'Contrase?a demasiado corta',
+            mensaje: 'La contrase?a de verificacion debe tener al menos 8 caracteres.',
             tipo: 'warn'
         };
     }
@@ -704,7 +708,8 @@ function renderFormulario(t) {
     poblarSelect('f-afp',           CONFIG.AFPS,            t.afp);
     poblarSelect('f-sistema-salud', CONFIG.SISTEMAS_SALUD,  t.sistema_salud);
     setVal('f-nombre-isapre', t.nombre_isapre);
-    setVal('f-valor-plan-uf', t.valor_plan_uf);
+    poblarSelect('f-seguro-falp', CONFIG.OPCIONES_SEGURO_FALP, t.seguro_falp);
+    poblarSelect('f-cargas-seguro-complementario', CONFIG.OPCIONES_CARGAS_SEGURO_COMPLEMENTARIO, t.cargas_familiares_seguro_complementario);
 
     // 6. Datos bancarios (selects + input)
     poblarSelect('f-banco',       CONFIG.BANCOS,       t.banco);
@@ -712,14 +717,15 @@ function renderFormulario(t) {
     setVal('f-numero-cuenta', t.numero_cuenta);
 
     // 7. Tallas EPP
-    poblarSelect('f-talla-zapato',   CONFIG.TALLAS_ZAPATO, t.talla_zapato);
-    poblarSelect('f-talla-pantalon', CONFIG.TALLAS_LETRA,  t.talla_pantalon);
-    poblarSelect('f-talla-polera',   CONFIG.TALLAS_LETRA,  t.talla_polera);
-    poblarSelect('f-talla-camisa',   CONFIG.TALLAS_LETRA,  t.talla_camisa);
-    poblarSelect('f-talla-chaqueta', CONFIG.TALLAS_LETRA,  t.talla_chaqueta);
-    poblarSelect('f-talla-guantes',  CONFIG.TALLAS_LETRA,  t.talla_guantes);
-    poblarSelect('f-talla-casco',    CONFIG.TALLAS_LETRA,  t.talla_casco);
-    poblarSelect('f-talla-chaleco',  CONFIG.TALLAS_LETRA,  t.talla_chaleco);
+    poblarSelect('f-talla-zapato',   CONFIG.TALLAS_ZAPATO,     t.talla_zapato || t.calzado_seguridad);
+    poblarSelect('f-talla-polera',   CONFIG.TALLAS_LETRA,      t.talla_polera);
+    poblarSelect('f-talla-camisa',   CONFIG.TALLAS_LETRA,      t.talla_camisa);
+    poblarSelect('f-talla-chaqueta', CONFIG.TALLAS_LETRA,      t.talla_chaqueta);
+    poblarSelect('f-talla-guantes',  CONFIG.TALLAS_LETRA,      t.talla_guantes);
+    poblarSelect('f-talla-casco',    CONFIG.TALLAS_LETRA,      t.talla_casco);
+    poblarSelect('f-talla-chaleco',  CONFIG.TALLAS_LETRA,      t.talla_chaleco);
+    poblarSelect('f-talla-buzo',     CONFIG.TALLAS_BUZO,       t.talla_buzo);
+    poblarSelect('f-respirador',     CONFIG.TALLAS_RESPIRADOR, t.respirador);
 
     // 8. Informacion opcional
     poblarSelect('f-licencia-tipo', CONFIG.TIPOS_LICENCIA, t.licencia_conducir_tipo);

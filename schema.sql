@@ -50,7 +50,11 @@ ALTER TABLE public.trabajadores
     ADD COLUMN IF NOT EXISTS teletrabajo_comuna                varchar,
     ADD COLUMN IF NOT EXISTS teletrabajo_calle                 varchar,
     ADD COLUMN IF NOT EXISTS teletrabajo_numero                varchar,
-    ADD COLUMN IF NOT EXISTS teletrabajo_departamento          varchar;
+    ADD COLUMN IF NOT EXISTS teletrabajo_departamento          varchar,
+    -- Tallas EPP adicionales y seguros
+    ADD COLUMN IF NOT EXISTS talla_buzo                        varchar,
+    ADD COLUMN IF NOT EXISTS seguro_falp                       varchar,
+    ADD COLUMN IF NOT EXISTS cargas_familiares_seguro_complementario varchar;
 
 CREATE INDEX IF NOT EXISTS idx_trabajadores_email_corporativo
     ON public.trabajadores (lower(email_corporativo));

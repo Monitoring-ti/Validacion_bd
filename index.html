@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=20" />
+    <link rel="stylesheet" href="styles.css?v=21" />
 </head>
 <body>
 
@@ -26,7 +26,7 @@
 
             <div class="monitoring-logo login-logo" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.5</span>
+                <span class="logo-version" data-app-version>v1.0.6</span>
             </div>
             <h1 id="login-titulo">Validacion de datos personales</h1>
             <p class="login-sub" id="login-sub">
@@ -83,7 +83,7 @@
         <header class="app-header">
             <div class="monitoring-logo brand" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.5</span>
+                <span class="logo-version" data-app-version>v1.0.6</span>
             </div>
             <div class="user-box">
                 <div class="user-info">
@@ -304,9 +304,17 @@
                         <label for="f-nombre-isapre">Nombre Isapre</label>
                         <input id="f-nombre-isapre" type="text" data-campo="nombre_isapre" data-editable="1" maxlength="80" placeholder="Solo si pertenece a Isapre" />
                     </div>
+                </div>
+
+                <div class="subseccion-titulo">Seguros</div>
+                <div class="grid">
                     <div class="field">
-                        <label for="f-valor-plan-uf">Valor plan (UF)</label>
-                        <input id="f-valor-plan-uf" type="number" inputmode="decimal" step="0.01" min="0" data-campo="valor_plan_uf" data-editable="1" placeholder="0.00" />
+                        <label for="f-seguro-falp">Seguro FALP</label>
+                        <select id="f-seguro-falp" data-campo="seguro_falp" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-cargas-seguro-complementario">Cargas familiares seguro complementario</label>
+                        <select id="f-cargas-seguro-complementario" data-campo="cargas_familiares_seguro_complementario" data-editable="1"></select>
                     </div>
                 </div>
             </article>
@@ -341,12 +349,8 @@
                 </header>
                 <div class="grid">
                     <div class="field">
-                        <label for="f-talla-zapato">Talla zapato</label>
+                        <label for="f-talla-zapato">Talla zapato / calzado</label>
                         <select id="f-talla-zapato" data-campo="talla_zapato" data-editable="1"></select>
-                    </div>
-                    <div class="field">
-                        <label for="f-talla-pantalon">Talla pantalon</label>
-                        <select id="f-talla-pantalon" data-campo="talla_pantalon" data-editable="1"></select>
                     </div>
                     <div class="field">
                         <label for="f-talla-polera">Talla polera</label>
@@ -371,6 +375,14 @@
                     <div class="field">
                         <label for="f-talla-chaleco">Talla chaleco</label>
                         <select id="f-talla-chaleco" data-campo="talla_chaleco" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-talla-buzo">Talla buzo</label>
+                        <select id="f-talla-buzo" data-campo="talla_buzo" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-respirador">Talla respirador</label>
+                        <select id="f-respirador" data-campo="respirador" data-editable="1"></select>
                     </div>
                 </div>
             </article>
@@ -456,7 +468,7 @@
         </main>
 
         <footer class="app-footer">
-            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.5</span>
+            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.6</span>
         </footer>
 
     </section>
@@ -600,8 +612,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=20"></script>
-    <script src="app.js?v=20"></script>
+    <script src="config.js?v=21"></script>
+    <script src="app.js?v=21"></script>
 
 </body>
 </html>

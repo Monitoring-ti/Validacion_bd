@@ -8,7 +8,7 @@
 
 window.CONFIG = {
     // --- Version del portal ---
-    APP_VERSION: '1.0.5',
+    APP_VERSION: '1.0.6',
 
     // --- Supabase ---
     SUPABASE_URL: 'https://wjzdqcttuiixrybxoaqi.supabase.co',
@@ -38,6 +38,8 @@ window.CONFIG = {
 
     // --- Opciones de UI ---
     TALLAS_LETRA: ['S', 'M', 'L', 'XL', 'XXL'],
+    TALLAS_BUZO: ['S', 'M', 'L', 'XL'],
+    TALLAS_RESPIRADOR: ['Pequeño', 'Mediano', 'Grande'],
     TALLAS_ZAPATO: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47'],
     TIPOS_DOCUMENTO: ['RUT', 'DNI', 'PASAPORTE'],
     TIPOS_CUENTA: ['Corriente', 'Vista', 'CuentaRUT', 'Ahorro'],
@@ -109,5 +111,19 @@ window.CONFIG = {
         'Clase D',
         'Clase E',
         'Clase F'
+    ],
+    OPCIONES_SEGURO_FALP: [
+        'No aplica',
+        'Titular FALP',
+        'Carga familiar FALP',
+        'En tramite de afiliacion'
+    ],
+    OPCIONES_CARGAS_SEGURO_COMPLEMENTARIO: [
+        'Sin seguro complementario',
+        '0 cargas familiares',
+        '1 carga familiar',
+        '2 cargas familiares',
+        '3 cargas familiares',
+        '4 o mas cargas familiares'
     ]
 };
