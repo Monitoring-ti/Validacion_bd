@@ -96,6 +96,7 @@ function bindEventos() {
     document.getElementById('input-email').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') autenticar();
     });
+    document.getElementById('input-email').addEventListener('input', autocompletarDominio);
     document.getElementById('input-password').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') autenticar();
     });
@@ -148,6 +149,26 @@ function poblarTextoLegal() {
 // =======================================================================
 // Estado de login: 'signin' (default) o 'signup' (primera vez).
 let MODO_LOGIN = 'signin';
+
+function autocompletarDominio(e) {
+    // Solo cuando el usuario teclea literalmente "@"
+    if (e.inputType !== 'insertText' || e.data !== '@') return;
+
+    const input = e.target;
+    const valor = input.value;
+    const idxAt = valor.indexOf('@');
+
+    // Solo si el @ recien tecleado es el ultimo caracter del campo.
+    if (idxAt === -1 || idxAt !== valor.length - 1) return;
+
+    const dominio = String(CONFIG.ALLOWED_DOMAIN || '').replace(/^@/, '');
+    if (!dominio) return;
+
+    input.value = valor + dominio;
+    // Selecciona el dominio para que el usuario lo pueda sobreescribir
+    // facilmente si escribe otra cosa, o presionar Tab/Enter para aceptarlo.
+    input.setSelectionRange(idxAt + 1, input.value.length);
+}
 
 function cambiarModoLogin(modo) {
     MODO_LOGIN = (modo === 'signup') ? 'signup' : 'signin';
