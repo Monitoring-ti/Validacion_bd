@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=16" />
+    <link rel="stylesheet" href="styles.css?v=17" />
 </head>
 <body>
 
@@ -528,6 +528,25 @@
     </dialog>
 
     <!-- ======================================================
+         MODAL: exito tras confirmar
+         ====================================================== -->
+    <dialog id="modal-exito" class="modal modal-exito">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Datos guardados correctamente</h3>
+            </header>
+            <div class="modal-body modal-exito-body">
+                <p id="exito-mensaje" class="exito-mensaje"></p>
+                <p class="exito-sub">Que deseas hacer ahora?</p>
+            </div>
+            <footer class="modal-footer modal-exito-footer">
+                <button type="button" id="btn-exito-seguir" class="btn btn-primary">Seguir editando</button>
+                <button type="button" id="btn-exito-logout" class="btn btn-ghost">Cerrar sesion</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <!-- ======================================================
          MODAL: politica de privacidad (placeholder)
          ====================================================== -->
     <dialog id="modal-privacidad" class="modal">
@@ -561,7 +580,7 @@
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js?v=16"></script>
-    <script src="app.js?v=16"></script>
+    <script src="app.js?v=17"></script>
 
 </body>
 </html>

@@ -194,6 +194,8 @@ function bindEventos() {
     });
     document.getElementById('btn-confirmar').addEventListener('click', mostrarResumenAntesConfirmar);
     document.getElementById('btn-confirmar-final').addEventListener('click', confirmarYEnviar);
+    document.getElementById('btn-exito-seguir').addEventListener('click', onSeguirEditando);
+    document.getElementById('btn-exito-logout').addEventListener('click', onCerrarSesionTrasExito);
 
     // Cerradores generales de modales
     document.querySelectorAll('[data-close-modal]').forEach((btn) => {
@@ -950,6 +952,9 @@ async function confirmarYEnviar() {
 
     showLoader();
     try {
+        if (!STATE.sesionId && STATE.trabajador) {
+            await ejecutarPaso('crearSesionValidacion', () => crearSesionValidacion(STATE.trabajador));
+        }
         if (cambios.length > 0) {
             await ejecutarPaso('guardarCambiosTrabajador', () => guardarCambiosTrabajador(actuales));
             await ejecutarPaso('registrarLogValidacion',   () => registrarLogValidacion(cambios));
@@ -965,12 +970,11 @@ async function confirmarYEnviar() {
         document.getElementById('btn-confirmar').disabled = true;
         document.getElementById('chk-legal').checked = false;
 
-        mostrarMensaje(
-            'success',
-            cambios.length > 0
-                ? 'Datos actualizados y confirmacion registrada correctamente.'
-                : 'Confirmacion registrada correctamente. No habia cambios.'
-        );
+        const textoExito = cambios.length > 0
+            ? 'Tus datos fueron actualizados y la confirmacion legal quedo registrada.'
+            : 'Tu confirmacion legal quedo registrada. No habia cambios en los campos editables.';
+
+        mostrarModalExito(textoExito);
     } catch (err) {
         console.error('Error al confirmar:', err);
         const detalle = (err && (err.message || err.error_description || err.details || err.hint)) ||
@@ -1066,6 +1070,30 @@ async function cerrarSesionValidacion() {
         .eq('id', STATE.sesionId);
 
     if (error) console.warn('No se pudo cerrar la sesion de validacion:', error);
+    STATE.sesionId = null;
+}
+
+function mostrarModalExito(mensaje) {
+    const dlg = document.getElementById('modal-exito');
+    const msg = document.getElementById('exito-mensaje');
+    if (msg) msg.textContent = mensaje || 'Operacion completada correctamente.';
+    if (dlg) dlg.showModal();
+}
+
+function onSeguirEditando() {
+    const dlg = document.getElementById('modal-exito');
+    if (dlg) dlg.close();
+    mostrarMensaje('info', 'Puedes seguir editando. Vuelve a marcar la confirmacion legal si deseas guardar nuevos cambios.');
+    const intro = document.querySelector('.page-intro');
+    if (intro) {
+        try { intro.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
+    }
+}
+
+function onCerrarSesionTrasExito() {
+    const dlg = document.getElementById('modal-exito');
+    if (dlg) dlg.close();
+    cerrarSesion();
 }
 
 // =======================================================================
