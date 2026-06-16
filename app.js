@@ -663,10 +663,7 @@ function renderFormulario(t) {
     setVal('f-nacionalidad',          t.nacionalidad);
     setVal('f-tipo-identificacion',   t.tipo_identificacion);
     setVal('f-numero-identificacion', t.numero_identificacion);
-    setVal('f-cargo',                 t.cargo);
     setVal('f-tipo-contrato',         t.tipo_contrato);
-    setVal('f-centro-costo',          t.centro_costo);
-    setVal('f-unidad',                t.unidad || t.area_departamento);
     setVal('f-email-corporativo',     t.email_corporativo);
     setVal('f-fecha-vencimiento-id', formatearFechaInput(t.fecha_vencimiento_id));
 
