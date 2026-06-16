@@ -463,6 +463,19 @@ a:hover { text-decoration: underline; }
 }
 .check-legal input { margin-top: 2px; transform: scale(1.15); }
 
+.check-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+}
+.check-toggle input { transform: scale(1.15); }
+
 /* ===== MODALES ============================================ */
 .modal {
     border: none;

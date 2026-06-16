@@ -49,7 +49,15 @@ const CAMPOS_EDITABLES = [
     'talla_chaqueta',
     'talla_guantes',
     'talla_casco',
-    'talla_chaleco'
+    'talla_chaleco',
+    // Opcionales
+    'fecha_vencimiento_id',
+    'licencia_conducir_tipo',
+    'licencia_conducir_numero',
+    'vencimiento_licencia_conducir',
+    'pase_codelco',
+    'pase_codelco_numero',
+    'enfermedades_cronicas'
 ];
 
 // Etiqueta legible por campo (para resumen y logs visuales)
@@ -79,7 +87,14 @@ const ETIQUETAS = {
     talla_chaqueta:             'Talla chaqueta',
     talla_guantes:              'Talla guantes',
     talla_casco:                'Talla casco',
-    talla_chaleco:              'Talla chaleco'
+    talla_chaleco:              'Talla chaleco',
+    fecha_vencimiento_id:           'Vencimiento cedula',
+    licencia_conducir_tipo:         'Tipo de licencia',
+    licencia_conducir_numero:       'Numero de licencia',
+    vencimiento_licencia_conducir:  'Vencimiento licencia',
+    pase_codelco:                   'Pase Codelco',
+    pase_codelco_numero:            'Numero pase Codelco',
+    enfermedades_cronicas:          'Enfermedades cronicas'
 };
 
 // =======================================================================
@@ -138,6 +153,18 @@ function bindEventos() {
     document.getElementById('tab-signin').addEventListener('click', () => cambiarModoLogin('signin'));
     document.getElementById('tab-signup').addEventListener('click', () => cambiarModoLogin('signup'));
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
+
+    // Toggle: si destilda el pase Codelco, se oculta el numero y se limpia.
+    const chkPase = document.getElementById('f-pase-codelco');
+    if (chkPase) {
+        chkPase.addEventListener('change', () => {
+            const campoNumero = document.getElementById('campo-pase-numero');
+            campoNumero.hidden = !chkPase.checked;
+            if (!chkPase.checked) {
+                document.getElementById('f-pase-numero').value = '';
+            }
+        });
+    }
 
     // Modal documento
     document.getElementById('btn-solicitar-correccion')
@@ -487,10 +514,32 @@ function renderFormulario(t) {
     poblarSelect('f-talla-casco',    CONFIG.TALLAS_LETRA,  t.talla_casco);
     poblarSelect('f-talla-chaleco',  CONFIG.TALLAS_LETRA,  t.talla_chaleco);
 
-    // 8. Checkbox legal: nunca premarcado
+    // 8. Informacion opcional
+    setVal('f-fecha-vencimiento-id', formatearFechaInput(t.fecha_vencimiento_id));
+    poblarSelect('f-licencia-tipo', CONFIG.TIPOS_LICENCIA, t.licencia_conducir_tipo);
+    setVal('f-licencia-numero',     t.licencia_conducir_numero);
+    setVal('f-licencia-vencimiento', formatearFechaInput(t.vencimiento_licencia_conducir));
+
+    const chkPase = document.getElementById('f-pase-codelco');
+    chkPase.checked = !!t.pase_codelco;
+    document.getElementById('campo-pase-numero').hidden = !chkPase.checked;
+    setVal('f-pase-numero', t.pase_codelco_numero);
+
+    setVal('f-enfermedades-cronicas', t.enfermedades_cronicas);
+
+    // 9. Checkbox legal: nunca premarcado
     const chk = document.getElementById('chk-legal');
     chk.checked = false;
     document.getElementById('btn-confirmar').disabled = true;
+}
+
+// Convierte un valor de fecha de Supabase (ISO o YYYY-MM-DD) al formato
+// requerido por <input type="date">: YYYY-MM-DD.
+function formatearFechaInput(v) {
+    if (!v) return '';
+    const s = String(v);
+    if (s.length >= 10) return s.substring(0, 10);
+    return s;
 }
 
 function formatNombreCompleto(t) {
@@ -619,17 +668,45 @@ function leerValoresActuales() {
     const out = {};
     CAMPOS_EDITABLES.forEach((campo) => {
         const el = document.querySelector('[data-campo="' + campo + '"]');
-        if (el) out[campo] = el.value != null ? String(el.value) : '';
+        if (!el) return;
+        if (el.type === 'checkbox') {
+            out[campo] = !!el.checked;
+        } else {
+            out[campo] = el.value != null ? String(el.value) : '';
+        }
     });
+    // Si el pase Codelco esta destildado, el numero debe ir vacio aunque
+    // alguien lo hubiera tipeado antes.
+    if (out.pase_codelco === false) {
+        out.pase_codelco_numero = '';
+    }
     return out;
 }
 
 function recolectarCambios(originales, actuales) {
     const cambios = [];
     CAMPOS_EDITABLES.forEach((campo) => {
-        const antes = originales[campo] != null ? String(originales[campo]) : '';
-        const desp  = actuales[campo]   != null ? String(actuales[campo])   : '';
-        if (antes !== desp) {
+        const aRaw = originales[campo];
+        const dRaw = actuales[campo];
+        const esBool = typeof aRaw === 'boolean' || typeof dRaw === 'boolean';
+
+        let antes, desp;
+        if (esBool) {
+            antes = !!aRaw;
+            desp  = !!dRaw;
+            if (antes === desp) return;
+            cambios.push({
+                campo,
+                etiqueta: ETIQUETAS[campo] || campo,
+                valor_anterior: antes ? 'Si' : 'No',
+                valor_nuevo:    desp  ? 'Si' : 'No'
+            });
+        } else {
+            antes = aRaw != null ? String(aRaw) : '';
+            desp  = dRaw != null ? String(dRaw) : '';
+            // Las fechas en BD pueden venir con timestamp; en el input son YYYY-MM-DD.
+            if (antes.length >= 10 && /\d{4}-\d{2}-\d{2}/.test(antes)) antes = antes.substring(0, 10);
+            if (antes === desp) return;
             cambios.push({
                 campo,
                 etiqueta: ETIQUETAS[campo] || campo,
@@ -731,7 +808,14 @@ async function guardarCambiosTrabajador(actuales) {
     const t = STATE.trabajador;
     // Solo enviamos campos editables, para no tocar nada mas.
     const patch = {};
-    CAMPOS_EDITABLES.forEach((campo) => { patch[campo] = actuales[campo] || null; });
+    CAMPOS_EDITABLES.forEach((campo) => {
+        const v = actuales[campo];
+        if (typeof v === 'boolean') {
+            patch[campo] = v;
+        } else {
+            patch[campo] = (v != null && v !== '') ? v : null;
+        }
+    });
 
     const { error } = await STATE.sb
         .from('trabajadores')

@@ -36,7 +36,13 @@ ALTER TABLE public.trabajadores
     ADD COLUMN IF NOT EXISTS fecha_aceptacion_datos            timestamptz,
     ADD COLUMN IF NOT EXISTS version_texto_legal               varchar,
     ADD COLUMN IF NOT EXISTS actualizado_por_email             varchar,
-    ADD COLUMN IF NOT EXISTS ultima_actualizacion_autogestion  timestamptz;
+    ADD COLUMN IF NOT EXISTS ultima_actualizacion_autogestion  timestamptz,
+    -- Datos opcionales: licencia, pase Codelco, salud
+    ADD COLUMN IF NOT EXISTS licencia_conducir_tipo            varchar,
+    ADD COLUMN IF NOT EXISTS licencia_conducir_numero          varchar,
+    ADD COLUMN IF NOT EXISTS pase_codelco                      boolean DEFAULT false,
+    ADD COLUMN IF NOT EXISTS pase_codelco_numero               varchar,
+    ADD COLUMN IF NOT EXISTS enfermedades_cronicas             text;
 
 CREATE INDEX IF NOT EXISTS idx_trabajadores_email_corporativo
     ON public.trabajadores (lower(email_corporativo));

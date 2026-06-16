@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=7" />
+    <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
 
@@ -299,10 +299,60 @@
                 </div>
             </article>
 
-            <!-- ============== 8. CONFIRMACION LEGAL ============== -->
+            <!-- ============== 8. INFORMACION OPCIONAL ============== -->
+            <article class="card" id="card-opcional">
+                <header class="card-header">
+                    <h2>8. Informacion opcional</h2>
+                    <span class="card-sub">
+                        Completalo si aplica. Estos datos son utiles para gestion operativa
+                        pero no son obligatorios.
+                    </span>
+                </header>
+
+                <div class="grid">
+                    <div class="field">
+                        <label for="f-fecha-vencimiento-id">Vencimiento cedula de identidad</label>
+                        <input id="f-fecha-vencimiento-id" type="date" data-campo="fecha_vencimiento_id" data-editable="1" />
+                    </div>
+                    <div class="field">
+                        <label for="f-licencia-tipo">Tipo de licencia de conducir</label>
+                        <select id="f-licencia-tipo" data-campo="licencia_conducir_tipo" data-editable="1"></select>
+                    </div>
+                    <div class="field">
+                        <label for="f-licencia-numero">Numero de licencia</label>
+                        <input id="f-licencia-numero" type="text" data-campo="licencia_conducir_numero" data-editable="1" maxlength="40" />
+                    </div>
+                    <div class="field">
+                        <label for="f-licencia-vencimiento">Vencimiento licencia</label>
+                        <input id="f-licencia-vencimiento" type="date" data-campo="vencimiento_licencia_conducir" data-editable="1" />
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="field" style="grid-column: 1 / -1;">
+                        <label class="check-toggle">
+                            <input id="f-pase-codelco" type="checkbox" data-campo="pase_codelco" data-editable="1" />
+                            <span>Tengo pase interno de Codelco</span>
+                        </label>
+                    </div>
+                    <div class="field" id="campo-pase-numero" hidden>
+                        <label for="f-pase-numero">Numero de pase Codelco</label>
+                        <input id="f-pase-numero" type="text" data-campo="pase_codelco_numero" data-editable="1" maxlength="40" />
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="field" style="grid-column: 1 / -1;">
+                        <label for="f-enfermedades-cronicas">Declaracion de enfermedades cronicas (opcional)</label>
+                        <textarea id="f-enfermedades-cronicas" data-campo="enfermedades_cronicas" data-editable="1" rows="3" placeholder="Describe brevemente si tienes alguna enfermedad cronica relevante. Si no aplica, deja en blanco."></textarea>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ============== 9. CONFIRMACION LEGAL ============== -->
             <article class="card card-legal" id="card-legal">
                 <header class="card-header">
-                    <h2>8. Confirmacion legal</h2>
+                    <h2>9. Confirmacion legal</h2>
                 </header>
 
                 <p id="texto-legal" class="texto-legal"></p>
@@ -433,8 +483,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=7"></script>
-    <script src="app.js?v=7"></script>
+    <script src="config.js?v=8"></script>
+    <script src="app.js?v=8"></script>
 
 </body>
 </html>

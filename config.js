@@ -90,5 +90,18 @@ window.CONFIG = {
         'Hermana',
         'Pareja',
         'Otro'
+    ],
+    // --- Tipos de licencia de conducir (Chile) ---
+    TIPOS_LICENCIA: [
+        'Clase A-1',
+        'Clase A-2',
+        'Clase A-3',
+        'Clase A-4',
+        'Clase A-5',
+        'Clase B',
+        'Clase C',
+        'Clase D',
+        'Clase E',
+        'Clase F'
     ]
 };
