@@ -702,6 +702,29 @@ a:hover { text-decoration: underline; }
     min-height: 80px;
 }
 
+.field-hint {
+    font-size: 12.5px;
+    color: var(--color-muted);
+    line-height: 1.35;
+}
+
+.req-mark {
+    color: var(--color-error);
+    font-weight: 700;
+}
+
+.field-required label .req-mark {
+    margin-left: 2px;
+}
+
+.field input.campo-invalido,
+.field select.campo-invalido,
+.field textarea.campo-invalido {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+    background: #fffbfb;
+}
+
 /* ===== BOTONES ============================================ */
 .btn {
     display: inline-flex;

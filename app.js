@@ -16,6 +16,11 @@ const STATE = {
     userAgent: navigator.userAgent || ''
 };
 
+// Campos obligatorios antes de confirmar (ademas del checkbox legal).
+const CAMPOS_OBLIGATORIOS = [
+    { campo: 'fecha_vencimiento_id', id: 'f-fecha-vencimiento-id', etiqueta: 'Vigencia del carnet de identidad' }
+];
+
 // ---------- Campos editables -------------------------------------------
 const CAMPOS_EDITABLES = [
     // Contacto personal
@@ -58,7 +63,7 @@ const CAMPOS_EDITABLES = [
     'talla_guantes',
     'talla_casco',
     'talla_chaleco',
-    // Opcionales
+    // Informacion adicional
     'fecha_vencimiento_id',
     'licencia_conducir_tipo',
     'licencia_conducir_numero',
@@ -103,7 +108,7 @@ const ETIQUETAS = {
     talla_guantes:              'Talla guantes',
     talla_casco:                'Talla casco',
     talla_chaleco:              'Talla chaleco',
-    fecha_vencimiento_id:           'Vencimiento cedula',
+    fecha_vencimiento_id:           'Vigencia carnet de identidad',
     licencia_conducir_tipo:         'Tipo de licencia',
     licencia_conducir_numero:       'Numero de licencia',
     vencimiento_licencia_conducir:  'Vencimiento licencia',
@@ -182,6 +187,11 @@ function bindEventos() {
         chkTele.addEventListener('change', aplicarVisibilidadTeletrabajo);
     }
 
+    const fechaId = document.getElementById('f-fecha-vencimiento-id');
+    if (fechaId) {
+        fechaId.addEventListener('change', () => fechaId.classList.remove('campo-invalido'));
+    }
+
     // Modal documento
     document.getElementById('btn-solicitar-correccion')
         .addEventListener('click', abrirModalCorreccionDocumento);
@@ -241,13 +251,13 @@ function bindTogglePassword() {
         input.type = mostrar ? 'text' : 'password';
         btn.classList.toggle('is-revealed', mostrar);
         btn.setAttribute('aria-pressed', mostrar ? 'true' : 'false');
-        btn.setAttribute('aria-label', mostrar ? 'Ocultar contrasena' : 'Mostrar contrasena');
-        btn.title = mostrar ? 'Ocultar contrasena' : 'Mostrar contrasena';
+        btn.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        btn.title = mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña';
     });
 }
 
 function aplicarVersionApp() {
-    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.4';
+    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.5';
     const label = raw.startsWith('v') ? raw : ('v' + raw);
     document.querySelectorAll('[data-app-version]').forEach((el) => {
         el.textContent = label;
@@ -261,7 +271,7 @@ function aplicarVersionApp() {
 }
 
 // =======================================================================
-// AUTENTICACION (Email + contrasena de verificacion, flujo unificado)
+// AUTENTICACION (Email + contraseña de verificacion, flujo unificado)
 // =======================================================================
 // Un solo boton: intenta crear cuenta (primera vez) o iniciar sesion si ya existe.
 
@@ -286,8 +296,8 @@ function prepararVistaLogin() {
     if (toggle) {
         toggle.classList.remove('is-revealed');
         toggle.setAttribute('aria-pressed', 'false');
-        toggle.setAttribute('aria-label', 'Mostrar contrasena');
-        toggle.title = 'Mostrar contrasena';
+        toggle.setAttribute('aria-label', 'Mostrar contraseña');
+        toggle.title = 'Mostrar contraseña';
     }
     const banner = document.getElementById('login-banner-reingreso');
     if (banner) {
@@ -341,13 +351,13 @@ async function autenticarUnificado(email, password) {
     if (!signUpError) {
         if (signUpData && signUpData.session) {
             return {
-                info: 'Contrasena de verificacion creada. Revisa y confirma tus datos.'
+                info: 'Contraseña de verificacion creada. Revisa y confirma tus datos.'
             };
         }
         const { error: signInAfterSignUp } = await STATE.sb.auth.signInWithPassword({ email, password });
         if (!signInAfterSignUp) {
             return {
-                info: 'Contrasena de verificacion creada. Revisa y confirma tus datos.'
+                info: 'Contraseña de verificacion creada. Revisa y confirma tus datos.'
             };
         }
         throw signInAfterSignUp;
@@ -377,7 +387,7 @@ async function autenticar() {
         return;
     }
     if (!password) {
-        mostrarErrorLogin('Ingresa tu contrasena de verificacion.', { titulo: 'Contrasena requerida', tipo: 'warn' });
+        mostrarErrorLogin('Ingresa tu contraseña de verificacion.', { titulo: 'Contraseña requerida', tipo: 'warn' });
         return;
     }
 
@@ -395,8 +405,8 @@ async function autenticar() {
 
     if (password.length < 8) {
         mostrarErrorLogin(
-            'La contrasena de verificacion debe tener al menos 8 caracteres. No uses la de Microsoft ni la del PC.',
-            { titulo: 'Contrasena muy corta', tipo: 'warn' }
+            'La contrase�a de verificacion debe tener al menos 8 caracteres. No uses la de Microsoft ni la del PC.',
+            { titulo: 'Contraseña muy corta', tipo: 'warn' }
         );
         return;
     }
@@ -433,8 +443,8 @@ function traducirErrorAuth(msg) {
 
     if (msg === 'UNIFIED_WRONG_PASSWORD') {
         return {
-            titulo: 'Contrasena incorrecta',
-            mensaje: 'Esa contrasena no coincide con la que creaste en tu primera visita a este portal. ' +
+            titulo: 'Contraseña incorrecta',
+            mensaje: 'Esa contraseña no coincide con la que creaste en tu primera visita a este portal. ' +
                      'Recuerda: es solo para esta verificacion, no la de Microsoft. ' +
                      'Si la olvidaste, escribe a ' + soporte + '.',
             tipo: 'error'
@@ -446,9 +456,9 @@ function traducirErrorAuth(msg) {
     if (lc.includes('invalid login credentials')) {
         return {
             titulo: 'No se pudo ingresar',
-            mensaje: 'No pudimos validar tu acceso. Verifica tu correo ' + dominio + ' y tu contrasena de verificacion. ' +
-                     'Si es tu primera vez, crea una contrasena nueva (minimo 8 caracteres). ' +
-                     'Si ya entraste antes, usa la misma contrasena. ' +
+            mensaje: 'No pudimos validar tu acceso. Verifica tu correo ' + dominio + ' y tu contraseña de verificacion. ' +
+                     'Si es tu primera vez, crea una contraseña nueva (minimo 8 caracteres). ' +
+                     'Si ya entraste antes, usa la misma contraseña. ' +
                      'Si el problema continua, escribe a ' + soporte + '.',
             tipo: 'error'
         };
@@ -456,7 +466,7 @@ function traducirErrorAuth(msg) {
     if (lc.includes('user already registered') || lc.includes('already been registered') || lc.includes('user already exists')) {
         return {
             titulo: 'Cuenta ya registrada',
-            mensaje: 'Tu cuenta ya existe. Usa la misma contrasena de verificacion que definiste la primera vez.',
+            mensaje: 'Tu cuenta ya existe. Usa la misma contraseña de verificacion que definiste la primera vez.',
             tipo: 'warn'
         };
     }
@@ -469,8 +479,8 @@ function traducirErrorAuth(msg) {
     }
     if (lc.includes('password should be at least')) {
         return {
-            titulo: 'Contrasena demasiado corta',
-            mensaje: 'La contrasena de verificacion debe tener al menos 8 caracteres.',
+            titulo: 'Contraseña demasiado corta',
+            mensaje: 'La contraseña de verificacion debe tener al menos 8 caracteres.',
             tipo: 'warn'
         };
     }
@@ -658,6 +668,7 @@ function renderFormulario(t) {
     setVal('f-centro-costo',          t.centro_costo);
     setVal('f-unidad',                t.unidad || t.area_departamento);
     setVal('f-email-corporativo',     t.email_corporativo);
+    setVal('f-fecha-vencimiento-id', formatearFechaInput(t.fecha_vencimiento_id));
 
     // 2. Contacto personal
     setVal('f-email-personal',   t.email_personal);
@@ -714,7 +725,6 @@ function renderFormulario(t) {
     poblarSelect('f-talla-chaleco',  CONFIG.TALLAS_LETRA,  t.talla_chaleco);
 
     // 8. Informacion opcional
-    setVal('f-fecha-vencimiento-id', formatearFechaInput(t.fecha_vencimiento_id));
     poblarSelect('f-licencia-tipo', CONFIG.TIPOS_LICENCIA, t.licencia_conducir_tipo);
     setVal('f-licencia-numero',     t.licencia_conducir_numero);
     setVal('f-licencia-vencimiento', formatearFechaInput(t.vencimiento_licencia_conducir));
@@ -748,7 +758,7 @@ function aplicarEstadoConfirmacion(t) {
             if (fechaEl) fechaEl.textContent = fechaTxt;
         }
         if (intro) {
-            intro.textContent = 'Tu informacion ya fue validada. Revisa los datos y, si necesitas corregir algo, editalo y confirma nuevamente al final.';
+            intro.textContent = 'Tu informacion ya fue validada. Revisa los datos y, si necesitas corregir algo, editalo y confirma nuevamente al final. La vigencia del carnet de identidad es obligatoria.';
         }
         if (legalNota) {
             legalNota.hidden = false;
@@ -757,7 +767,7 @@ function aplicarEstadoConfirmacion(t) {
     } else {
         if (panel) panel.hidden = true;
         if (intro) {
-            intro.textContent = 'Revisa cuidadosamente la informacion. Los campos en gris son de solo lectura. Edita los campos habilitados, confirma al final y envia el formulario.';
+            intro.textContent = 'Revisa cuidadosamente la informacion. Los campos en gris son de solo lectura. Edita los campos habilitados, completa la vigencia del carnet de identidad y confirma al final.';
         }
         if (legalNota) legalNota.hidden = true;
     }
@@ -987,6 +997,43 @@ function recolectarCambios(originales, actuales) {
     return cambios;
 }
 
+function validarCamposObligatorios(actuales) {
+    const faltantes = [];
+    CAMPOS_OBLIGATORIOS.forEach((c) => {
+        const val = actuales ? actuales[c.campo] : '';
+        if (!val || !String(val).trim()) faltantes.push(c);
+    });
+    return faltantes;
+}
+
+function marcarCamposObligatoriosInvalidos(faltantes) {
+    CAMPOS_OBLIGATORIOS.forEach((c) => {
+        const el = document.getElementById(c.id);
+        if (el) el.classList.remove('campo-invalido');
+    });
+    (faltantes || []).forEach((c) => {
+        const el = document.getElementById(c.id);
+        if (el) el.classList.add('campo-invalido');
+    });
+}
+
+function bloquearConfirmacionPorObligatorios(actuales) {
+    const faltantes = validarCamposObligatorios(actuales);
+    if (faltantes.length === 0) {
+        marcarCamposObligatoriosInvalidos([]);
+        return false;
+    }
+    marcarCamposObligatoriosInvalidos(faltantes);
+    const lista = faltantes.map((f) => f.etiqueta).join(', ');
+    mostrarMensaje('error', 'Debes completar los campos obligatorios: ' + lista + '.');
+    const first = document.getElementById(faltantes[0].id);
+    if (first) {
+        try { first.focus(); } catch (_) {}
+        try { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+    }
+    return true;
+}
+
 function mostrarResumenAntesConfirmar() {
     if (!document.getElementById('chk-legal').checked) {
         mostrarMensaje('error', 'Debes marcar el checkbox legal para continuar.');
@@ -994,6 +1041,8 @@ function mostrarResumenAntesConfirmar() {
     }
 
     const actuales = leerValoresActuales();
+    if (bloquearConfirmacionPorObligatorios(actuales)) return;
+
     const cambios = recolectarCambios(STATE.trabajadorOriginal, actuales);
 
     const cont = document.getElementById('resumen-lista');
@@ -1027,6 +1076,8 @@ async function confirmarYEnviar() {
     }
 
     const actuales = leerValoresActuales();
+    if (bloquearConfirmacionPorObligatorios(actuales)) return;
+
     const cambios  = recolectarCambios(STATE.trabajadorOriginal, actuales);
 
     showLoader();

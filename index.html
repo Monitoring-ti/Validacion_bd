@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=18" />
+    <link rel="stylesheet" href="styles.css?v=19" />
 </head>
 <body>
 
@@ -21,24 +21,24 @@
     <section id="vista-login" class="vista vista-login">
         <div class="login-card">
             <div id="login-banner-reingreso" class="login-banner-info" hidden role="status">
-                Ya registraste tu validacion. Puedes ingresar de nuevo para revisar o actualizar tus datos con la misma contrasena de verificacion.
+                Ya registraste tu validacion. Puedes ingresar de nuevo para revisar o actualizar tus datos con la misma contraseña de verificacion.
             </div>
 
             <div class="monitoring-logo login-logo" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.4</span>
+                <span class="logo-version" data-app-version>v1.0.5</span>
             </div>
             <h1 id="login-titulo">Validacion de datos personales</h1>
             <p class="login-sub" id="login-sub">
-                Ingresa con tu correo corporativo y una contrasena de verificacion para este portal.
+                Ingresa con tu correo corporativo y una contraseña de verificacion para este portal.
             </p>
 
             <div class="login-instructions" role="note" aria-label="Instrucciones de acceso">
                 <p class="login-instructions-title">Como ingresar</p>
                 <ol class="login-steps">
                     <li>Usa tu correo <strong>@monitoring.cl</strong> (el mismo con el que trabajas en Monitoring).</li>
-                    <li>Crea una <strong>contrasena de verificacion</strong> de al menos 8 caracteres. <em>No es la de Microsoft 365 ni la de tu PC.</em></li>
-                    <li><strong>Primera vez:</strong> al entrar, el sistema crea esa contrasena. <strong>Siguientes veces:</strong> usa la misma para volver.</li>
+                    <li>Crea una <strong>contraseña de verificacion</strong> de al menos 8 caracteres. <em>No es la de Microsoft 365 ni la de tu PC.</em></li>
+                    <li><strong>Primera vez:</strong> al entrar, el sistema crea esa contraseña. <strong>Siguientes veces:</strong> usa la misma para volver.</li>
                     <li>Revisa tus datos, actualiza lo necesario y confirma al final del formulario.</li>
                 </ol>
             </div>
@@ -49,10 +49,10 @@
                     <input id="input-email" type="email" placeholder="nombre.apellido@monitoring.cl" autocomplete="email" />
                 </div>
                 <div class="field" style="text-align:left; margin-bottom: 14px;">
-                    <label for="input-password" id="label-password">Contrasena de verificacion</label>
+                    <label for="input-password" id="label-password">Contraseña de verificacion</label>
                     <div class="password-wrap">
                         <input id="input-password" type="password" placeholder="Minimo 8 caracteres (solo para este portal)" autocomplete="current-password" minlength="8" />
-                        <button type="button" id="btn-toggle-password" class="password-toggle" aria-label="Mostrar contrasena" aria-pressed="false" title="Mostrar contrasena">
+                        <button type="button" id="btn-toggle-password" class="password-toggle" aria-label="Mostrar contraseña" aria-pressed="false" title="Mostrar contraseña">
                             <svg class="icon-eye" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
                                 <path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12.5c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
                             </svg>
@@ -69,7 +69,7 @@
 
             <p id="login-error" class="login-error" hidden></p>
             <p class="login-foot">
-                Acceso exclusivo <strong>@monitoring.cl</strong>. La contrasena sirve solo para esta verificacion de datos.<br />
+                Acceso exclusivo <strong>@monitoring.cl</strong>. La contraseña sirve solo para esta verificacion de datos.<br />
                 Problemas con tu cuenta: <a id="login-support-email" href="mailto:ti.soporte@monitoring.cl">ti.soporte@monitoring.cl</a>
             </p>
         </div>
@@ -83,7 +83,7 @@
         <header class="app-header">
             <div class="monitoring-logo brand" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.4</span>
+                <span class="logo-version" data-app-version>v1.0.5</span>
             </div>
             <div class="user-box">
                 <div class="user-info">
@@ -99,9 +99,8 @@
             <div class="page-intro">
                 <h1>Validacion de datos personales</h1>
                 <p id="page-intro-texto">
-                    Revisa cuidadosamente la informacion. Los campos en gris son de
-                    solo lectura. Edita los campos habilitados, confirma al final y
-                    envia el formulario.
+                    Revisa cuidadosamente la informacion. Los campos en gris son de solo lectura.
+                    Edita los campos habilitados, completa la vigencia del carnet de identidad y confirma al final.
                 </p>
             </div>
 
@@ -118,7 +117,7 @@
             <article class="card" id="card-personales">
                 <header class="card-header">
                     <h2>1. Datos personales</h2>
-                    <span class="card-sub">Solo lectura. Para corregir el documento usa el boton al pie.</span>
+                    <span class="card-sub">Solo lectura, excepto la vigencia del carnet de identidad (obligatoria).</span>
                 </header>
                 <div class="grid">
                     <div class="field">
@@ -160,6 +159,11 @@
                     <div class="field">
                         <label>Email corporativo</label>
                         <input id="f-email-corporativo" type="text" readonly />
+                    </div>
+                    <div class="field field-required">
+                        <label for="f-fecha-vencimiento-id">Vigencia carnet de identidad <span class="req-mark" aria-hidden="true">*</span></label>
+                        <input id="f-fecha-vencimiento-id" type="date" data-campo="fecha_vencimiento_id" data-editable="1" data-obligatorio="1" required />
+                        <span class="field-hint">Obligatorio. Fecha de vencimiento de tu carnet de identidad vigente.</span>
                     </div>
                 </div>
                 <div class="card-actions">
@@ -388,16 +392,11 @@
                 <header class="card-header">
                     <h2>8. Informacion opcional</h2>
                     <span class="card-sub">
-                        Completalo si aplica. Estos datos son utiles para gestion operativa
-                        pero no son obligatorios.
+                        Completalo si aplica. Licencia de conducir, pase Codelco y otros datos utiles.
                     </span>
                 </header>
 
                 <div class="grid">
-                    <div class="field">
-                        <label for="f-fecha-vencimiento-id">Vencimiento cedula de identidad</label>
-                        <input id="f-fecha-vencimiento-id" type="date" data-campo="fecha_vencimiento_id" data-editable="1" />
-                    </div>
                     <div class="field">
                         <label for="f-licencia-tipo">Tipo de licencia de conducir</label>
                         <select id="f-licencia-tipo" data-campo="licencia_conducir_tipo" data-editable="1"></select>
@@ -469,7 +468,7 @@
         </main>
 
         <footer class="app-footer">
-            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.4</span>
+            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.5</span>
         </footer>
 
     </section>
@@ -613,8 +612,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=18"></script>
-    <script src="app.js?v=18"></script>
+    <script src="config.js?v=19"></script>
+    <script src="app.js?v=19"></script>
 
 </body>
 </html>
