@@ -1,6 +1,6 @@
 # Manual de usuario — Portal del Trabajador Monitoring
 
-**Versión del portal:** 1.0.0.1  
+**Versión del portal:** 1.0.0.2  
 **Sitio:** [https://valida-bd.vercel.app](https://valida-bd.vercel.app)  
 **Acceso:** solo correos **@monitoring.cl**
 
@@ -208,15 +208,14 @@ Recibirás confirmación en pantalla. El cambio lo gestiona el equipo interno; n
 
 ---
 
-## 10. Límite de ingresos al portal
+## 10. Aviso de ingreso
 
-Por seguridad, después de **varios ingresos** al portal puede solicitarse una autorización adicional antes de volver a entrar.
+Cada vez que entras al portal verás un mensaje informativo, por ejemplo:
 
-Si ves un mensaje de **“Autorización de TI requerida”**:
+- *"Este es tu 1er ingreso al portal."*
+- *"Este es tu 3° ingreso al portal."*
 
-1. Escribe a **ti.soporte@monitoring.cl**.
-2. Indica tu **correo corporativo** completo.
-3. Espera la habilitación antes de intentar de nuevo.
+Es solo informativo: **no bloquea** tu acceso ni requiere autorización adicional.
 
 ---
 

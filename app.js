@@ -951,8 +951,7 @@ async function manejarSesion(session) {
             trabajador.sexo = normalizarGeneroBd(trabajador.sexo);
         }
 
-        const accesoOk = await procesarIngresoPortal(trabajador);
-        if (!accesoOk) return;
+        const numeroIngreso = await procesarIngresoPortal(trabajador);
 
         STATE.trabajador = trabajador;
         STATE.trabajadorOriginal = JSON.parse(JSON.stringify(trabajador));
@@ -965,6 +964,7 @@ async function manejarSesion(session) {
         }
         mostrarVistaApp();
         renderFormulario(trabajador);
+        mostrarAvisoIngresoPortal(numeroIngreso);
         await cargarCatalogoNormativo();
         await cargarActivosEmpresa(trabajador.id_trabajador);
         if (trabajadorYaConfirmado(trabajador)) {
@@ -1033,74 +1033,49 @@ async function cargarTrabajador(email) {
 }
 
 async function procesarIngresoPortal(trabajador) {
-    const limite = CONFIG.MAX_INGRESOS_PORTAL || 5;
-    const yaAutorizado = !!trabajador.portal_autorizado_ti;
     const countActual = parseInt(trabajador.ingresos_portal_count, 10) || 0;
-
-    if (countActual >= limite && !yaAutorizado) {
-        mostrarBloqueoAutorizacionTI(trabajador, countActual);
-        await STATE.sb.auth.signOut();
-        return false;
-    }
-
     const nuevoCount = countActual + 1;
-    const requiereTi = nuevoCount >= limite && !yaAutorizado;
 
     try {
-        const patch = { ingresos_portal_count: nuevoCount };
-        if (requiereTi) patch.portal_requiere_autorizacion_ti = true;
-
         const { error } = await STATE.sb
             .from('trabajadores')
-            .update(patch)
+            .update({ ingresos_portal_count: nuevoCount })
             .eq('id_trabajador', trabajador.id_trabajador);
 
         if (error) {
             console.warn('No se pudo actualizar contador de ingresos:', error);
         } else {
             trabajador.ingresos_portal_count = nuevoCount;
-            if (requiereTi) trabajador.portal_requiere_autorizacion_ti = true;
-        }
-
-        if (requiereTi) {
-            await crearSolicitudAutorizacionTI(trabajador, nuevoCount);
-            mostrarBloqueoAutorizacionTI(trabajador, nuevoCount);
-            await STATE.sb.auth.signOut();
-            return false;
         }
     } catch (err) {
-        console.warn('Error en control de ingresos portal:', err);
+        console.warn('Error al actualizar contador de ingresos:', err);
     }
 
-    return true;
+    return trabajador.ingresos_portal_count || nuevoCount;
 }
 
-async function crearSolicitudAutorizacionTI(trabajador, numeroIngreso) {
-    try {
-        const { error } = await STATE.sb
-            .from('solicitudes_autorizacion_portal')
-            .insert({
-                trabajador_id:     trabajador.id_trabajador,
-                email_corporativo: trabajador.email_corporativo,
-                numero_ingreso:    numeroIngreso,
-                estado:            'pendiente',
-                ip_origen:         STATE.ip,
-                user_agent:        STATE.userAgent
-            });
-        if (error) console.warn('No se pudo registrar solicitud autorizacion TI:', error);
-    } catch (err) {
-        console.warn('Tabla solicitudes_autorizacion_portal no disponible:', err);
+function textoNumeroIngreso(n) {
+    const num = parseInt(n, 10) || 1;
+    if (num === 1) return 'Este es tu 1er ingreso al portal.';
+    return 'Este es tu ' + num + '\u00b0 ingreso al portal.';
+}
+
+function mostrarAvisoIngresoPortal(numeroIngreso) {
+    const texto = textoNumeroIngreso(numeroIngreso);
+    const el = document.getElementById('banner-ingreso-portal');
+    if (el) {
+        el.textContent = texto;
+        el.hidden = false;
     }
+    mostrarMensaje('info', texto);
 }
 
-function mostrarBloqueoAutorizacionTI(trabajador, count) {
-    const soporte = emailSoporte();
-    mostrarErrorLogin(
-        'Has ingresado ' + count + ' veces al portal de validacion. Por seguridad, el acceso requiere autorizacion de TI. ' +
-        'Escribe a ' + soporte + ' indicando tu correo ' + (trabajador.email_corporativo || '') + ' para habilitar tu cuenta.',
-        { titulo: 'Autorizacion de TI requerida', tipo: 'warn' }
-    );
-    mostrarMensaje('warn', 'Acceso pendiente de autorizacion TI.');
+function ocultarAvisoIngresoPortal() {
+    const el = document.getElementById('banner-ingreso-portal');
+    if (el) {
+        el.hidden = true;
+        el.textContent = '';
+    }
 }
 
 async function actualizarUltimoLoginMicrosoft(idTrabajador) {
@@ -2135,6 +2110,7 @@ function onCerrarSesionTrasExito() {
 function mostrarVistaLogin() {
     document.getElementById('vista-login').hidden = false;
     document.getElementById('vista-app').hidden   = true;
+    ocultarAvisoIngresoPortal();
     prepararVistaLogin();
 }
 function mostrarVistaApp() {

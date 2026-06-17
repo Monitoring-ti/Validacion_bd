@@ -238,6 +238,22 @@ a:hover { text-decoration: underline; }
     border-radius: var(--radius-sm);
 }
 
+.banner-ingreso-portal {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e3a5f;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.banner-ingreso-portal[hidden] {
+    display: none !important;
+}
+
 .login-banner-info[hidden] {
     display: none !important;
 }

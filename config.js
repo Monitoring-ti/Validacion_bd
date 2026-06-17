@@ -8,7 +8,7 @@
 
 window.CONFIG = {
     // --- Version del portal ---
-    APP_VERSION: '1.0.0.1',
+    APP_VERSION: '1.0.0.2',
     PRODUCTION_ACTIVE: true,
 
     // --- Supabase ---
@@ -141,7 +141,7 @@ window.CONFIG = {
     ],
     // Compatibilidad con codigo legacy
     GENEROS: ['Femenino', 'Masculino', 'No binario'],
-    MAX_INGRESOS_PORTAL: 5,
+    // Contador informativo de ingresos (sin bloqueo ni autorizacion TI)
     DIAS_ALERTA_VIGENCIA_ID: 90,
     // --- Activos (tabla public.activos) ---
     TIPOS_ACTIVO: ['Notebook', 'Computador', 'Celular', 'Monitor', 'Tablet', 'Radio', 'Otro'],
