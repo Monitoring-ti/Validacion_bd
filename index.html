@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=21" />
+    <link rel="stylesheet" href="styles.css?v=27" />
 </head>
 <body>
 
@@ -16,60 +16,57 @@
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <!-- ======================================================
-         Vista LOGIN (Email + Password)
+         Vista LOGIN (Magic Link)
          ====================================================== -->
     <section id="vista-login" class="vista vista-login">
         <div class="login-card">
             <div id="login-banner-reingreso" class="login-banner-info" hidden role="status">
-                Ya registraste tu validacion. Puedes ingresar de nuevo para revisar o actualizar tus datos con la misma contraseña de verificacion.
+                Ya registraste tu validacion. Puedes ingresar de nuevo con un enlace magico al mismo correo @monitoring.cl.
             </div>
+            <div id="login-banner-confirmacion-ok" class="login-banner-info login-banner-ok" hidden role="status"></div>
 
             <div class="monitoring-logo login-logo" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.6</span>
+                <span class="logo-version" data-app-version>v1.1.1</span>
             </div>
             <h1 id="login-titulo">Validacion de datos personales</h1>
             <p class="login-sub" id="login-sub">
-                Ingresa con tu correo corporativo y una contraseña de verificacion para este portal.
+                Ingresa tu correo corporativo y te enviaremos un enlace seguro de acceso (magic link).
             </p>
 
             <div class="login-instructions" role="note" aria-label="Instrucciones de acceso">
                 <p class="login-instructions-title">Como ingresar</p>
                 <ol class="login-steps">
                     <li>Usa tu correo <strong>@monitoring.cl</strong> (el mismo con el que trabajas en Monitoring).</li>
-                    <li>Crea una <strong>contraseña de verificacion</strong> de al menos 8 caracteres. <em>No es la de Microsoft 365 ni la de tu PC.</em></li>
-                    <li><strong>Primera vez:</strong> al entrar, el sistema crea esa contraseña. <strong>Siguientes veces:</strong> usa la misma para volver.</li>
+                    <li>Pulsa <strong>Enviar enlace de acceso</strong>. Revisa tu bandeja de entrada y spam.</li>
+                    <li>Abre el enlace del correo en este mismo navegador para entrar al portal.</li>
                     <li>Revisa tus datos, actualiza lo necesario y confirma al final del formulario.</li>
                 </ol>
             </div>
 
             <div id="login-form-box">
-                <div class="field" style="text-align:left; margin-bottom: 10px;">
+                <div class="field" style="text-align:left; margin-bottom: 14px;">
                     <label for="input-email">Correo corporativo</label>
                     <input id="input-email" type="email" placeholder="nombre.apellido@monitoring.cl" autocomplete="email" />
                 </div>
-                <div class="field" style="text-align:left; margin-bottom: 14px;">
-                    <label for="input-password" id="label-password">Contraseña de verificacion</label>
-                    <div class="password-wrap">
-                        <input id="input-password" type="password" placeholder="Minimo 8 caracteres (solo para este portal)" autocomplete="current-password" minlength="8" />
-                        <button type="button" id="btn-toggle-password" class="password-toggle" aria-label="Mostrar contraseña" aria-pressed="false" title="Mostrar contraseña">
-                            <svg class="icon-eye" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-                                <path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12.5c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
-                            </svg>
-                            <svg class="icon-eye-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-                                <path fill="currentColor" d="M3.27 3.27 2 4.54l2.89 2.89C3.53 8.47 2.38 10.3 1 12.5 2.73 16.89 7 20 12 20c2.04 0 3.92-.52 5.57-1.43l2.36 2.36 1.27-1.27L3.27 3.27zM12 17.5c-3.04 0-5.64-1.88-6.82-4.53l1.56-1.56A4.97 4.97 0 0 0 12 15.5c.68 0 1.33-.14 1.92-.39l1.56 1.56A7.9 7.9 0 0 1 12 17.5zm6.82-4.53-1.45-1.45a8.03 8.03 0 0 0 .23-2.02l2.06-2.06C20.62 10.3 21.77 12.13 23 14.33c-1.73 4.39-6 7.5-11 7.5-1.45 0-2.84-.26-4.13-.73l1.67-1.67c.78.2 1.6.3 2.46.3 3.04 0 5.64-1.88 6.82-4.53zM12 7.5c.68 0 1.33.14 1.92.39l-1.56 1.56A4.97 4.97 0 0 0 12 9.5a4.97 4.97 0 0 0-1.92.39L8.52 8.33A7.9 7.9 0 0 1 12 7.5z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
                 <button id="btn-login" class="btn btn-primary btn-microsoft" type="button">
-                    Entrar al portal
+                    Enviar enlace de acceso
+                </button>
+            </div>
+
+            <div id="login-pending" class="login-pending" hidden role="status">
+                <p class="login-pending-title">Enlace enviado</p>
+                <p id="login-pending-texto" class="login-pending-texto">
+                    Revisa tu correo y abre el enlace para continuar. El acceso expira en unos minutos.
+                </p>
+                <button id="btn-reenviar-magic" class="btn btn-ghost" type="button" disabled>
+                    Reenviar enlace
                 </button>
             </div>
 
             <p id="login-error" class="login-error" hidden></p>
             <p class="login-foot">
-                Acceso exclusivo <strong>@monitoring.cl</strong>. La contraseña sirve solo para esta verificacion de datos.<br />
+                Acceso exclusivo <strong>@monitoring.cl</strong>. Sin contraseña: solo el enlace del correo.<br />
                 Problemas con tu cuenta: <a id="login-support-email" href="mailto:ti.soporte@monitoring.cl">ti.soporte@monitoring.cl</a>
             </p>
         </div>
@@ -83,7 +80,7 @@
         <header class="app-header">
             <div class="monitoring-logo brand" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.0.6</span>
+                <span class="logo-version" data-app-version>v1.1.1</span>
             </div>
             <div class="user-box">
                 <div class="user-info">
@@ -117,7 +114,7 @@
             <article class="card" id="card-personales">
                 <header class="card-header">
                     <h2>1. Datos personales</h2>
-                    <span class="card-sub">Solo lectura, excepto la vigencia del carnet de identidad (obligatoria).</span>
+                    <span class="card-sub">Solo lectura, excepto genero e identidad y la vigencia del carnet (obligatoria).</span>
                 </header>
                 <div class="grid">
                     <div class="field">
@@ -148,10 +145,16 @@
                         <label>Email corporativo</label>
                         <input id="f-email-corporativo" type="text" readonly />
                     </div>
+                    <div class="field">
+                        <label for="f-genero">Genero</label>
+                        <select id="f-genero" data-campo="sexo" data-editable="1"></select>
+                        <span class="field-hint">Identidad de genero: Femenino, Masculino o No binario.</span>
+                    </div>
                     <div class="field field-required">
                         <label for="f-fecha-vencimiento-id">Vigencia carnet de identidad <span class="req-mark" aria-hidden="true">*</span></label>
                         <input id="f-fecha-vencimiento-id" type="date" data-campo="fecha_vencimiento_id" data-editable="1" data-obligatorio="1" required />
-                        <span class="field-hint">Obligatorio. Fecha de vencimiento de tu carnet de identidad vigente.</span>
+                        <p id="fecha-vencimiento-estado" class="field-hint field-estado-vigencia" aria-live="polite"></p>
+                        <span class="field-hint">Obligatorio. Si esta vencido no podras confirmar hasta actualizar la fecha.</span>
                     </div>
                 </div>
                 <div class="card-actions">
@@ -196,7 +199,8 @@
                     </div>
                     <div class="field">
                         <label for="f-telefono-emergencia">Telefono de emergencia</label>
-                        <input id="f-telefono-emergencia" type="tel" data-campo="telefono_emergencia" data-editable="1" placeholder="+56 9 ..." maxlength="40" />
+                        <input id="f-telefono-emergencia" type="tel" data-campo="telefono_emergencia" data-editable="1" placeholder="+56 9 8765 4321" maxlength="20" inputmode="tel" />
+                        <span id="hint-telefono-emergencia" class="field-hint">Chile: movil 9 digitos comenzando en 9. Peru: movil 9 digitos comenzando en 9.</span>
                     </div>
                 </div>
             </article>
@@ -228,8 +232,9 @@
                         <input id="f-calle" type="text" data-campo="calle" data-editable="1" maxlength="120" />
                     </div>
                     <div class="field">
-                        <label for="f-numero-domicilio">Numero</label>
-                        <input id="f-numero-domicilio" type="text" data-campo="numero_domicilio" data-editable="1" maxlength="20" />
+                        <label for="f-numero-domicilio">Numero / manzana-lote</label>
+                        <input id="f-numero-domicilio" type="text" data-campo="numero_domicilio" data-editable="1" maxlength="30" placeholder="Ej. 1234, 1234-A, S/N, Mz A Lt 5" />
+                        <span id="hint-numero-domicilio" class="field-hint"></span>
                     </div>
                     <div class="field">
                         <label for="f-departamento-casa">Departamento / casa</label>
@@ -274,8 +279,8 @@
                             <input id="f-teletrabajo-calle" type="text" data-campo="teletrabajo_calle" data-editable="1" maxlength="120" />
                         </div>
                         <div class="field">
-                            <label for="f-teletrabajo-numero">Numero</label>
-                            <input id="f-teletrabajo-numero" type="text" data-campo="teletrabajo_numero" data-editable="1" maxlength="20" />
+                            <label for="f-teletrabajo-numero">Numero / manzana-lote</label>
+                            <input id="f-teletrabajo-numero" type="text" data-campo="teletrabajo_numero" data-editable="1" maxlength="30" placeholder="Ej. 1234, S/N, Mz A Lt 5" />
                         </div>
                         <div class="field">
                             <label for="f-teletrabajo-departamento">Departamento / casa</label>
@@ -438,10 +443,112 @@
                 </div>
             </article>
 
-            <!-- ============== 9. CONFIRMACION LEGAL ============== -->
+            <!-- ============== 9. ACTIVOS DE LA EMPRESA ============== -->
+            <article class="card" id="card-activos">
+                <header class="card-header">
+                    <h2>9. Activos entregados por la empresa</h2>
+                    <span class="card-sub">
+                        Equipos asignados por Monitoring. Puedes declarar un equipo recibido;
+                        TI lo validara. Base legal: interes legitimo.
+                    </span>
+                </header>
+
+                <div id="activos-lista" class="activos-lista" aria-live="polite"></div>
+                <p id="activos-vacio" class="activos-vacio" hidden>
+                    No tienes activos asignados. Si recibiste un equipo de la empresa, declaralo abajo.
+                </p>
+
+                <div class="activos-form">
+                    <p class="activos-form-title">Declarar equipo recibido</p>
+                    <p class="activos-form-hint">
+                        Quedara en estado <strong>Pendiente validacion TI</strong> hasta que el area de activos lo confirme.
+                    </p>
+                    <div class="grid">
+                        <div class="field field-required">
+                            <label for="activo-tipo">Tipo <span class="req-mark" aria-hidden="true">*</span></label>
+                            <select id="activo-tipo"></select>
+                        </div>
+                        <div class="field field-required">
+                            <label for="activo-marca">Marca <span class="req-mark" aria-hidden="true">*</span></label>
+                            <input id="activo-marca" type="text" maxlength="50" placeholder="Ej. Dell, HP, Lenovo" required />
+                        </div>
+                        <div class="field field-required">
+                            <label for="activo-modelo">Modelo <span class="req-mark" aria-hidden="true">*</span></label>
+                            <input id="activo-modelo" type="text" maxlength="50" placeholder="Ej. Latitude 5540" required />
+                        </div>
+                        <div class="field field-required">
+                            <label for="activo-identificador">Serie o codigo de inventario <span class="req-mark" aria-hidden="true">*</span></label>
+                            <input id="activo-identificador" type="text" maxlength="50" placeholder="Numero de serie o etiqueta de inventario" required />
+                        </div>
+                        <div class="field">
+                            <label for="activo-serie">Numero de serie (adicional)</label>
+                            <input id="activo-serie" type="text" maxlength="50" />
+                        </div>
+                        <div class="field">
+                            <label for="activo-inventario">Numero de inventario (adicional)</label>
+                            <input id="activo-inventario" type="text" maxlength="50" />
+                        </div>
+                        <div class="field">
+                            <label for="activo-fecha-asignacion">Fecha de entrega</label>
+                            <input id="activo-fecha-asignacion" type="date" />
+                        </div>
+                        <div class="field">
+                            <label for="activo-proveedor">Proveedor (si lo conoces)</label>
+                            <input id="activo-proveedor" type="text" maxlength="120" placeholder="Ej. Dell, Entel, Arriendo externo" />
+                        </div>
+                        <div class="field" style="grid-column: 1 / -1;">
+                            <label for="activo-observaciones">Observaciones</label>
+                            <textarea id="activo-observaciones" rows="2" maxlength="500" placeholder="Detalle adicional si aplica."></textarea>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button id="btn-agregar-activo" class="btn btn-secondary" type="button">
+                            Declarar activo
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- ============== 10. BASES LEGALES DEL TRATAMIENTO ============== -->
+            <article class="card" id="card-tratamiento">
+                <header class="card-header">
+                    <h2>10. Bases legales del tratamiento de datos</h2>
+                    <span class="card-sub">
+                        Referencia de como Monitoring trata tus datos personales en este portal.
+                    </span>
+                </header>
+
+                <div class="table-wrap">
+                    <table class="tabla-normativa" id="tabla-bases-legales">
+                        <caption class="sr-only">Bases legales del tratamiento</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Base legal</th>
+                                <th scope="col">Ejemplo en el portal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-bases-legales"></tbody>
+                    </table>
+                </div>
+
+                <div class="table-wrap table-wrap-spaced">
+                    <table class="tabla-normativa" id="tabla-categorias-datos">
+                        <caption class="sr-only">Categorias de datos y su base legal</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Categoria de datos</th>
+                                <th scope="col">Base legal principal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-categorias-datos"></tbody>
+                    </table>
+                </div>
+            </article>
+
+            <!-- ============== 11. CONFIRMACION LEGAL ============== -->
             <article class="card card-legal" id="card-legal">
                 <header class="card-header">
-                    <h2>9. Confirmacion legal</h2>
+                    <h2>11. Confirmacion legal</h2>
                 </header>
 
                 <p id="texto-legal" class="texto-legal"></p>
@@ -452,6 +559,8 @@
                 </p>
 
                 <p id="legal-ya-confirmado" class="legal-ya-confirmado" hidden></p>
+
+                <div id="panel-error-confirmacion" class="panel-error-confirmacion" hidden role="alert"></div>
 
                 <label class="check-legal">
                     <input id="chk-legal" type="checkbox" />
@@ -468,7 +577,7 @@
         </main>
 
         <footer class="app-footer">
-            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.0.6</span>
+            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.1.1</span>
         </footer>
 
     </section>
@@ -612,8 +721,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=21"></script>
-    <script src="app.js?v=21"></script>
+    <script src="config.js?v=27"></script>
+    <script src="app.js?v=27"></script>
 
 </body>
 </html>

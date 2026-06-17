@@ -8,11 +8,16 @@
 
 window.CONFIG = {
     // --- Version del portal ---
-    APP_VERSION: '1.0.6',
+    APP_VERSION: '1.1.1',
 
     // --- Supabase ---
     SUPABASE_URL: 'https://wjzdqcttuiixrybxoaqi.supabase.co',
     SUPABASE_ANON_KEY: 'sb_publishable_Vd8reHQz6C18PAcKvNF36g_eemMHc9p',
+
+    // --- Magic Link (Supabase OTP por email) ---
+    MAGIC_LINK_COOLDOWN_SEC: 60,
+    // URLs que deben estar en Supabase → Authentication → URL Configuration → Redirect URLs:
+    // https://valida-bd.vercel.app, https://valida-bd.vercel.app/, http://localhost:5173, http://localhost:5173/
 
     // --- Dominio corporativo permitido (validacion estricta) ---
     ALLOWED_DOMAIN: '@monitoring.cl',
@@ -125,5 +130,46 @@ window.CONFIG = {
         '2 cargas familiares',
         '3 cargas familiares',
         '4 o mas cargas familiares'
+    ],
+    // --- Identidad de genero (columna sexo: M / F / NB en BD) ---
+    GENEROS_OPCIONES: [
+        { etiqueta: 'Femenino',   bd: 'F'  },
+        { etiqueta: 'Masculino',  bd: 'M'  },
+        { etiqueta: 'No binario', bd: 'NB' }
+    ],
+    // Compatibilidad con codigo legacy
+    GENEROS: ['Femenino', 'Masculino', 'No binario'],
+    MAX_INGRESOS_PORTAL: 3,
+    DIAS_ALERTA_VIGENCIA_ID: 90,
+    // --- Activos (tabla public.activos) ---
+    TIPOS_ACTIVO: ['Notebook', 'Computador', 'Celular', 'Monitor', 'Tablet', 'Radio', 'Otro'],
+    ESTADOS_ACTIVO: {
+        disponible:           'Disponible',
+        pendiente_validacion: 'Pendiente validacion TI',
+        asignado:             'Asignado',
+        en_reparacion:        'En reparacion',
+        devolucion_pendiente: 'Devolucion pendiente',
+        dado_baja:            'Dado de baja'
+    },
+    // --- Catalogo normativo (fallback si aun no se ejecuta schema_normativa.sql) ---
+    BASES_LEGALES: [
+        { codigo: 'consentimiento', nombre: 'Consentimiento', ejemplo_uso: 'Checkbox explicito en registro y confirmacion del portal.' },
+        { codigo: 'contrato', nombre: 'Contrato', ejemplo_uso: 'Datos necesarios para prestar el servicio.' },
+        { codigo: 'obligacion_legal', nombre: 'Obligacion legal', ejemplo_uso: 'Datos requeridos por normativa minera y laboral.' },
+        { codigo: 'interes_legitimo', nombre: 'Interes legitimo', ejemplo_uso: 'Monitoreo de activos propio de la operacion.' },
+        { codigo: 'interes_vital', nombre: 'Interes vital', ejemplo_uso: 'Emergencias de seguridad.' },
+        { codigo: 'interes_publico', nombre: 'Interes publico', ejemplo_uso: 'Informacion a organismos reguladores.' }
+    ],
+    CATEGORIAS_DATOS: [
+        { codigo: 'identidad', nombre: 'Identidad y documentacion', base_legal_codigo: 'obligacion_legal' },
+        { codigo: 'contacto_personal', nombre: 'Contacto personal', base_legal_codigo: 'contrato' },
+        { codigo: 'contacto_emergencia', nombre: 'Contacto de emergencia', base_legal_codigo: 'interes_vital' },
+        { codigo: 'domicilio', nombre: 'Domicilio y teletrabajo', base_legal_codigo: 'contrato' },
+        { codigo: 'previsional', nombre: 'Datos previsionales y seguros', base_legal_codigo: 'obligacion_legal' },
+        { codigo: 'bancarios', nombre: 'Datos bancarios', base_legal_codigo: 'contrato' },
+        { codigo: 'epp_tallas', nombre: 'Tallas EPP', base_legal_codigo: 'obligacion_legal' },
+        { codigo: 'activos_empresa', nombre: 'Activos entregados por la empresa', base_legal_codigo: 'interes_legitimo' },
+        { codigo: 'consentimiento_portal', nombre: 'Consentimiento del portal', base_legal_codigo: 'consentimiento' },
+        { codigo: 'regulatorio', nombre: 'Informacion regulatoria', base_legal_codigo: 'interes_publico' }
     ]
 };

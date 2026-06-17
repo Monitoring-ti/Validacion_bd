@@ -1,0 +1,56 @@
+<!--
+  Plantilla Magic Link — Supabase Dashboard
+  Authentication → Email Templates → Magic Link
+
+  Asunto sugerido:
+  Acceso al Portal del Trabajador Monitoring
+-->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0;padding:0;background:#F5F7FA;">
+  <tr>
+    <td align="center" style="padding:40px 20px;font-family:Montserrat,Arial,sans-serif;color:#20242C;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:#FFFFFF;border-radius:20px;border:1px solid #E6E8EC;">
+        <tr>
+          <td style="padding:40px;">
+            <p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:#808285;text-transform:uppercase;letter-spacing:0.06em;">
+              Monitoring SpA
+            </p>
+            <h2 style="margin:0 0 16px;font-size:28px;line-height:1.2;color:#1A418C;font-weight:700;">
+              Acceso al portal
+            </h2>
+
+            <p style="margin:0 0 8px;font-size:16px;line-height:1.6;color:#20242C;">
+              Hola <strong>{{ .Email }}</strong>:
+            </p>
+            <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#20242C;">
+              Haz clic en el botón para iniciar sesión en el <strong>Portal del Trabajador</strong>. El enlace es de un solo uso y expira en pocos minutos.
+            </p>
+
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:32px 0;">
+              <tr>
+                <td align="center" bgcolor="#1A418C" style="border-radius:12px;">
+                  <a href="{{ .ConfirmationURL }}"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     style="display:inline-block;padding:14px 24px;font-size:16px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:12px;">
+                    Iniciar sesión
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#808285;">
+              Si el botón no funciona, copia y pega este enlace en el mismo navegador donde solicitaste el acceso:
+            </p>
+            <p style="word-break:break-all;font-size:12px;line-height:1.5;color:#808285;margin:12px 0 0;">
+              <a href="{{ .ConfirmationURL }}" style="color:#1A418C;">{{ .ConfirmationURL }}</a>
+            </p>
+
+            <p style="margin:24px 0 0;font-size:12px;line-height:1.5;color:#808285;">
+              Si no solicitaste este correo, ignóralo. Para ayuda: ti.soporte@monitoring.cl
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

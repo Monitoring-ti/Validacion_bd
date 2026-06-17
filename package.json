@@ -1,0 +1,13 @@
+{
+  "name": "valida-bd-portal",
+  "private": true,
+  "version": "1.1.1",
+  "description": "Portal del Trabajador Monitoring - validacion de datos",
+  "scripts": {
+    "dev": "http-server . -p 5173 -c-1",
+    "start": "http-server . -p 5173 -c-1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
