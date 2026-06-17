@@ -1667,6 +1667,45 @@ a:hover { text-decoration: underline; }
     color: var(--text, #0a2540);
 }
 
+.activos-fieldset {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: #fafbfc;
+    text-align: left;
+}
+
+.activos-legend {
+    padding: 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.activos-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 8px 0;
+    font-size: 14px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.activos-radio input {
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.activos-subbloque {
+    margin-bottom: 14px;
+}
+
+.activos-subbloque[hidden] {
+    display: none !important;
+}
+
 .btn-quitar-activo {
     flex-shrink: 0;
     font-size: 13px;
