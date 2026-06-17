@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=33" />
+    <link rel="stylesheet" href="styles.css?v=34" />
 </head>
 <body>
 
@@ -468,67 +468,86 @@
                 </div>
             </article>
 
-            <!-- ============== 9. ACTIVOS DE LA EMPRESA ============== -->
+            <!-- ============== 9. ACTIVOS / EQUIPO DE TRABAJO ============== -->
             <article class="card" id="card-activos">
                 <header class="card-header">
-                    <h2>9. Activos entregados por la empresa</h2>
+                    <h2>9. Equipo de trabajo (notebook)</h2>
                     <span class="card-sub">
-                        Equipos asignados por Monitoring. Puedes declarar un equipo recibido;
-                        TI lo validara. Base legal: interes legitimo.
+                        Indica si usas un notebook de la empresa o tu computador propio.
+                        Base legal: interes legitimo.
                     </span>
                 </header>
 
                 <div id="activos-lista" class="activos-lista" aria-live="polite"></div>
                 <p id="activos-vacio" class="activos-vacio" hidden>
-                    No tienes activos asignados. Si recibiste un equipo de la empresa, declaralo abajo.
+                    Aun no has declarado tu equipo. Completa el formulario abajo.
                 </p>
 
                 <div class="activos-form">
-                    <p class="activos-form-title">Declarar equipo recibido</p>
+                    <p class="activos-form-title">Declarar mi equipo</p>
                     <p class="activos-form-hint">
-                        Quedara en estado <strong>Pendiente validacion TI</strong> hasta que el area de activos lo confirme.
+                        Solo <strong>Notebook</strong> de empresa o <strong>computador propio</strong>.
+                        Quedara pendiente de validacion por TI.
                     </p>
-                    <div class="grid">
-                        <div class="field field-required">
-                            <label for="activo-tipo">Tipo <span class="req-mark" aria-hidden="true">*</span></label>
-                            <select id="activo-tipo"></select>
-                        </div>
-                        <div class="field field-required">
-                            <label for="activo-marca">Marca <span class="req-mark" aria-hidden="true">*</span></label>
-                            <input id="activo-marca" type="text" maxlength="50" placeholder="Ej. Dell, HP, Lenovo" required />
-                        </div>
-                        <div class="field field-required">
-                            <label for="activo-modelo">Modelo <span class="req-mark" aria-hidden="true">*</span></label>
-                            <input id="activo-modelo" type="text" maxlength="50" placeholder="Ej. Latitude 5540" required />
-                        </div>
-                        <div class="field field-required">
-                            <label for="activo-identificador">Serie o codigo de inventario <span class="req-mark" aria-hidden="true">*</span></label>
-                            <input id="activo-identificador" type="text" maxlength="50" placeholder="Numero de serie o etiqueta de inventario" required />
+
+                    <fieldset class="activos-fieldset">
+                        <legend class="activos-legend">¿Que equipo utilizas?</legend>
+                        <label class="activos-radio">
+                            <input type="radio" name="activo-origen" value="empresa" checked />
+                            <span>Notebook entregado por Monitoring</span>
+                        </label>
+                        <label class="activos-radio">
+                            <input type="radio" name="activo-origen" value="propio" />
+                            <span>Computador propio (equipo personal)</span>
+                        </label>
+                    </fieldset>
+
+                    <div id="bloque-empresa-caract" class="activos-subbloque">
+                        <fieldset class="activos-fieldset">
+                            <legend class="activos-legend">¿Conoces las caracteristicas de tu notebook?</legend>
+                            <label class="activos-radio">
+                                <input type="radio" name="activo-conoce-caract" value="si" />
+                                <span>Si, puedo indicar marca, modelo u otros datos</span>
+                            </label>
+                            <label class="activos-radio">
+                                <input type="radio" name="activo-conoce-caract" value="no" checked />
+                                <span>No las conozco / no las tengo a mano</span>
+                            </label>
+                        </fieldset>
+                    </div>
+
+                    <div id="bloque-caracteristicas" class="activos-subbloque grid" hidden>
+                        <div class="field">
+                            <label for="activo-marca">Marca</label>
+                            <input id="activo-marca" type="text" maxlength="50" placeholder="Ej. Dell, HP, Lenovo" />
                         </div>
                         <div class="field">
-                            <label for="activo-serie">Numero de serie (adicional)</label>
-                            <input id="activo-serie" type="text" maxlength="50" />
+                            <label for="activo-modelo">Modelo</label>
+                            <input id="activo-modelo" type="text" maxlength="50" placeholder="Ej. Latitude 5540" />
                         </div>
                         <div class="field">
-                            <label for="activo-inventario">Numero de inventario (adicional)</label>
-                            <input id="activo-inventario" type="text" maxlength="50" />
+                            <label for="activo-serie">Numero de serie</label>
+                            <input id="activo-serie" type="text" maxlength="50" placeholder="Etiqueta del equipo" />
                         </div>
                         <div class="field">
-                            <label for="activo-fecha-asignacion">Fecha de entrega</label>
-                            <input id="activo-fecha-asignacion" type="date" />
+                            <label for="activo-ram">Memoria RAM</label>
+                            <input id="activo-ram" type="text" maxlength="30" placeholder="Ej. 16 GB" />
                         </div>
                         <div class="field">
-                            <label for="activo-proveedor">Proveedor (si lo conoces)</label>
-                            <input id="activo-proveedor" type="text" maxlength="120" placeholder="Ej. Dell, Entel, Arriendo externo" />
+                            <label for="activo-hd">Disco (HD / SSD)</label>
+                            <input id="activo-hd" type="text" maxlength="30" placeholder="Ej. SSD 512 GB" />
                         </div>
                         <div class="field" style="grid-column: 1 / -1;">
-                            <label for="activo-observaciones">Observaciones</label>
-                            <textarea id="activo-observaciones" rows="2" maxlength="500" placeholder="Detalle adicional si aplica."></textarea>
+                            <label for="activo-otro">Otro (procesador, pantalla, etc.)</label>
+                            <input id="activo-otro" type="text" maxlength="200" placeholder="Detalle adicional si aplica" />
                         </div>
                     </div>
+
+                    <input type="hidden" id="activo-tipo" value="Notebook" />
+
                     <div class="card-actions">
                         <button id="btn-agregar-activo" class="btn btn-secondary" type="button">
-                            Declarar activo
+                            Guardar declaracion de equipo
                         </button>
                     </div>
                 </div>
@@ -750,8 +769,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=33"></script>
-    <script src="app.js?v=33"></script>
+    <script src="config.js?v=34"></script>
+    <script src="app.js?v=34"></script>
 
 </body>
 </html>

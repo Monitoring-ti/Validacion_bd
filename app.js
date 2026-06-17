@@ -237,6 +237,12 @@ function bindEventos() {
 
     const btnActivo = document.getElementById('btn-agregar-activo');
     if (btnActivo) btnActivo.addEventListener('click', onAgregarActivo);
+    document.querySelectorAll('input[name="activo-origen"]').forEach((el) => {
+        el.addEventListener('change', aplicarVisibilidadFormularioActivo);
+    });
+    document.querySelectorAll('input[name="activo-conoce-caract"]').forEach((el) => {
+        el.addEventListener('change', aplicarVisibilidadFormularioActivo);
+    });
 
     // Cerradores generales de modales
     document.querySelectorAll('[data-close-modal]').forEach((btn) => {
@@ -267,7 +273,7 @@ function poblarTextoLegal() {
 
 function poblarSelectsEstaticos() {
     poblarSelectGenero('f-genero', '');
-    poblarSelect('activo-tipo', CONFIG.TIPOS_ACTIVO, '');
+    aplicarVisibilidadFormularioActivo();
 }
 
 function generoEtiqueta(valorBd) {
@@ -1845,6 +1851,62 @@ function leerDetallesActivo(a) {
     return d;
 }
 
+function etiquetaTipoActivo(a) {
+    const det = leerDetallesActivo(a);
+    if (det.origen_equipo === 'propio' || det.es_equipo_personal) {
+        return CONFIG.TIPO_ACTIVO_PROPIO || 'Computador propio';
+    }
+    return CONFIG.TIPO_ACTIVO_EMPRESA || a.tipo || 'Notebook';
+}
+
+function aplicarVisibilidadFormularioActivo() {
+    const origen = document.querySelector('input[name="activo-origen"]:checked');
+    const esPropio = origen && origen.value === 'propio';
+    const bloqueEmpresa = document.getElementById('bloque-empresa-caract');
+    const bloqueCaract = document.getElementById('bloque-caracteristicas');
+    const conoceSi = document.querySelector('input[name="activo-conoce-caract"][value="si"]');
+    const conoceNo = document.querySelector('input[name="activo-conoce-caract"][value="no"]');
+
+    if (bloqueEmpresa) bloqueEmpresa.hidden = !!esPropio;
+    if (esPropio) {
+        if (bloqueCaract) bloqueCaract.hidden = false;
+        if (conoceNo) conoceNo.checked = false;
+    } else {
+        const conoce = document.querySelector('input[name="activo-conoce-caract"]:checked');
+        const mostrarCaract = conoce && conoce.value === 'si';
+        if (bloqueCaract) bloqueCaract.hidden = !mostrarCaract;
+        if (!mostrarCaract && conoceNo && !document.querySelector('input[name="activo-conoce-caract"]:checked')) {
+            conoceNo.checked = true;
+        }
+    }
+}
+
+function origenEquipoSeleccionado() {
+    const el = document.querySelector('input[name="activo-origen"]:checked');
+    return (el && el.value === 'propio') ? 'propio' : 'empresa';
+}
+
+function conoceCaracteristicasEquipo() {
+    if (origenEquipoSeleccionado() === 'propio') return true;
+    const el = document.querySelector('input[name="activo-conoce-caract"]:checked');
+    return el && el.value === 'si';
+}
+
+function generarIdentificadorActivo(trabajador, origen, serie) {
+    const s = (serie || '').trim();
+    if (s) return s.substring(0, 50);
+    const tid = String(trabajador.id_trabajador || 'x').replace(/-/g, '').substring(0, 8);
+    const prefix = origen === 'propio' ? 'PROPIO' : 'NB';
+    return prefix + '-' + tid + '-' + Date.now();
+}
+
+function yaTieneEquipoPropioDeclarado() {
+    return (STATE.activos || []).some((a) => {
+        const d = leerDetallesActivo(a);
+        return d.origen_equipo === 'propio' || d.es_equipo_personal === true;
+    });
+}
+
 function renderListaActivos() {
     const lista = document.getElementById('activos-lista');
     const vacio = document.getElementById('activos-vacio');
@@ -1859,13 +1921,15 @@ function renderListaActivos() {
         const det = leerDetallesActivo(a);
         const card = document.createElement('div');
         card.className = 'activo-item';
+        const esPropio = det.origen_equipo === 'propio' || det.es_equipo_personal === true;
         const partes = [
+            esPropio ? 'Equipo personal' : 'Notebook empresa',
             [a.marca, a.modelo].filter(Boolean).join(' '),
-            a.identificador_unico ? ('ID: ' + a.identificador_unico) : '',
-            det.numero_serie ? ('Serie: ' + det.numero_serie) : '',
-            det.numero_inventario ? ('Inv: ' + det.numero_inventario) : '',
-            a.fecha_asignacion ? ('Entrega: ' + formatearFechaLegible(a.fecha_asignacion)) : '',
-            det.proveedor_declarado ? ('Proveedor: ' + det.proveedor_declarado) : ''
+            det.numero_serie ? ('Serie: ' + det.numero_serie) : (a.identificador_unico && !String(a.identificador_unico).startsWith('NB-') && !String(a.identificador_unico).startsWith('PROPIO-') ? ('Serie/ID: ' + a.identificador_unico) : ''),
+            det.ram ? ('RAM: ' + det.ram) : '',
+            det.almacenamiento ? ('Disco: ' + det.almacenamiento) : '',
+            det.otro_caracteristicas ? ('Otro: ' + det.otro_caracteristicas) : '',
+            det.conoce_caracteristicas === false ? 'Caracteristicas no indicadas' : ''
         ].filter(Boolean);
 
         const historial = STATE.activosHistorial[a.id_activo] || [];
@@ -1874,21 +1938,20 @@ function renderListaActivos() {
                 historial.slice(0, 5).map((ev) =>
                     '<li><span class="activo-hist-fecha">' + escapeHtml(formatearFechaLegible(ev.created_at)) + '</span> ' +
                     escapeHtml(ev.tipo_evento || '') +
-                    (ev.estado_nuevo ? (' ? ' + escapeHtml(etiquetaEstadoActivo(ev.estado_nuevo))) : '') +
+                    (ev.estado_nuevo ? (' · ' + escapeHtml(etiquetaEstadoActivo(ev.estado_nuevo))) : '') +
                     '</li>'
                 ).join('') + '</ul></details>')
             : '';
 
-        const puedeDevolver = ['asignado', 'pendiente_validacion'].includes(a.estado);
+        const puedeDevolver = !esPropio && ['asignado', 'pendiente_validacion'].includes(a.estado);
 
         card.innerHTML =
             '<div class="activo-item-body">' +
                 '<div class="activo-item-head">' +
-                    '<strong>' + escapeHtml(a.tipo || 'Activo') + '</strong>' +
+                    '<strong>' + escapeHtml(etiquetaTipoActivo(a)) + '</strong>' +
                     '<span class="' + claseEstadoActivo(a.estado) + '">' + escapeHtml(etiquetaEstadoActivo(a.estado)) + '</span>' +
                 '</div>' +
-                '<span class="activo-item-detalle">' + escapeHtml(partes.join(' ? ') || 'Sin detalle adicional') + '</span>' +
-                (det.observaciones ? ('<span class="activo-item-obs">' + escapeHtml(det.observaciones) + '</span>') : '') +
+                '<span class="activo-item-detalle">' + escapeHtml(partes.join(' · ') || 'Sin detalle adicional') + '</span>' +
                 histHtml +
             '</div>' +
             (puedeDevolver
@@ -1904,27 +1967,34 @@ function renderListaActivos() {
 }
 
 function limpiarFormularioActivo() {
-    const tipo = document.getElementById('activo-tipo');
-    if (tipo) tipo.value = '';
-    ['activo-marca', 'activo-modelo', 'activo-identificador', 'activo-serie', 'activo-inventario',
-     'activo-fecha-asignacion', 'activo-proveedor', 'activo-observaciones']
+    const origenEmpresa = document.querySelector('input[name="activo-origen"][value="empresa"]');
+    const conoceNo = document.querySelector('input[name="activo-conoce-caract"][value="no"]');
+    if (origenEmpresa) origenEmpresa.checked = true;
+    if (conoceNo) conoceNo.checked = true;
+    ['activo-marca', 'activo-modelo', 'activo-serie', 'activo-ram', 'activo-hd', 'activo-otro']
         .forEach((id) => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const tipo = document.getElementById('activo-tipo');
+    if (tipo) tipo.value = CONFIG.TIPO_ACTIVO_EMPRESA || 'Notebook';
+    aplicarVisibilidadFormularioActivo();
 }
 
-function construirDetallesActivo(t) {
+function construirDetallesActivo(t, origen, conoceCaract) {
     const det = {
         origen: 'portal',
+        origen_equipo: origen,
+        es_equipo_personal: origen === 'propio',
+        conoce_caracteristicas: !!conoceCaract,
         registrado_por_email: t.email_corporativo,
         portal_version: CONFIG.APP_VERSION
     };
     const serie = valOrNull('activo-serie');
-    const inv = valOrNull('activo-inventario');
-    const prov = valOrNull('activo-proveedor');
-    const obs = valOrNull('activo-observaciones');
+    const ram = valOrNull('activo-ram');
+    const hd = valOrNull('activo-hd');
+    const otro = valOrNull('activo-otro');
     if (serie) det.numero_serie = serie;
-    if (inv) det.numero_inventario = inv;
-    if (prov) det.proveedor_declarado = prov;
-    if (obs) det.observaciones = obs;
+    if (ram) det.ram = ram;
+    if (hd) det.almacenamiento = hd;
+    if (otro) det.otro_caracteristicas = otro;
     if (t.tipo_contrato) det.tipo_contrato_laboral = t.tipo_contrato;
     if (t.fecha_vencimiento_contrato) {
         det.fecha_vencimiento_contrato = String(t.fecha_vencimiento_contrato).substring(0, 10);
@@ -1936,29 +2006,45 @@ async function onAgregarActivo() {
     const t = STATE.trabajador;
     if (!t) return;
 
-    const tipo = (document.getElementById('activo-tipo') || {}).value || '';
+    const origen = origenEquipoSeleccionado();
+    const conoce = conoceCaracteristicasEquipo();
     const marca = valOrNull('activo-marca');
     const modelo = valOrNull('activo-modelo');
-    const identificador = valOrNull('activo-identificador');
+    const serie = valOrNull('activo-serie');
+    const ram = valOrNull('activo-ram');
+    const hd = valOrNull('activo-hd');
+    const otro = valOrNull('activo-otro');
 
-    if (!tipo.trim()) {
-        mostrarMensaje('error', 'Selecciona el tipo de activo.');
+    if (origen === 'propio' && yaTieneEquipoPropioDeclarado()) {
+        mostrarMensaje('warn', 'Ya tienes un computador propio declarado. Si necesitas cambiarlo, contacta a soporte.');
         return;
     }
-    if (!marca || !modelo || !identificador) {
-        mostrarMensaje('error', 'Marca, modelo e identificador unico son obligatorios.');
-        return;
+
+    if (origen === 'empresa' && conoce) {
+        if (!marca && !modelo && !serie) {
+            mostrarMensaje('error', 'Si conoces las caracteristicas, indica al menos marca, modelo o numero de serie.');
+            return;
+        }
     }
+
+    if (origen === 'propio' && !marca && !modelo && !serie && !ram && !hd && !otro) {
+        mostrarMensaje('warn', 'Puedes guardar el computador propio sin detalles, pero te recomendamos indicar lo que sepas.');
+    }
+
+    const tipo = origen === 'propio'
+        ? (CONFIG.TIPO_ACTIVO_PROPIO || 'Computador propio')
+        : (CONFIG.TIPO_ACTIVO_EMPRESA || 'Notebook');
+    const identificador = generarIdentificadorActivo(t, origen, serie);
 
     const payload = {
-        tipo:                   tipo.trim(),
-        marca:                  marca,
-        modelo:                 modelo,
+        tipo:                   tipo,
+        marca:                  marca || (origen === 'propio' ? 'Equipo personal' : null),
+        modelo:                 modelo || null,
         identificador_unico:    identificador,
         estado:                 'pendiente_validacion',
         id_trabajador_asignado: t.id_trabajador,
-        fecha_asignacion:       valOrNull('activo-fecha-asignacion'),
-        detalles_adicionales:   construirDetallesActivo(t)
+        fecha_asignacion:       null,
+        detalles_adicionales:   construirDetallesActivo(t, origen, conoce)
     };
 
     showLoader();
@@ -1973,14 +2059,17 @@ async function onAgregarActivo() {
         if (data) STATE.activos.unshift(data);
         limpiarFormularioActivo();
         await cargarActivosEmpresa(t.id_trabajador);
-        mostrarMensaje('success', 'Activo declarado. Quedara pendiente de validacion por TI.');
+        const msgOk = origen === 'propio'
+            ? 'Computador propio registrado. Quedara pendiente de validacion.'
+            : 'Notebook declarado. Quedara pendiente de validacion por TI.';
+        mostrarMensaje('success', msgOk);
     } catch (err) {
-        console.error('Error al declarar activo:', err);
+        console.error('Error al declarar equipo:', err);
         const msg = String((err && err.message) || '');
         if (msg.toLowerCase().includes('unique') || msg.includes('activos_identificador_unico')) {
-            mostrarMensaje('error', 'Ese identificador ya existe en el inventario. Verifica serie o codigo de inventario.');
+            mostrarMensaje('error', 'Ese numero de serie ya existe. Verifica o deja el campo serie vacio.');
         } else {
-            mostrarMensaje('error', 'No se pudo declarar el activo. Verifica que schema_activos.sql este ejecutado en Supabase.');
+            mostrarMensaje('error', 'No se pudo guardar la declaracion. Intenta nuevamente o contacta soporte.');
         }
     } finally {
         hideLoader();

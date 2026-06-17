@@ -8,7 +8,7 @@
 
 window.CONFIG = {
     // --- Version del portal ---
-    APP_VERSION: '1.0.0.2',
+    APP_VERSION: '1.0.0.3',
     PRODUCTION_ACTIVE: true,
 
     // --- Supabase ---
@@ -143,8 +143,9 @@ window.CONFIG = {
     GENEROS: ['Femenino', 'Masculino', 'No binario'],
     // Contador informativo de ingresos (sin bloqueo ni autorizacion TI)
     DIAS_ALERTA_VIGENCIA_ID: 90,
-    // --- Activos (tabla public.activos) ---
-    TIPOS_ACTIVO: ['Notebook', 'Computador', 'Celular', 'Monitor', 'Tablet', 'Radio', 'Otro'],
+    // --- Activos / equipo de trabajo (tabla public.activos) ---
+    TIPO_ACTIVO_EMPRESA: 'Notebook',
+    TIPO_ACTIVO_PROPIO: 'Computador propio',
     ESTADOS_ACTIVO: {
         disponible:           'Disponible',
         pendiente_validacion: 'Pendiente validacion TI',
