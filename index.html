@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=27" />
+    <link rel="stylesheet" href="styles.css?v=32" />
 </head>
 <body>
 
@@ -16,59 +16,82 @@
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <!-- ======================================================
-         Vista LOGIN (Magic Link)
+         Vista LOGIN (Email + Password)
          ====================================================== -->
     <section id="vista-login" class="vista vista-login">
         <div class="login-card">
             <div id="login-banner-reingreso" class="login-banner-info" hidden role="status">
-                Ya registraste tu validacion. Puedes ingresar de nuevo con un enlace magico al mismo correo @monitoring.cl.
+                Ya registraste tu validacion. Puedes ingresar de nuevo para revisar o actualizar tus datos con la misma contraseña de verificacion.
             </div>
             <div id="login-banner-confirmacion-ok" class="login-banner-info login-banner-ok" hidden role="status"></div>
 
             <div class="monitoring-logo login-logo" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.1.1</span>
+                <span class="logo-version" data-app-version>1.0.0.1</span>
             </div>
             <h1 id="login-titulo">Validacion de datos personales</h1>
             <p class="login-sub" id="login-sub">
-                Ingresa tu correo corporativo y te enviaremos un enlace seguro de acceso (magic link).
+                Ingresa tu correo corporativo. Si es tu primera vez, registrate con una contraseña de verificacion para continuar.
             </p>
 
             <div class="login-instructions" role="note" aria-label="Instrucciones de acceso">
                 <p class="login-instructions-title">Como ingresar</p>
                 <ol class="login-steps">
-                    <li>Usa tu correo <strong>@monitoring.cl</strong> (el mismo con el que trabajas en Monitoring).</li>
-                    <li>Pulsa <strong>Enviar enlace de acceso</strong>. Revisa tu bandeja de entrada y spam.</li>
-                    <li>Abre el enlace del correo en este mismo navegador para entrar al portal.</li>
-                    <li>Revisa tus datos, actualiza lo necesario y confirma al final del formulario.</li>
+                    <li>Usa tu correo <strong>@monitoring.cl</strong>.</li>
+                    <li>Pulsa <strong>Continuar</strong> e ingresa una contraseña de verificacion (minimo 8 caracteres, ej. <strong>12345678</strong>). No es la de Microsoft.</li>
+                    <li><strong>Primera vez:</strong> el sistema crea tu cuenta. <strong>Siguientes veces:</strong> usa la misma contraseña.</li>
+                    <li>Revisa tus datos, actualiza lo necesario y confirma al final.</li>
                 </ol>
             </div>
 
-            <div id="login-form-box">
+            <div id="login-paso-email">
                 <div class="field" style="text-align:left; margin-bottom: 14px;">
                     <label for="input-email">Correo corporativo</label>
                     <input id="input-email" type="email" placeholder="nombre.apellido@monitoring.cl" autocomplete="email" />
                 </div>
-                <button id="btn-login" class="btn btn-primary btn-microsoft" type="button">
-                    Enviar enlace de acceso
+                <button id="btn-continuar-email" class="btn btn-primary btn-microsoft" type="button">
+                    Continuar
                 </button>
             </div>
 
-            <div id="login-pending" class="login-pending" hidden role="status">
-                <p class="login-pending-title">Enlace enviado</p>
-                <p id="login-pending-texto" class="login-pending-texto">
-                    Revisa tu correo y abre el enlace para continuar. El acceso expira en unos minutos.
+            <div id="login-paso-acceso" hidden>
+                <div class="login-email-resumen">
+                    <span class="login-email-resumen-label">Correo</span>
+                    <strong id="login-email-resumen" class="login-email-resumen-valor"></strong>
+                    <button type="button" id="btn-volver-email" class="btn btn-ghost btn-link-back">Cambiar correo</button>
+                </div>
+                <p id="login-registro-aviso" class="login-registro-aviso" role="note">
+                    Registrate para continuar: crea una contraseña de verificacion (minimo 8 caracteres, ej. 12345678).
                 </p>
-                <button id="btn-reenviar-magic" class="btn btn-ghost" type="button" disabled>
-                    Reenviar enlace
+                <div class="field" style="text-align:left; margin-bottom: 14px;">
+                    <label for="input-password" id="label-password">Contraseña de verificacion</label>
+                    <div class="password-wrap">
+                        <input id="input-password" type="password" placeholder="Ej. 12345678 (solo para este portal)" autocomplete="new-password" minlength="8" />
+                        <button type="button" id="btn-toggle-password" class="password-toggle" aria-label="Mostrar contraseña" aria-pressed="false" title="Mostrar contraseña">
+                            <svg class="icon-eye" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12.5c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                            </svg>
+                            <svg class="icon-eye-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M3.27 3.27 2 4.54l2.89 2.89C3.53 8.47 2.38 10.3 1 12.5 2.73 16.89 7 20 12 20c2.04 0 3.92-.52 5.57-1.43l2.36 2.36 1.27-1.27L3.27 3.27zM12 17.5c-3.04 0-5.64-1.88-6.82-4.53l1.56-1.56A4.97 4.97 0 0 0 12 15.5c.68 0 1.33-.14 1.92-.39l1.56 1.56A7.9 7.9 0 0 1 12 17.5zm6.82-4.53-1.45-1.45a8.03 8.03 0 0 0 .23-2.02l2.06-2.06C20.62 10.3 21.77 12.13 23 14.33c-1.73 4.39-6 7.5-11 7.5-1.45 0-2.84-.26-4.13-.73l1.67-1.67c.78.2 1.6.3 2.46.3 3.04 0 5.64-1.88 6.82-4.53zM12 7.5c.68 0 1.33.14 1.92.39l-1.56 1.56A4.97 4.97 0 0 0 12 9.5a4.97 4.97 0 0 0-1.92.39L8.52 8.33A7.9 7.9 0 0 1 12 7.5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button id="btn-login" class="btn btn-primary btn-microsoft" type="button">
+                    Registrar y continuar
                 </button>
             </div>
 
             <p id="login-error" class="login-error" hidden></p>
             <p class="login-foot">
-                Acceso exclusivo <strong>@monitoring.cl</strong>. Sin contraseña: solo el enlace del correo.<br />
+                Acceso exclusivo <strong>@monitoring.cl</strong>. La contraseña sirve solo para esta verificacion de datos.<br />
                 Problemas con tu cuenta: <a id="login-support-email" href="mailto:ti.soporte@monitoring.cl">ti.soporte@monitoring.cl</a>
             </p>
+            <footer class="login-site-footer">
+                <span id="login-prod-badge" class="footer-prod-badge">Produccion activa</span>
+                <p class="footer-line">Monitoring SpA · Portal del Trabajador · <span data-app-version>1.0.0.1</span></p>
+                <p class="footer-credit">Desarrollado por <a id="login-footer-dev-email" href="mailto:ti.soporte@monitoring.cl">ti.soporte@monitoring.cl</a></p>
+            </footer>
         </div>
     </section>
 
@@ -80,7 +103,7 @@
         <header class="app-header">
             <div class="monitoring-logo brand" title="Monitoring">
                 <span class="logo-word">Monitoring</span>
-                <span class="logo-version" data-app-version>v1.1.1</span>
+                <span class="logo-version" data-app-version>1.0.0.1</span>
             </div>
             <div class="user-box">
                 <div class="user-info">
@@ -577,7 +600,11 @@
         </main>
 
         <footer class="app-footer">
-            Monitoring SpA - Portal del Trabajador · <span class="footer-version" data-app-version>v1.1.1</span>
+            <div class="footer-inner">
+                <span id="footer-prod-badge" class="footer-prod-badge">Produccion activa</span>
+                <p class="footer-line">Monitoring SpA · Portal del Trabajador · <span class="footer-version" data-app-version>1.0.0.1</span></p>
+                <p class="footer-credit">Desarrollado por <a id="footer-dev-email" href="mailto:ti.soporte@monitoring.cl">ti.soporte@monitoring.cl</a></p>
+            </div>
         </footer>
 
     </section>
@@ -721,8 +748,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=27"></script>
-    <script src="app.js?v=27"></script>
+    <script src="config.js?v=32"></script>
+    <script src="app.js?v=32"></script>
 
 </body>
 </html>

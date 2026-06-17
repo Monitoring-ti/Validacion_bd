@@ -8,16 +8,18 @@
 
 window.CONFIG = {
     // --- Version del portal ---
-    APP_VERSION: '1.1.1',
+    APP_VERSION: '1.0.0.1',
+    PRODUCTION_ACTIVE: true,
 
     // --- Supabase ---
     SUPABASE_URL: 'https://wjzdqcttuiixrybxoaqi.supabase.co',
     SUPABASE_ANON_KEY: 'sb_publishable_Vd8reHQz6C18PAcKvNF36g_eemMHc9p',
 
-    // --- Magic Link (Supabase OTP por email) ---
-    MAGIC_LINK_COOLDOWN_SEC: 60,
-    // URLs que deben estar en Supabase → Authentication → URL Configuration → Redirect URLs:
-    // https://valida-bd.vercel.app, https://valida-bd.vercel.app/, http://localhost:5173, http://localhost:5173/
+    // --- Auth: correo → registro con contraseña de verificacion ---
+    // Supabase → Authentication → Providers → Email: habilitado
+    // Supabase → Authentication → Email → Confirm email: DESACTIVADO
+    PASSWORD_MIN_LENGTH: 8,
+    PASSWORD_EJEMPLO: '12345678',
 
     // --- Dominio corporativo permitido (validacion estricta) ---
     ALLOWED_DOMAIN: '@monitoring.cl',
@@ -139,7 +141,7 @@ window.CONFIG = {
     ],
     // Compatibilidad con codigo legacy
     GENEROS: ['Femenino', 'Masculino', 'No binario'],
-    MAX_INGRESOS_PORTAL: 3,
+    MAX_INGRESOS_PORTAL: 5,
     DIAS_ALERTA_VIGENCIA_ID: 90,
     // --- Activos (tabla public.activos) ---
     TIPOS_ACTIVO: ['Notebook', 'Computador', 'Celular', 'Monitor', 'Tablet', 'Radio', 'Otro'],

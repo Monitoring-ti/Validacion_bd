@@ -201,5 +201,10 @@ CREATE POLICY sesiones_update_self
     WITH CHECK (lower(email_corporativo) = lower(auth.jwt() ->> 'email'));
 
 -- =====================================================================
--- FIN del schema
+-- FIN del schema principal
+-- =====================================================================
+-- Para cumplimiento normativo y activos de empresa, ejecutar ademas:
+--   schema_normativa.sql
+--   schema_activos.sql
+--   schema_ajustes_portal.sql
 -- =====================================================================

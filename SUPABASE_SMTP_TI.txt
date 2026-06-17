@@ -1,0 +1,78 @@
+================================================================================
+  CONFIGURAR SMTP EN SUPABASE — Portal Valida BD (magic link)
+  Proyecto: wjzdqcttuiixrybxoaqi.supabase.co
+  Error actual: 500 "Error sending magic link email"
+================================================================================
+
+El portal y las URLs estan bien. Falla el ENVIO de correo en Supabase.
+Hasta activar SMTP correcto, ningun cambio en el codigo lo arregla.
+
+--------------------------------------------------------------------------------
+PASO 1 — URL Configuration (Authentication → URL Configuration)
+--------------------------------------------------------------------------------
+  Site URL:
+    https://valida-bd.vercel.app
+
+  Redirect URLs (agregar):
+    https://valida-bd.vercel.app/**
+
+--------------------------------------------------------------------------------
+PASO 2 — Custom SMTP (Authentication → SMTP Settings)
+--------------------------------------------------------------------------------
+  [x] Enable Custom SMTP
+
+  Opcion A — Resend (recomendado, rapido)
+  ----------------------------------------
+  1. Crear cuenta en https://resend.com
+  2. Verificar dominio monitoring.cl (o usar onboarding@resend.dev solo pruebas)
+  3. API Keys → crear key
+  4. En Supabase SMTP:
+
+     Sender email:     noreply@monitoring.cl   (o el dominio verificado)
+     Sender name:      Portal del Trabajador Monitoring
+     Host:             smtp.resend.com
+     Port:             465
+     Username:         resend
+     Password:         <API KEY de Resend>
+
+  Opcion B — Microsoft 365
+  ------------------------
+     Host:             smtp.office365.com
+     Port:             587
+     Username:         cuenta que envia (ej. noreply@monitoring.cl)
+     Password:         contraseña de aplicacion / SMTP
+     Sender email:     misma cuenta autorizada
+
+  ERRORES COMUNES:
+  - Host con espacios al final → falla DNS
+  - Host con https:// → quitar protocolo
+  - Admin email y Username intercambiados
+  - Puerto 25 bloqueado → usar 587 o 465
+
+--------------------------------------------------------------------------------
+PASO 3 — Plantilla Magic Link (Authentication → Email Templates)
+--------------------------------------------------------------------------------
+  Subject: Acceso al Portal del Trabajador Monitoring
+
+  Body (prueba minima):
+    <h2>Magic Link</h2>
+    <p><a href="{{ .ConfirmationURL }}">Iniciar sesion</a></p>
+
+  Si la minima funciona, usar plantilla completa en:
+    email-templates/magic-link.html
+
+--------------------------------------------------------------------------------
+PASO 4 — Verificar
+--------------------------------------------------------------------------------
+  1. Supabase → Logs → Auth → buscar "Error sending magic link"
+  2. Abrir https://valida-bd.vercel.app
+  3. Correo @monitoring.cl que exista en tabla trabajadores
+  4. Enviar enlace de acceso
+
+--------------------------------------------------------------------------------
+PASO 5 — Trabajador de prueba en BD (si Auth OK pero "cuenta no encontrada")
+--------------------------------------------------------------------------------
+  SELECT * FROM trabajadores
+  WHERE lower(email_corporativo) = lower('prueba.test@monitoring.cl');
+
+================================================================================

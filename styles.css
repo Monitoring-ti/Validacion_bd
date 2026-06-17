@@ -242,6 +242,85 @@ a:hover { text-decoration: underline; }
     display: none !important;
 }
 
+.login-banner-ok {
+    background: #d4edda;
+    border-color: #b8dfc4;
+    color: #155724;
+}
+
+.login-pending {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    text-align: left;
+}
+
+.login-pending[hidden] {
+    display: none !important;
+}
+
+.login-pending-title {
+    margin: 0 0 6px;
+    font-weight: 600;
+    color: #1e3a5f;
+}
+
+.login-pending-texto {
+    margin: 0 0 12px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #334e68;
+}
+
+.login-email-resumen {
+    margin: 0 0 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: #f0f4f8;
+    border: 1px solid #dce3ec;
+    text-align: left;
+}
+
+.login-email-resumen-label {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.login-email-resumen-valor {
+    display: block;
+    font-size: 15px;
+    color: #1e293b;
+    word-break: break-all;
+}
+
+.btn-link-back {
+    margin-top: 8px;
+    padding: 4px 0;
+    font-size: 13px;
+    min-height: auto;
+}
+
+.login-registro-aviso {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #1e3a5f;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: var(--radius-sm);
+    text-align: left;
+}
+
+#login-paso-acceso[hidden],
+#login-paso-email[hidden] {
+    display: none !important;
+}
+
 .login-error[hidden] {
     display: none !important;
     margin: 0;
@@ -491,9 +570,81 @@ a:hover { text-decoration: underline; }
 }
 
 .footer-version {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #1a418c;
+}
+
+.app-footer,
+.login-site-footer {
+    padding: 20px 16px 24px;
+    text-align: center;
+    font-size: 12.5px;
+    line-height: 1.5;
+    background: linear-gradient(180deg, #f5f7fa 0%, #e8edf5 100%);
+    border-top: 3px solid #1a418c;
+    color: #334155;
+}
+
+.login-site-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-radius: 0 0 var(--radius) var(--radius);
+    border-top: 2px solid #1a418c;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.footer-inner {
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.footer-line {
+    margin: 0 0 4px;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    opacity: 0.85;
+    color: #0a2540;
+}
+
+.footer-credit {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.footer-credit a,
+.login-site-footer .footer-credit a {
+    color: #1a418c;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.footer-credit a:hover,
+.login-site-footer .footer-credit a:hover {
+    color: var(--color-orange);
+    text-decoration: underline;
+}
+
+.footer-prod-badge {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #1a418c 0%, #0a2540 55%, #143a66 100%);
+    border-radius: 999px;
+    border: 1px solid var(--color-orange);
+    box-shadow: 0 2px 8px rgba(26, 65, 140, 0.25), 0 0 0 1px rgba(234, 88, 12, 0.2);
+}
+
+.footer-prod-badge[hidden] {
+    display: none !important;
+}
+
+.app-footer {
+    margin-top: auto;
 }
 
 .user-box {
@@ -515,13 +666,6 @@ a:hover { text-decoration: underline; }
 .user-email {
     font-size: 12px;
     color: #cbd5e1;
-}
-
-.app-footer {
-    padding: 24px;
-    text-align: center;
-    color: var(--color-muted);
-    font-size: 12.5px;
 }
 
 /* ===== LAYOUT ============================================= */
@@ -592,6 +736,27 @@ a:hover { text-decoration: underline; }
 .panel-confirmado-sub {
     color: var(--color-muted) !important;
     font-size: 13.5px !important;
+}
+
+.field-estado-vigencia.estado-vigente { color: #155724; }
+.field-estado-vigencia.estado-por_vencer { color: #856404; }
+.field-estado-vigencia.estado-vencido,
+.field-estado-vigencia.estado-sin_fecha,
+.field-estado-vigencia.estado-invalida { color: #721c24; font-weight: 600; }
+
+.panel-error-confirmacion {
+    margin: 0 22px 16px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid #f5c2c7;
+    background: #f8d7da;
+    color: #721c24;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.panel-error-confirmacion[hidden] {
+    display: none !important;
 }
 
 .legal-ya-confirmado {
@@ -1339,5 +1504,171 @@ a:hover { text-decoration: underline; }
         animation-iteration-count: 1 !important;
         transition-duration: 0.001ms !important;
         scroll-behavior: auto !important;
+    }
+}
+
+/* --- Normativa y activos de empresa (v1.0.7) --- */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border, #d8e2ec);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.table-wrap-spaced {
+    margin-top: 16px;
+}
+
+.tabla-normativa {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.tabla-normativa th,
+.tabla-normativa td {
+    padding: 10px 14px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--border, #e8eef4);
+}
+
+.tabla-normativa th {
+    background: #f4f8fb;
+    font-weight: 600;
+    color: var(--text-muted, #4a6075);
+}
+
+.tabla-normativa tr:last-child td {
+    border-bottom: none;
+}
+
+.activos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.activos-vacio {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #f7fafc;
+    color: var(--text-muted, #4a6075);
+    font-size: 14px;
+}
+
+.activo-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border, #d8e2ec);
+    border-radius: 10px;
+    background: #fbfdff;
+}
+
+.activo-item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.activo-item-detalle,
+.activo-item-obs {
+    font-size: 13px;
+    color: var(--text-muted, #4a6075);
+}
+
+.activos-form-hint {
+    margin: 0 0 14px;
+    font-size: 13px;
+    color: var(--text-muted, #4a6075);
+}
+
+.activo-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.activo-estado {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #e8eef4;
+    color: #334e68;
+}
+
+.activo-estado-pendiente-validacion { background: #fff3cd; color: #856404; }
+.activo-estado-asignado { background: #d4edda; color: #155724; }
+.activo-estado-devolucion-pendiente { background: #f8d7da; color: #721c24; }
+.activo-estado-en-reparacion { background: #cce5ff; color: #004085; }
+
+.activo-historial {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-muted, #4a6075);
+}
+
+.activo-historial ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.activo-hist-fecha {
+    color: var(--text-muted, #6b7c93);
+}
+
+.activos-form {
+    padding-top: 8px;
+    border-top: 1px dashed var(--border, #d8e2ec);
+}
+
+.activos-form-title {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text, #0a2540);
+}
+
+.btn-quitar-activo {
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+@media (max-width: 640px) {
+    .activo-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-quitar-activo {
+        align-self: flex-end;
+    }
+
+    .tabla-normativa th,
+    .tabla-normativa td {
+        padding: 8px 10px;
+        font-size: 13px;
     }
 }

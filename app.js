@@ -177,13 +177,17 @@ function initSupabase() {
 // EVENTOS DE UI
 // =======================================================================
 function bindEventos() {
-    // Login magic link / logout
-    document.getElementById('btn-login').addEventListener('click', enviarMagicLink);
+    // Login en dos pasos: correo → registro / ingreso con contraseña
+    document.getElementById('btn-continuar-email').addEventListener('click', continuarConEmail);
     document.getElementById('input-email').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') enviarMagicLink();
+        if (e.key === 'Enter') continuarConEmail();
     });
-    const btnReenviar = document.getElementById('btn-reenviar-magic');
-    if (btnReenviar) btnReenviar.addEventListener('click', enviarMagicLink);
+    document.getElementById('btn-volver-email').addEventListener('click', volverPasoEmail);
+    document.getElementById('btn-login').addEventListener('click', autenticar);
+    document.getElementById('input-password').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') autenticar();
+    });
+    bindTogglePassword();
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
 
     // Toggle on/off: pase Codelco. Si apagado, oculta numero y limpia.
@@ -541,10 +545,18 @@ function bindTogglePassword() {
 }
 
 function aplicarVersionApp() {
-    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.1.0';
-    const label = raw.startsWith('v') ? raw : ('v' + raw);
+    const raw = (CONFIG && CONFIG.APP_VERSION) ? String(CONFIG.APP_VERSION).trim() : '1.0.0.1';
+    const label = raw.startsWith('v') ? raw : raw;
     document.querySelectorAll('[data-app-version]').forEach((el) => {
         el.textContent = label;
+    });
+    const prodBadge = document.getElementById('footer-prod-badge');
+    const loginProdBadge = document.getElementById('login-prod-badge');
+    const prodActiva = !!(CONFIG && CONFIG.PRODUCTION_ACTIVE);
+    [prodBadge, loginProdBadge].forEach((el) => {
+        if (!el) return;
+        el.hidden = !prodActiva;
+        el.setAttribute('aria-hidden', prodActiva ? 'false' : 'true');
     });
     const soporte = emailSoporte();
     const linkSoporte = document.getElementById('login-support-email');
@@ -552,83 +564,73 @@ function aplicarVersionApp() {
         linkSoporte.textContent = soporte;
         linkSoporte.href = 'mailto:' + soporte;
     }
-}
-
-// =======================================================================
-// AUTENTICACION (Magic Link - Supabase OTP email)
-// =======================================================================
-
-let magicLinkCooldownTimer = null;
-
-function urlRedirectMagicLink() {
-    return window.location.origin + window.location.pathname;
-}
-
-function esCallbackMagicLinkEnUrl() {
-    const h = window.location.hash || '';
-    const q = window.location.search || '';
-    return h.includes('access_token=') || h.includes('type=magiclink') ||
-           q.includes('code=') || q.includes('token_hash=');
-}
-
-function limpiarParametrosAuthEnUrl() {
-    if (!window.location.hash && !window.location.search) return;
-    if (esCallbackMagicLinkEnUrl() || window.location.hash) {
-        try {
-            window.history.replaceState({}, document.title, window.location.pathname);
-        } catch (_) {}
+    const footerDev = document.getElementById('footer-dev-email');
+    if (footerDev) {
+        footerDev.textContent = soporte;
+        footerDev.href = 'mailto:' + soporte;
+    }
+    const loginFooterDev = document.getElementById('login-footer-dev-email');
+    if (loginFooterDev) {
+        loginFooterDev.textContent = soporte;
+        loginFooterDev.href = 'mailto:' + soporte;
     }
 }
 
-function mostrarEstadoMagicLinkEnviado(email) {
-    const form = document.getElementById('login-form-box');
-    const pending = document.getElementById('login-pending');
-    const texto = document.getElementById('login-pending-texto');
-    if (form) form.hidden = true;
-    if (pending) pending.hidden = false;
-    if (texto) {
-        texto.textContent = 'Enviamos un enlace a ' + email + '. Abre el correo en este equipo y pulsa el enlace para entrar.';
+// =======================================================================
+// AUTENTICACION (correo → registro con contraseña de verificacion)
+// =======================================================================
+
+function longitudMinimaPassword() {
+    return (CONFIG && CONFIG.PASSWORD_MIN_LENGTH) ? CONFIG.PASSWORD_MIN_LENGTH : 8;
+}
+
+function ejemploPasswordPortal() {
+    return (CONFIG && CONFIG.PASSWORD_EJEMPLO) ? CONFIG.PASSWORD_EJEMPLO : '12345678';
+}
+
+function validarPasswordPortal(password) {
+    const min = longitudMinimaPassword();
+    if (!password || password.length < min) {
+        return {
+            ok: false,
+            mensaje: 'La contraseña debe tener al menos ' + min + ' caracteres (ej. ' + ejemploPasswordPortal() + ').'
+        };
     }
-    iniciarCooldownReenvioMagicLink();
+    return { ok: true };
 }
 
-function ocultarEstadoMagicLinkEnviado() {
-    const form = document.getElementById('login-form-box');
-    const pending = document.getElementById('login-pending');
-    if (form) form.hidden = false;
-    if (pending) pending.hidden = true;
+function mostrarPasoLoginEmail() {
+    const pasoEmail = document.getElementById('login-paso-email');
+    const pasoAcceso = document.getElementById('login-paso-acceso');
+    if (pasoEmail) pasoEmail.hidden = false;
+    if (pasoAcceso) pasoAcceso.hidden = true;
 }
 
-function iniciarCooldownReenvioMagicLink() {
-    const btn = document.getElementById('btn-reenviar-magic');
-    if (!btn) return;
-    const total = CONFIG.MAGIC_LINK_COOLDOWN_SEC || 60;
-    let restante = total;
-    btn.disabled = true;
-    btn.textContent = 'Reenviar en ' + restante + ' s';
-    if (magicLinkCooldownTimer) clearInterval(magicLinkCooldownTimer);
-    magicLinkCooldownTimer = setInterval(() => {
-        restante -= 1;
-        if (restante <= 0) {
-            clearInterval(magicLinkCooldownTimer);
-            magicLinkCooldownTimer = null;
-            btn.disabled = false;
-            btn.textContent = 'Reenviar enlace';
-            return;
-        }
-        btn.textContent = 'Reenviar en ' + restante + ' s';
-    }, 1000);
+function mostrarPasoLoginAcceso(email) {
+    const pasoEmail = document.getElementById('login-paso-email');
+    const pasoAcceso = document.getElementById('login-paso-acceso');
+    const resumen = document.getElementById('login-email-resumen');
+    const pwd = document.getElementById('input-password');
+    const btnLogin = document.getElementById('btn-login');
+    if (pasoEmail) pasoEmail.hidden = true;
+    if (pasoAcceso) pasoAcceso.hidden = false;
+    if (resumen) resumen.textContent = email;
+    if (pwd) {
+        pwd.value = '';
+        pwd.setAttribute('autocomplete', 'new-password');
+        setTimeout(() => { try { pwd.focus(); } catch (_) {} }, 50);
+    }
+    if (btnLogin) btnLogin.textContent = 'Registrar y continuar';
 }
 
-function extraerMensajeError(err) {
-    if (!err) return '';
-    if (err.message) return String(err.message);
-    if (err.error_description) return String(err.error_description);
-    if (err.error) return String(err.error);
-    try { return JSON.stringify(err); } catch (_) { return String(err); }
+function volverPasoEmail() {
+    ocultarErrorLogin();
+    mostrarPasoLoginEmail();
+    const emailInput = document.getElementById('input-email');
+    if (emailInput) setTimeout(() => { try { emailInput.focus(); } catch (_) {} }, 50);
 }
 
-async function enviarMagicLink() {
+function continuarConEmail() {
     const email = (document.getElementById('input-email').value || '').trim().toLowerCase();
     ocultarErrorLogin();
 
@@ -648,23 +650,94 @@ async function enviarMagicLink() {
         return;
     }
 
+    mostrarPasoLoginAcceso(email);
+}
+
+async function autenticarUnificado(email, password) {
+    const redirectTo = window.location.origin + window.location.pathname;
+
+    const { data: signUpData, error: signUpError } = await STATE.sb.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: redirectTo }
+    });
+
+    if (!signUpError) {
+        if (signUpData && signUpData.session) {
+            return { registro: true };
+        }
+        const { error: signInAfterSignUp } = await STATE.sb.auth.signInWithPassword({ email, password });
+        if (!signInAfterSignUp) {
+            return { registro: true };
+        }
+        throw signInAfterSignUp;
+    }
+
+    if (esErrorCuentaYaRegistrada(signUpError.message)) {
+        const { error: signInError } = await STATE.sb.auth.signInWithPassword({ email, password });
+        if (!signInError) return {};
+        const lc2 = String(signInError.message || '').toLowerCase();
+        if (lc2.includes('invalid login credentials')) {
+            throw new Error('UNIFIED_WRONG_PASSWORD');
+        }
+        throw signInError;
+    }
+
+    throw signUpError;
+}
+
+async function autenticar() {
+    const pasoAcceso = document.getElementById('login-paso-acceso');
+    if (pasoAcceso && pasoAcceso.hidden) {
+        continuarConEmail();
+        return;
+    }
+
+    const email = (document.getElementById('input-email').value || '').trim().toLowerCase();
+    const password = document.getElementById('input-password').value || '';
+
+    ocultarErrorLogin();
+
+    if (!email) {
+        mostrarErrorLogin('Ingresa tu correo corporativo.', { titulo: 'Correo requerido', tipo: 'warn' });
+        return;
+    }
+    if (!password) {
+        mostrarErrorLogin('Crea una contraseña de verificacion para continuar.', { titulo: 'Contraseña requerida', tipo: 'warn' });
+        return;
+    }
+
+    if (!validarDominio(email)) {
+        const soporte = emailSoporte();
+        mostrarErrorLogin(
+            'El correo ' + email + ' no pertenece a Monitoring. ' +
+            'Verifica que termine en ' + CONFIG.ALLOWED_DOMAIN + '. ' +
+            'Si crees que es un error, escribe a ' + soporte + '.',
+            { titulo: 'Dominio no permitido', tipo: 'error' }
+        );
+        return;
+    }
+
+    const valPwd = validarPasswordPortal(password);
+    if (!valPwd.ok) {
+        mostrarErrorLogin(valPwd.mensaje, { titulo: 'Contraseña muy corta', tipo: 'warn' });
+        return;
+    }
+
     showLoader();
     try {
-        const { error } = await STATE.sb.auth.signInWithOtp({
-            email,
-            options: {
-                emailRedirectTo: urlRedirectMagicLink(),
-                shouldCreateUser: true
-            }
-        });
-        if (error) throw error;
-        mostrarEstadoMagicLinkEnviado(email);
-        mostrarMensaje('success', 'Enlace enviado. Revisa tu correo corporativo.');
+        const resultado = await autenticarUnificado(email, password);
+        if (resultado && resultado.registro) {
+            mostrarMensaje('info', 'Cuenta creada. Revisa y confirma tus datos.');
+        }
     } catch (err) {
-        console.error('Error enviando magic link:', err);
-        const detalle = extraerMensajeError(err);
-        const tr = traducirErrorAuth(detalle, err);
+        console.error('Error autenticando:', err);
+        const detalle = (err && err.message === 'UNIFIED_WRONG_PASSWORD')
+            ? 'UNIFIED_WRONG_PASSWORD'
+            : extraerMensajeError(err);
+        const tr = traducirErrorAuth(detalle);
         mostrarErrorLogin(tr.mensaje, { titulo: tr.titulo, tipo: tr.tipo });
+        if (tr.tipo === 'error') mostrarMensaje('error', tr.titulo || 'No se pudo iniciar sesion');
     } finally {
         hideLoader();
     }
@@ -681,7 +754,20 @@ function ocultarErrorLogin() {
 
 function prepararVistaLogin() {
     ocultarErrorLogin();
-    ocultarEstadoMagicLinkEnviado();
+    mostrarPasoLoginEmail();
+    const pwd = document.getElementById('input-password');
+    const toggle = document.getElementById('btn-toggle-password');
+    if (pwd) {
+        pwd.value = '';
+        pwd.type = 'password';
+        pwd.setAttribute('autocomplete', 'new-password');
+    }
+    if (toggle) {
+        toggle.classList.remove('is-revealed');
+        toggle.setAttribute('aria-pressed', 'false');
+        toggle.setAttribute('aria-label', 'Mostrar contraseña');
+        toggle.title = 'Mostrar contraseña';
+    }
     const banner = document.getElementById('login-banner-reingreso');
     if (banner) {
         try {
@@ -738,32 +824,65 @@ function esErrorCuentaYaRegistrada(msg) {
            lc.includes('user already exists');
 }
 
+function extraerMensajeError(err) {
+    if (!err) return '';
+    if (err.msg) return String(err.msg);
+    if (err.message && err.message !== '{}') return String(err.message);
+    if (err.error_description) return String(err.error_description);
+    if (err.error) return String(err.error);
+    try { return JSON.stringify(err); } catch (_) { return String(err); }
+}
+
 // Devuelve { titulo, mensaje, tipo } segun el error de autenticacion.
-function traducirErrorAuth(msg, errObj) {
+function traducirErrorAuth(msg) {
     const dominio = CONFIG.ALLOWED_DOMAIN || '@monitoring.cl';
     const soporte = emailSoporte();
-    const status = errObj && (errObj.status || errObj.code);
 
     if (!msg) {
         return { titulo: 'No se pudo autenticar', mensaje: 'Intenta nuevamente en unos segundos.', tipo: 'error' };
     }
 
+    if (msg === 'UNIFIED_WRONG_PASSWORD') {
+        return {
+            titulo: 'Contraseña incorrecta',
+            mensaje: 'Esa contraseña no coincide con la que creaste en tu primera visita a este portal. ' +
+                     'Recuerda: es solo para esta verificacion, no la de Microsoft. ' +
+                     'Si la olvidaste, escribe a ' + soporte + '.',
+            tipo: 'error'
+        };
+    }
+
     const lc = String(msg).toLowerCase();
 
-    if (status === 500 || lc.includes('internal server error') || lc.includes('error sending confirmation email') ||
-        lc.includes('error sending magic link') || lc.includes('smtp')) {
+    if (lc.includes('invalid login credentials')) {
         return {
-            titulo: 'No se pudo enviar el correo',
-            mensaje: 'Supabase no pudo enviar el enlace magico. TI debe configurar SMTP en el proyecto ' +
-                     '(Authentication ? SMTP Settings). Mientras tanto, escribe a ' + soporte + '.',
+            titulo: 'No se pudo ingresar',
+            mensaje: 'No pudimos validar tu acceso. Verifica tu correo ' + dominio + ' y tu contraseña de verificacion. ' +
+                     'Si es tu primera vez, crea una contraseña nueva (minimo 8 caracteres). ' +
+                     'Si ya entraste antes, usa la misma contraseña. ' +
+                     'Si el problema continua, escribe a ' + soporte + '.',
             tipo: 'error'
         };
     }
     if (lc.includes('signup is disabled') || lc.includes('signups not allowed')) {
         return {
             titulo: 'Registro no habilitado',
-            mensaje: 'El acceso por enlace no esta habilitado para nuevas cuentas. Contacta a ' + soporte + '.',
+            mensaje: 'El registro no esta habilitado en Supabase. Contacta a ' + soporte + '.',
             tipo: 'error'
+        };
+    }
+    if (lc.includes('user already registered') || lc.includes('already been registered') || lc.includes('user already exists')) {
+        return {
+            titulo: 'Cuenta ya registrada',
+            mensaje: 'Tu cuenta ya existe. Usa la misma contraseña de verificacion que definiste la primera vez.',
+            tipo: 'warn'
+        };
+    }
+    if (lc.includes('email not confirmed')) {
+        return {
+            titulo: 'Correo sin confirmar',
+            mensaje: 'La cuenta existe pero el correo aun no esta confirmado. TI debe desactivar confirmacion por email en Supabase o escribe a ' + soporte + '.',
+            tipo: 'warn'
         };
     }
     if (lc.includes('email address is invalid') || lc.includes('invalid email')) {
@@ -773,77 +892,30 @@ function traducirErrorAuth(msg, errObj) {
             tipo: 'warn'
         };
     }
-    if (lc.includes('email not confirmed')) {
+    if (lc.includes('password should be at least') || lc.includes('weak password') || lc.includes('known to be weak')) {
         return {
-            titulo: 'Correo sin confirmar',
-            mensaje: 'La cuenta existe pero el correo aun no esta confirmado. Escribe a ' + soporte + '.',
+            titulo: 'Contraseña no aceptada',
+            mensaje: 'Usa al menos ' + longitudMinimaPassword() + ' caracteres (ej. ' + ejemploPasswordPortal() + '). ' +
+                     'Si Supabase rechaza contraseñas simples, TI debe desactivar "Leaked password protection" en Auth.',
             tipo: 'warn'
         };
     }
     if (lc.includes('rate limit') || lc.includes('too many requests') || lc.includes('over_email_send_rate_limit')) {
         return {
             titulo: 'Demasiados intentos',
-            mensaje: 'Hubo demasiados envios seguidos. Espera unos minutos y vuelve a intentar.',
+            mensaje: 'Hubo demasiados intentos seguidos. Espera unos minutos y vuelve a intentar.',
             tipo: 'warn'
         };
     }
-    if (lc.includes('user already registered') || lc.includes('already been registered') || lc.includes('user already exists')) {
-        return {
-            titulo: 'Cuenta ya registrada',
-            mensaje: 'Si ya recibiste un enlace antes, revisa tu correo. Tambien puedes solicitar reenvio.',
-            tipo: 'info'
-        };
-    }
-    return { titulo: 'No se pudo enviar el enlace', mensaje: msg, tipo: 'error' };
-}
-
-async function obtenerSesionTrasMagicLink() {
-    const reintentos = esCallbackMagicLinkEnUrl() ? 6 : 1;
-    for (let i = 0; i < reintentos; i++) {
-        const { data, error } = await STATE.sb.auth.getSession();
-        if (error) throw error;
-        if (data && data.session) return data.session;
-        if (!esCallbackMagicLinkEnUrl()) break;
-        await new Promise((r) => setTimeout(r, 350));
-    }
-
-    const code = new URLSearchParams(window.location.search).get('code');
-    if (code) {
-        const { data, error } = await STATE.sb.auth.exchangeCodeForSession(code);
-        if (error) throw error;
-        if (data && data.session) return data.session;
-    }
-
-    const { data } = await STATE.sb.auth.getSession();
-    return (data && data.session) ? data.session : null;
+    return { titulo: 'No se pudo autenticar', mensaje: msg, tipo: 'error' };
 }
 
 async function procesarSesionActual() {
-    if (esCallbackMagicLinkEnUrl()) showLoader();
-    try {
-        const session = await obtenerSesionTrasMagicLink();
-        if (session) {
-            await manejarSesion(session);
-        } else if (esCallbackMagicLinkEnUrl()) {
-            mostrarVistaLogin();
-            mostrarErrorLogin(
-                'No pudimos validar el enlace. Puede haber expirado o ya fue usado. Solicita un enlace nuevo.',
-                { titulo: 'Enlace invalido o expirado', tipo: 'warn' }
-            );
-        } else {
-            mostrarVistaLogin();
-        }
-    } catch (err) {
-        console.error('Error procesando callback magic link:', err);
+    const { data } = await STATE.sb.auth.getSession();
+    if (data && data.session) {
+        await manejarSesion(data.session);
+    } else {
         mostrarVistaLogin();
-        if (esCallbackMagicLinkEnUrl()) {
-            const detalle = extraerMensajeError(err);
-            const tr = traducirErrorAuth(detalle, err);
-            mostrarErrorLogin(tr.mensaje, { titulo: tr.titulo || 'No se pudo iniciar sesion', tipo: tr.tipo });
-        }
-    } finally {
-        limpiarParametrosAuthEnUrl();
-        hideLoader();
     }
 }
 
@@ -898,8 +970,6 @@ async function manejarSesion(session) {
         if (trabajadorYaConfirmado(trabajador)) {
             mostrarModalIngresoConfirmado(trabajador);
         }
-        limpiarParametrosAuthEnUrl();
-        ocultarEstadoMagicLinkEnviado();
     } catch (err) {
         console.error('Error al manejar sesion:', err);
         mostrarMensaje('error', 'No se pudieron cargar tus datos. Intenta nuevamente.');
@@ -963,7 +1033,7 @@ async function cargarTrabajador(email) {
 }
 
 async function procesarIngresoPortal(trabajador) {
-    const limite = CONFIG.MAX_INGRESOS_PORTAL || 3;
+    const limite = CONFIG.MAX_INGRESOS_PORTAL || 5;
     const yaAutorizado = !!trabajador.portal_autorizado_ti;
     const countActual = parseInt(trabajador.ingresos_portal_count, 10) || 0;
 
