@@ -8,7 +8,7 @@
 
 window.CONFIG = {
     // --- Version del portal ---
-    APP_VERSION: '1.0.0.3',
+    APP_VERSION: '1.0.1.2',
     PRODUCTION_ACTIVE: true,
 
     // --- Supabase ---
@@ -46,7 +46,9 @@ window.CONFIG = {
     // --- Opciones de UI ---
     TALLAS_LETRA: ['S', 'M', 'L', 'XL', 'XXL'],
     TALLAS_BUZO: ['S', 'M', 'L', 'XL'],
-    TALLAS_RESPIRADOR: ['Pequeño', 'Mediano', 'Grande'],
+    TALLAS_GUANTES: ['7', '8', '9', '10', '11'],
+    OPCIONES_CASCO: ['Si', 'No'],
+    TALLAS_RESPIRADOR: ['S', 'M', 'L'],
     TALLAS_ZAPATO: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47'],
     TIPOS_DOCUMENTO: ['RUT', 'DNI', 'PASAPORTE'],
     TIPOS_CUENTA: ['Corriente', 'Vista', 'CuentaRUT', 'Ahorro'],

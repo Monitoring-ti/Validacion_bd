@@ -8,13 +8,10 @@
 --   3. Indices utiles
 --   4. Politicas RLS para asegurar acceso solo a la fila propia
 -- =====================================================================
--- Configuracion previa de Supabase Auth (Microsoft 365):
---   a) Dashboard Supabase -> Authentication -> Providers -> habilitar Azure.
---   b) Tenant URL: https://login.microsoftonline.com/<TENANT_ID_MONITORING>/v2.0
---      (asi se limita al tenant corporativo de Monitoring).
---   c) Registrar app en Azure AD con redirect:
---      https://<TU-PROYECTO>.supabase.co/auth/v1/callback
---   d) Copiar Client ID y Client Secret al panel Supabase.
+-- Configuracion previa de Supabase Auth:
+--   a) Authentication → Providers → Email habilitado.
+--   b) Confirm email: DESACTIVADO (login con contraseña de verificacion del portal).
+--   c) Opcional Azure AD: limitar tenant Monitoring si se usa SSO en el futuro.
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
@@ -160,7 +157,14 @@ CREATE POLICY solicitudes_doc_insert_self
     ON public.solicitudes_cambio_documento
     FOR INSERT
     TO authenticated
-    WITH CHECK (lower(email_corporativo) = lower(auth.jwt() ->> 'email'));
+    WITH CHECK (
+        trabajador_id IS NOT NULL
+        AND lower(trim(email_corporativo)) = lower(trim(auth.jwt() ->> 'email'))
+        AND trabajador_id IN (
+            SELECT id_trabajador FROM public.trabajadores
+            WHERE lower(trim(email_corporativo)) = lower(trim(auth.jwt() ->> 'email'))
+        )
+    );
 
 -- --- log_validaciones ---
 DROP POLICY IF EXISTS log_validaciones_select_self ON public.log_validaciones;
@@ -207,4 +211,5 @@ CREATE POLICY sesiones_update_self
 --   schema_normativa.sql
 --   schema_activos.sql
 --   schema_ajustes_portal.sql
+--   schema_revision_portal.sql
 -- =====================================================================

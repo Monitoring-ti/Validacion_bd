@@ -1636,6 +1636,15 @@ a:hover { text-decoration: underline; }
 }
 
 .activo-estado-pendiente-validacion { background: #fff3cd; color: #856404; }
+.activo-estado-borrador { background: #e8eaf0; color: #4a5568; }
+.activo-item-pendiente { border-style: dashed; }
+.resumen-activos-titulo {
+    margin: 16px 0 8px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+.resumen-item-activo .despues { font-size: 13px; }
 .activo-estado-asignado { background: #d4edda; color: #155724; }
 .activo-estado-devolucion-pendiente { background: #f8d7da; color: #721c24; }
 .activo-estado-en-reparacion { background: #cce5ff; color: #004085; }
@@ -1706,19 +1715,10 @@ a:hover { text-decoration: underline; }
     display: none !important;
 }
 
-.btn-quitar-activo {
-    flex-shrink: 0;
-    font-size: 13px;
-}
-
 @media (max-width: 640px) {
     .activo-item {
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .btn-quitar-activo {
-        align-self: flex-end;
     }
 
     .tabla-normativa th,

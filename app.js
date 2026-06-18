@@ -15,6 +15,7 @@ const STATE = {
     ip: null,                  // ip publica detectada
     userAgent: navigator.userAgent || '',
     activos: [],               // filas de public.activos
+    activoFormInteracted: false, // true si el usuario edito la seccion 9
     activosHistorial: {},      // id_activo -> eventos[]
     basesLegales: null,        // catalogo desde BD o CONFIG
     categoriasDatos: null      // catalogo desde BD o CONFIG
@@ -114,11 +115,11 @@ const ETIQUETAS = {
     talla_polera:               'Talla polera',
     talla_camisa:               'Talla camisa',
     talla_chaqueta:             'Talla chaqueta',
-    talla_guantes:              'Talla guantes',
-    talla_casco:                'Talla casco',
+    talla_guantes:              'Talla guantes (7-11)',
+    talla_casco:                'Casco (Si/No)',
     talla_chaleco:              'Talla chaleco',
     talla_buzo:                 'Talla buzo',
-    respirador:                 'Talla respirador',
+    respirador:                 'Talla respirador (S/M/L)',
     fecha_vencimiento_id:           'Vigencia carnet de identidad',
     licencia_conducir_tipo:         'Tipo de licencia',
     licencia_conducir_numero:       'Numero de licencia',
@@ -218,10 +219,10 @@ function bindEventos() {
     }
 
     // Modal documento
-    document.getElementById('btn-solicitar-correccion')
-        .addEventListener('click', abrirModalCorreccionDocumento);
-    document.getElementById('btn-enviar-doc')
-        .addEventListener('click', onEnviarSolicitudDocumento);
+    const btnSolicitarDoc = document.getElementById('btn-solicitar-correccion');
+    const btnEnviarDoc = document.getElementById('btn-enviar-doc');
+    if (btnSolicitarDoc) btnSolicitarDoc.addEventListener('click', abrirModalCorreccionDocumento);
+    if (btnEnviarDoc) btnEnviarDoc.addEventListener('click', onEnviarSolicitudDocumento);
 
     // Confirmacion legal
     document.getElementById('chk-legal').addEventListener('change', (e) => {
@@ -235,8 +236,7 @@ function bindEventos() {
     document.getElementById('btn-ingreso-revisar').addEventListener('click', onRevisarDatosTrasIngreso);
     document.getElementById('btn-ingreso-salir').addEventListener('click', onCerrarSesionTrasIngreso);
 
-    const btnActivo = document.getElementById('btn-agregar-activo');
-    if (btnActivo) btnActivo.addEventListener('click', onAgregarActivo);
+    bindFormularioActivo();
     document.querySelectorAll('input[name="activo-origen"]').forEach((el) => {
         el.addEventListener('change', aplicarVisibilidadFormularioActivo);
     });
@@ -269,6 +269,24 @@ function bindEventos() {
 function poblarTextoLegal() {
     document.getElementById('texto-legal').textContent = CONFIG.LEGAL_TEXT;
     document.getElementById('legal-version').textContent = CONFIG.LEGAL_TEXT_VERSION;
+}
+
+function normalizarRespiradorBd(valor) {
+    if (valor == null || valor === '') return valor;
+    const u = String(valor).trim().toUpperCase();
+    if (u === 'S' || u === 'M' || u === 'L') return u;
+    const lc = String(valor).trim().toLowerCase()
+        .normalize('NFD').replace(/\p{M}/gu, '');
+    const map = { pequeno: 'S', mediano: 'M', grande: 'L' };
+    return map[lc] || valor;
+}
+
+function normalizarCascoBd(valor) {
+    if (valor == null || valor === '') return valor;
+    const lc = String(valor).trim().toLowerCase();
+    if (lc === 'si' || lc === 'sí' || lc === 'yes') return 'Si';
+    if (lc === 'no') return 'No';
+    return valor;
 }
 
 function poblarSelectsEstaticos() {
@@ -1013,6 +1031,7 @@ async function cerrarSesion() {
     STATE.trabajadorOriginal = null;
     STATE.sesionId = null;
     STATE.activos = [];
+    STATE.activoFormInteracted = false;
     STATE.activosHistorial = {};
     const dlgIngreso = document.getElementById('modal-ingreso-confirmado');
     const dlgExito = document.getElementById('modal-exito');
@@ -1199,11 +1218,11 @@ function renderFormulario(t) {
     poblarSelect('f-talla-polera',   CONFIG.TALLAS_LETRA,      t.talla_polera);
     poblarSelect('f-talla-camisa',   CONFIG.TALLAS_LETRA,      t.talla_camisa);
     poblarSelect('f-talla-chaqueta', CONFIG.TALLAS_LETRA,      t.talla_chaqueta);
-    poblarSelect('f-talla-guantes',  CONFIG.TALLAS_LETRA,      t.talla_guantes);
-    poblarSelect('f-talla-casco',    CONFIG.TALLAS_LETRA,      t.talla_casco);
+    poblarSelect('f-talla-guantes',  CONFIG.TALLAS_GUANTES,      t.talla_guantes);
+    poblarSelect('f-talla-casco',    CONFIG.OPCIONES_CASCO,      normalizarCascoBd(t.talla_casco));
     poblarSelect('f-talla-chaleco',  CONFIG.TALLAS_LETRA,      t.talla_chaleco);
     poblarSelect('f-talla-buzo',     CONFIG.TALLAS_BUZO,       t.talla_buzo);
-    poblarSelect('f-respirador',     CONFIG.TALLAS_RESPIRADOR, t.respirador);
+    poblarSelect('f-respirador',     CONFIG.TALLAS_RESPIRADOR, normalizarRespiradorBd(t.respirador));
 
     // 8. Informacion opcional
     poblarSelect('f-licencia-tipo', CONFIG.TIPOS_LICENCIA, t.licencia_conducir_tipo);
@@ -1223,6 +1242,7 @@ function renderFormulario(t) {
     document.getElementById('btn-confirmar').disabled = true;
 
     aplicarEstadoConfirmacion(t);
+    limpiarFormularioActivo();
 }
 
 function aplicarEstadoConfirmacion(t) {
@@ -1343,59 +1363,136 @@ function getVal(id) {
 // =======================================================================
 // MODAL: SOLICITUD DE CAMBIO DE DOCUMENTO
 // =======================================================================
+function normalizarTipoDocumento(valor) {
+    const v = String(valor || '').trim().toUpperCase();
+    if (!v) return '';
+    if (v === 'CEDULA' || v === '\u00C9DULA' || v === 'CI') return 'RUT';
+    return v;
+}
+
+function normalizarNumeroDocumento(valor) {
+    return String(valor || '').replace(/\s+/g, '').toUpperCase();
+}
+
+function emailSesionActiva() {
+    const u = STATE.user && STATE.user.email ? String(STATE.user.email).trim() : '';
+    if (u) return u;
+    const t = STATE.trabajador && STATE.trabajador.email_corporativo;
+    return t ? String(t).trim() : '';
+}
+
 function abrirModalCorreccionDocumento() {
     const t = STATE.trabajador;
-    if (!t) return;
+    if (!t) {
+        mostrarMensaje('error', 'Tus datos aun no estan cargados. Espera un momento e intenta de nuevo.');
+        return;
+    }
 
-    setVal('doc-tipo-actual',   t.tipo_identificacion);
-    setVal('doc-numero-actual', t.numero_identificacion);
+    const tipoActual = normalizarTipoDocumento(t.tipo_identificacion) || t.tipo_identificacion || '';
+    setVal('doc-tipo-actual',   tipoActual || t.tipo_identificacion || '—');
+    setVal('doc-numero-actual', t.numero_identificacion || '—');
 
-    // Tipos posibles en selector
-    poblarSelect('doc-tipo-solicitado', CONFIG.TIPOS_DOCUMENTO, t.tipo_identificacion);
+    poblarSelect('doc-tipo-solicitado', CONFIG.TIPOS_DOCUMENTO, '');
     setVal('doc-numero-solicitado', '');
     setVal('doc-motivo', '');
 
     const dlg = document.getElementById('modal-documento');
-    dlg.showModal();
+    if (!dlg || typeof dlg.showModal !== 'function') {
+        mostrarMensaje('error', 'No se pudo abrir el formulario de correccion.');
+        return;
+    }
+    if (!dlg.open) dlg.showModal();
+
+    const sel = document.getElementById('doc-tipo-solicitado');
+    if (sel) {
+        try { sel.focus(); } catch (_) {}
+    }
 }
 
 async function onEnviarSolicitudDocumento() {
-    const tipoSolicitado   = getVal('doc-tipo-solicitado');
-    const numeroSolicitado = getVal('doc-numero-solicitado').trim();
+    if (!STATE.trabajador || !STATE.sb) {
+        mostrarMensaje('error', 'Debes iniciar sesion para enviar la solicitud.');
+        return;
+    }
+
+    const tipoSolicitado   = normalizarTipoDocumento(getVal('doc-tipo-solicitado'));
+    const numeroSolicitado = normalizarNumeroDocumento(getVal('doc-numero-solicitado'));
     const motivo           = getVal('doc-motivo').trim();
+    const t = STATE.trabajador;
+    const tipoActual   = normalizarTipoDocumento(t.tipo_identificacion);
+    const numeroActual = normalizarNumeroDocumento(t.numero_identificacion);
 
     if (!tipoSolicitado || !numeroSolicitado || !motivo) {
         mostrarMensaje('error', 'Completa tipo, numero y motivo antes de enviar.');
         return;
     }
 
+    if (tipoSolicitado === tipoActual && numeroSolicitado === numeroActual) {
+        mostrarMensaje('warn', 'El tipo y numero solicitados son iguales a los actuales. Indica los datos corregidos.');
+        return;
+    }
+
+    const btn = document.getElementById('btn-enviar-doc');
+    if (btn) btn.disabled = true;
     showLoader();
     try {
+        const { data: sesion } = await STATE.sb.auth.getSession();
+        if (!sesion || !sesion.session) {
+            throw new Error('Sesion expirada. Vuelve a iniciar sesion.');
+        }
+
         await enviarSolicitudCambioDocumento({
             tipo_documento_solicitado:   tipoSolicitado,
             numero_documento_solicitado: numeroSolicitado,
             motivo
         });
-        document.getElementById('modal-documento').close();
+
+        const dlg = document.getElementById('modal-documento');
+        if (dlg && dlg.open) dlg.close();
         mostrarMensaje(
             'success',
             'Solicitud enviada. RR.HH. la revisara. El cambio NO se aplica automaticamente.'
         );
     } catch (err) {
         console.error('Error al enviar solicitud documento:', err);
-        mostrarMensaje('error', 'No se pudo enviar la solicitud. Intenta nuevamente.');
+        mostrarMensaje('error', traducirErrorSolicitudDocumento(err));
     } finally {
         hideLoader();
+        if (btn) btn.disabled = false;
     }
+}
+
+function traducirErrorSolicitudDocumento(err) {
+    const msg = String((err && err.message) || err || '');
+    const lc = msg.toLowerCase();
+    const soporte = emailSoporte();
+
+    if (lc.includes('session') || lc.includes('jwt') || lc.includes('not authenticated')) {
+        return 'Tu sesion expiro. Cierra sesion e ingresa nuevamente.';
+    }
+    if (lc.includes('row-level security') || lc.includes('policy') || lc.includes('42501')) {
+        return 'No tienes permiso para registrar la solicitud. Verifica que iniciaste con tu correo corporativo o escribe a ' + soporte + '.';
+    }
+    if (lc.includes('does not exist') || lc.includes('42p01') || lc.includes('solicitudes_cambio_documento')) {
+        return 'La tabla de solicitudes no esta configurada en Supabase. Contacta a ' + soporte + '.';
+    }
+    if (lc.includes('foreign key') || lc.includes('23503')) {
+        return 'No se encontro tu registro de trabajador vinculado. Contacta a ' + soporte + '.';
+    }
+    if (msg) return 'No se pudo enviar la solicitud: ' + msg;
+    return 'No se pudo enviar la solicitud. Intenta nuevamente.';
 }
 
 async function enviarSolicitudCambioDocumento(payload) {
     const t = STATE.trabajador;
+    const email = emailSesionActiva();
+    if (!email) throw new Error('No hay correo de sesion activa.');
+
     const fila = {
         trabajador_id:               t.id_trabajador,
-        email_corporativo:           t.email_corporativo,
-        tipo_documento_actual:       t.tipo_identificacion,
-        numero_documento_actual:     t.numero_identificacion,
+        email_corporativo:           email,
+        tipo_documento_actual:       t.tipo_identificacion || null,
+        numero_documento_actual:     t.numero_identificacion || null,
         tipo_documento_solicitado:   payload.tipo_documento_solicitado,
         numero_documento_solicitado: payload.numero_documento_solicitado,
         motivo:                      payload.motivo,
@@ -1404,11 +1501,15 @@ async function enviarSolicitudCambioDocumento(payload) {
         user_agent:                  STATE.userAgent
     };
 
-    const { error } = await STATE.sb
+    const { data, error } = await STATE.sb
         .from('solicitudes_cambio_documento')
-        .insert(fila);
+        .insert(fila)
+        .select('id')
+        .single();
 
     if (error) throw error;
+    if (!data || !data.id) throw new Error('La solicitud no se registro correctamente.');
+    return data.id;
 }
 
 // =======================================================================
@@ -1578,11 +1679,12 @@ function mostrarResumenAntesConfirmar() {
     ocultarErrorConfirmacion();
 
     const cambios = recolectarCambios(STATE.trabajadorOriginal, actuales);
+    const payloadActivo = obtenerPayloadActivoDesdeFormulario();
 
     const cont = document.getElementById('resumen-lista');
     cont.innerHTML = '';
 
-    if (cambios.length === 0) {
+    if (cambios.length === 0 && !payloadActivo) {
         const p = document.createElement('p');
         p.className = 'resumen-vacio';
         p.textContent = 'No hay cambios en los campos editables. Se registrara solo la confirmacion legal.';
@@ -1598,6 +1700,21 @@ function mostrarResumenAntesConfirmar() {
                 '<div class="despues">' + escapeHtml(c.valor_nuevo || '(vacio)')    + '</div>';
             cont.appendChild(item);
         });
+    }
+
+    if (payloadActivo) {
+        const tit = document.createElement('p');
+        tit.className = 'resumen-activos-titulo';
+        tit.textContent = 'Declaracion de equipo (se guardara al confirmar):';
+        cont.appendChild(tit);
+        const item = document.createElement('div');
+        item.className = 'resumen-item resumen-item-activo';
+        item.innerHTML =
+            '<div class="campo">Equipo</div>' +
+            '<div class="antes">(nuevo)</div>' +
+            '<div class="flecha">&rarr;</div>' +
+            '<div class="despues">' + escapeHtml(describirActivoPayload(payloadActivo)) + '</div>';
+        cont.appendChild(item);
     }
 
     document.getElementById('modal-resumen').showModal();
@@ -1628,6 +1745,7 @@ async function confirmarYEnviar() {
             await ejecutarPaso('guardarCambiosTrabajador', () => guardarCambiosTrabajador(actuales));
             await ejecutarPaso('registrarLogValidacion',   () => registrarLogValidacion(cambios));
         }
+        const activosGuardados = await ejecutarPaso('guardarActivoDesdeFormulario', () => guardarActivoDesdeFormulario());
         await ejecutarPaso('marcarConfirmacionLegal', () => marcarConfirmacionLegal());
         await ejecutarPaso('registrarConsentimientosTratamiento', () => registrarConsentimientosTratamiento());
         await ejecutarPaso('cerrarSesionValidacion', () => cerrarSesionValidacion());
@@ -1645,9 +1763,19 @@ async function confirmarYEnviar() {
         ocultarErrorConfirmacion();
         cerrarModalResumen();
 
-        const textoExito = cambios.length > 0
-            ? 'Tus datos fueron actualizados y la confirmacion legal quedo registrada. Tu sesion se cerrara automaticamente.'
-            : 'Tu confirmacion legal quedo registrada. Tu sesion se cerrara automaticamente.';
+        const textoExito = (function () {
+            const partes = [];
+            if (cambios.length > 0) partes.push('tus datos fueron actualizados');
+            if (activosGuardados > 0) {
+                partes.push(
+                    activosGuardados === 1
+                        ? '1 declaracion de equipo fue registrada'
+                        : (activosGuardados + ' declaraciones de equipo fueron registradas')
+                );
+            }
+            partes.push('la confirmacion legal quedo registrada');
+            return 'Se registro: ' + partes.join(', ') + '. Tu sesion se cerrara automaticamente.';
+        })();
 
         try { sessionStorage.setItem('valida_bd_confirmacion_ok', textoExito); } catch (_) {}
         await cerrarSesion();
@@ -1688,6 +1816,10 @@ async function guardarCambiosTrabajador(actuales) {
             patch[campo] = normalizarGeneroBd(v) || null;
         } else if (campo === 'telefono_emergencia' && v) {
             patch[campo] = normalizarTelefonoParaBD(v, pais);
+        } else if (campo === 'respirador' && v) {
+            patch[campo] = normalizarRespiradorBd(v) || null;
+        } else if (campo === 'talla_casco' && v) {
+            patch[campo] = normalizarCascoBd(v) || null;
         } else if ((campo === 'numero_domicilio' || campo === 'teletrabajo_numero') && v) {
             patch[campo] = String(v).trim();
         } else {
@@ -1894,17 +2026,11 @@ function conoceCaracteristicasEquipo() {
 
 function generarIdentificadorActivo(trabajador, origen, serie) {
     const s = (serie || '').trim();
-    if (s) return s.substring(0, 50);
     const tid = String(trabajador.id_trabajador || 'x').replace(/-/g, '').substring(0, 8);
     const prefix = origen === 'propio' ? 'PROPIO' : 'NB';
-    return prefix + '-' + tid + '-' + Date.now();
-}
-
-function yaTieneEquipoPropioDeclarado() {
-    return (STATE.activos || []).some((a) => {
-        const d = leerDetallesActivo(a);
-        return d.origen_equipo === 'propio' || d.es_equipo_personal === true;
-    });
+    const sufijo = Date.now().toString(36);
+    if (s) return (s.substring(0, 40) + '-' + sufijo).substring(0, 50);
+    return prefix + '-' + tid + '-' + sufijo;
 }
 
 function renderListaActivos() {
@@ -1913,11 +2039,11 @@ function renderListaActivos() {
     if (!lista) return;
 
     lista.innerHTML = '';
-    const items = STATE.activos || [];
+    const guardados = STATE.activos || [];
 
-    if (vacio) vacio.hidden = items.length > 0;
+    if (vacio) vacio.hidden = guardados.length > 0;
 
-    items.forEach((a) => {
+    guardados.forEach((a) => {
         const det = leerDetallesActivo(a);
         const card = document.createElement('div');
         card.className = 'activo-item';
@@ -1943,8 +2069,6 @@ function renderListaActivos() {
                 ).join('') + '</ul></details>')
             : '';
 
-        const puedeDevolver = !esPropio && ['asignado', 'pendiente_validacion'].includes(a.estado);
-
         card.innerHTML =
             '<div class="activo-item-body">' +
                 '<div class="activo-item-head">' +
@@ -1953,17 +2077,33 @@ function renderListaActivos() {
                 '</div>' +
                 '<span class="activo-item-detalle">' + escapeHtml(partes.join(' · ') || 'Sin detalle adicional') + '</span>' +
                 histHtml +
-            '</div>' +
-            (puedeDevolver
-                ? '<button type="button" class="btn btn-ghost btn-quitar-activo" data-activo-id="' + escapeHtml(a.id_activo) + '">Solicitar devolucion</button>'
-                : '');
+            '</div>';
 
         lista.appendChild(card);
     });
+}
 
-    lista.querySelectorAll('.btn-quitar-activo').forEach((btn) => {
-        btn.addEventListener('click', () => onSolicitarDevolucionActivo(btn.getAttribute('data-activo-id')));
+function marcarInteraccionFormularioActivo() {
+    STATE.activoFormInteracted = true;
+}
+
+function bindFormularioActivo() {
+    const card = document.getElementById('card-activos');
+    if (!card) return;
+    card.querySelectorAll('input, select, textarea').forEach((el) => {
+        el.addEventListener('change', marcarInteraccionFormularioActivo);
+        el.addEventListener('input', marcarInteraccionFormularioActivo);
     });
+}
+
+function quiereDeclararEquipoDesdeFormulario() {
+    return !!STATE.activoFormInteracted;
+}
+
+function obtenerPayloadActivoDesdeFormulario() {
+    const t = STATE.trabajador;
+    if (!t || !quiereDeclararEquipoDesdeFormulario()) return null;
+    return construirPayloadActivo(t, leerDatosFormularioActivo());
 }
 
 function limpiarFormularioActivo() {
@@ -1975,10 +2115,26 @@ function limpiarFormularioActivo() {
         .forEach((id) => { const el = document.getElementById(id); if (el) el.value = ''; });
     const tipo = document.getElementById('activo-tipo');
     if (tipo) tipo.value = CONFIG.TIPO_ACTIVO_EMPRESA || 'Notebook';
+    STATE.activoFormInteracted = false;
     aplicarVisibilidadFormularioActivo();
 }
 
-function construirDetallesActivo(t, origen, conoceCaract) {
+function leerDatosFormularioActivo() {
+    return {
+        origen: origenEquipoSeleccionado(),
+        conoce: conoceCaracteristicasEquipo(),
+        marca:  valOrNull('activo-marca'),
+        modelo: valOrNull('activo-modelo'),
+        serie:  valOrNull('activo-serie'),
+        ram:    valOrNull('activo-ram'),
+        hd:     valOrNull('activo-hd'),
+        otro:   valOrNull('activo-otro')
+    };
+}
+
+function construirDetallesActivo(t, datos) {
+    const origen = datos.origen;
+    const conoceCaract = datos.conoce;
     const det = {
         origen: 'portal',
         origen_equipo: origen,
@@ -1987,14 +2143,10 @@ function construirDetallesActivo(t, origen, conoceCaract) {
         registrado_por_email: t.email_corporativo,
         portal_version: CONFIG.APP_VERSION
     };
-    const serie = valOrNull('activo-serie');
-    const ram = valOrNull('activo-ram');
-    const hd = valOrNull('activo-hd');
-    const otro = valOrNull('activo-otro');
-    if (serie) det.numero_serie = serie;
-    if (ram) det.ram = ram;
-    if (hd) det.almacenamiento = hd;
-    if (otro) det.otro_caracteristicas = otro;
+    if (datos.serie) det.numero_serie = datos.serie;
+    if (datos.ram) det.ram = datos.ram;
+    if (datos.hd) det.almacenamiento = datos.hd;
+    if (datos.otro) det.otro_caracteristicas = datos.otro;
     if (t.tipo_contrato) det.tipo_contrato_laboral = t.tipo_contrato;
     if (t.fecha_vencimiento_contrato) {
         det.fecha_vencimiento_contrato = String(t.fecha_vencimiento_contrato).substring(0, 10);
@@ -2002,126 +2154,87 @@ function construirDetallesActivo(t, origen, conoceCaract) {
     return det;
 }
 
-async function onAgregarActivo() {
-    const t = STATE.trabajador;
-    if (!t) return;
+function marcaActivoParaBd(datos) {
+    if (datos.marca) return datos.marca;
+    return datos.origen === 'propio' ? 'Equipo personal' : 'Sin indicar';
+}
 
-    const origen = origenEquipoSeleccionado();
-    const conoce = conoceCaracteristicasEquipo();
-    const marca = valOrNull('activo-marca');
-    const modelo = valOrNull('activo-modelo');
-    const serie = valOrNull('activo-serie');
-    const ram = valOrNull('activo-ram');
-    const hd = valOrNull('activo-hd');
-    const otro = valOrNull('activo-otro');
+function modeloActivoParaBd(datos) {
+    if (datos.modelo) return datos.modelo;
+    return 'Sin indicar';
+}
 
-    if (origen === 'propio' && yaTieneEquipoPropioDeclarado()) {
-        mostrarMensaje('warn', 'Ya tienes un computador propio declarado. Si necesitas cambiarlo, contacta a soporte.');
-        return;
-    }
+function normalizarPayloadActivoParaInsert(payload) {
+    const p = Object.assign({}, payload);
+    const det = p.detalles_adicionales || {};
+    const origen = det.origen_equipo === 'propio' ? 'propio' : 'empresa';
+    p.marca = marcaActivoParaBd({ marca: p.marca, origen });
+    p.modelo = modeloActivoParaBd({ modelo: p.modelo });
+    return p;
+}
 
-    if (origen === 'empresa' && conoce) {
-        if (!marca && !modelo && !serie) {
-            mostrarMensaje('error', 'Si conoces las caracteristicas, indica al menos marca, modelo o numero de serie.');
-            return;
-        }
-    }
-
-    if (origen === 'propio' && !marca && !modelo && !serie && !ram && !hd && !otro) {
-        mostrarMensaje('warn', 'Puedes guardar el computador propio sin detalles, pero te recomendamos indicar lo que sepas.');
-    }
-
+function construirPayloadActivo(t, datos) {
+    const origen = datos.origen;
     const tipo = origen === 'propio'
         ? (CONFIG.TIPO_ACTIVO_PROPIO || 'Computador propio')
         : (CONFIG.TIPO_ACTIVO_EMPRESA || 'Notebook');
-    const identificador = generarIdentificadorActivo(t, origen, serie);
-
-    const payload = {
+    const identificador = generarIdentificadorActivo(t, origen, datos.serie);
+    return {
         tipo:                   tipo,
-        marca:                  marca || (origen === 'propio' ? 'Equipo personal' : null),
-        modelo:                 modelo || null,
+        marca:                  marcaActivoParaBd(datos),
+        modelo:                 modeloActivoParaBd(datos),
         identificador_unico:    identificador,
         estado:                 'pendiente_validacion',
         id_trabajador_asignado: t.id_trabajador,
         fecha_asignacion:       null,
-        detalles_adicionales:   construirDetallesActivo(t, origen, conoce)
+        detalles_adicionales:   construirDetallesActivo(t, datos)
     };
-
-    showLoader();
-    try {
-        const { data, error } = await STATE.sb
-            .from('activos')
-            .insert(payload)
-            .select('*')
-            .single();
-
-        if (error) throw error;
-        if (data) STATE.activos.unshift(data);
-        limpiarFormularioActivo();
-        await cargarActivosEmpresa(t.id_trabajador);
-        const msgOk = origen === 'propio'
-            ? 'Computador propio registrado. Quedara pendiente de validacion.'
-            : 'Notebook declarado. Quedara pendiente de validacion por TI.';
-        mostrarMensaje('success', msgOk);
-    } catch (err) {
-        console.error('Error al declarar equipo:', err);
-        const msg = String((err && err.message) || '');
-        if (msg.toLowerCase().includes('unique') || msg.includes('activos_identificador_unico')) {
-            mostrarMensaje('error', 'Ese numero de serie ya existe. Verifica o deja el campo serie vacio.');
-        } else {
-            mostrarMensaje('error', 'No se pudo guardar la declaracion. Intenta nuevamente o contacta soporte.');
-        }
-    } finally {
-        hideLoader();
-    }
 }
 
-async function onSolicitarDevolucionActivo(idActivo) {
-    if (!idActivo || !STATE.trabajador) return;
-    if (!window.confirm('?Solicitar la devolucion de este activo a TI?')) return;
+function describirActivoPayload(payload) {
+    const det = payload.detalles_adicionales || {};
+    const esPropio = det.origen_equipo === 'propio' || det.es_equipo_personal === true;
+    const partes = [
+        esPropio ? 'Computador propio' : 'Notebook empresa',
+        [payload.marca, payload.modelo]
+            .filter((v) => v && v !== 'Equipo personal' && v !== 'Sin indicar')
+            .join(' '),
+        det.numero_serie ? ('Serie: ' + det.numero_serie) : '',
+        det.ram ? ('RAM: ' + det.ram) : '',
+        det.almacenamiento ? ('Disco: ' + det.almacenamiento) : ''
+    ].filter(Boolean);
+    return partes.join(' · ') || payload.tipo || 'Equipo';
+}
+
+async function guardarActivoDesdeFormulario() {
+    const payload = obtenerPayloadActivoDesdeFormulario();
+    if (!payload) return 0;
 
     const t = STATE.trabajador;
-    const activo = STATE.activos.find((a) => a.id_activo === idActivo);
-    if (!activo) return;
+    if (!t || !STATE.sb) return 0;
 
-    const det = Object.assign({}, leerDetallesActivo(activo), {
-        origen: 'portal',
-        registrado_por_email: t.email_corporativo,
-        solicitud_devolucion: new Date().toISOString()
-    });
+    const { error } = await STATE.sb
+        .from('activos')
+        .insert(normalizarPayloadActivoParaInsert(payload))
+        .select('id_activo')
+        .single();
 
-    showLoader();
-    try {
-        const { error } = await STATE.sb
-            .from('activos')
-            .update({
-                estado: 'devolucion_pendiente',
-                detalles_adicionales: det
-            })
-            .eq('id_activo', idActivo)
-            .eq('id_trabajador_asignado', t.id_trabajador);
-
-        if (error) throw error;
-
-        await STATE.sb.from('activos_historial').insert({
-            id_activo: idActivo,
-            tipo_evento: 'solicitud_devolucion',
-            estado_anterior: activo.estado,
-            estado_nuevo: 'devolucion_pendiente',
-            id_trabajador_anterior: t.id_trabajador,
-            registrado_por_email: t.email_corporativo,
-            origen: 'portal',
-            detalles: { motivo: 'Solicitud desde portal del trabajador' }
-        });
-
-        await cargarActivosEmpresa(t.id_trabajador);
-        mostrarMensaje('info', 'Devolucion solicitada. TI coordinara la recepcion del equipo.');
-    } catch (err) {
-        console.error('Error al solicitar devolucion:', err);
-        mostrarMensaje('error', 'No se pudo registrar la solicitud de devolucion.');
-    } finally {
-        hideLoader();
+    if (error) {
+        const msg = String(error.message || '');
+        if (msg.toLowerCase().includes('unique') || msg.includes('activos_identificador_unico')) {
+            throw new Error('Numero de serie duplicado en la declaracion de equipo. Corrige o deja el campo serie vacio.');
+        }
+        if (msg.includes('activos_estado_check')) {
+            throw new Error(
+                'La base de datos no acepta el estado pendiente_validacion. TI debe ejecutar schema_activos_estado_fix.sql en Supabase.'
+            );
+        }
+        throw error;
     }
+
+    limpiarFormularioActivo();
+    await cargarActivosEmpresa(t.id_trabajador);
+    return 1;
 }
 
 function valOrNull(id) {

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a2540" />
     <meta name="color-scheme" content="light" />
     <title>Portal del Trabajador - Monitoring</title>
-    <link rel="stylesheet" href="styles.css?v=34" />
+    <link rel="stylesheet" href="styles.css?v=43" />
 </head>
 <body>
 
@@ -397,10 +397,12 @@
                     <div class="field">
                         <label for="f-talla-guantes">Talla guantes</label>
                         <select id="f-talla-guantes" data-campo="talla_guantes" data-editable="1"></select>
+                        <span class="field-hint">Numerico: 7 a 11.</span>
                     </div>
                     <div class="field">
-                        <label for="f-talla-casco">Talla casco</label>
+                        <label for="f-talla-casco">Casco</label>
                         <select id="f-talla-casco" data-campo="talla_casco" data-editable="1"></select>
+                        <span class="field-hint">Indica Si o No.</span>
                     </div>
                     <div class="field">
                         <label for="f-talla-chaleco">Talla chaleco</label>
@@ -413,6 +415,7 @@
                     <div class="field">
                         <label for="f-respirador">Talla respirador</label>
                         <select id="f-respirador" data-campo="respirador" data-editable="1"></select>
+                        <span class="field-hint">S, M o L.</span>
                     </div>
                 </div>
             </article>
@@ -480,14 +483,14 @@
 
                 <div id="activos-lista" class="activos-lista" aria-live="polite"></div>
                 <p id="activos-vacio" class="activos-vacio" hidden>
-                    Aun no has declarado tu equipo. Completa el formulario abajo.
+                    Sin declaraciones previas. Si aplica, completa el formulario y confirma al final.
                 </p>
 
                 <div class="activos-form">
                     <p class="activos-form-title">Declarar mi equipo</p>
                     <p class="activos-form-hint">
-                        Solo <strong>Notebook</strong> de empresa o <strong>computador propio</strong>.
-                        Quedara pendiente de validacion por TI.
+                        Declaracion <strong>referencial y opcional</strong>. Completa solo si aplica;
+                        se guarda <strong>una sola vez</strong> al confirmar al final del formulario (sin boton intermedio).
                     </p>
 
                     <fieldset class="activos-fieldset">
@@ -544,12 +547,6 @@
                     </div>
 
                     <input type="hidden" id="activo-tipo" value="Notebook" />
-
-                    <div class="card-actions">
-                        <button id="btn-agregar-activo" class="btn btn-secondary" type="button">
-                            Guardar declaracion de equipo
-                        </button>
-                    </div>
                 </div>
             </article>
 
@@ -634,7 +631,7 @@
          MODAL: solicitud de cambio de documento
          ====================================================== -->
     <dialog id="modal-documento" class="modal">
-        <form method="dialog" class="modal-content" id="form-doc">
+        <div class="modal-content" id="form-doc" role="document">
             <header class="modal-header">
                 <h3>Solicitar correccion de documento</h3>
                 <button type="button" class="modal-close" data-close-modal="modal-documento" aria-label="Cerrar">&times;</button>
@@ -675,7 +672,7 @@
                 <button type="button" class="btn btn-ghost" data-close-modal="modal-documento">Cancelar</button>
                 <button type="button" id="btn-enviar-doc" class="btn btn-primary">Enviar solicitud</button>
             </footer>
-        </form>
+        </div>
     </dialog>
 
     <!-- ======================================================
@@ -769,8 +766,8 @@
          Scripts
          ====================================================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js?v=34"></script>
-    <script src="app.js?v=34"></script>
+    <script src="config.js?v=43"></script>
+    <script src="app.js?v=43"></script>
 
 </body>
 </html>

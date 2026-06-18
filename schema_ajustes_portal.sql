@@ -1,7 +1,7 @@
 -- =====================================================================
--- schema_ajustes_portal.sql - Ajustes portal v1.1
+-- schema_ajustes_portal.sql - Ajustes portal (genero, contador ingresos)
 -- =====================================================================
--- Ejecutar en Supabase SQL Editor.
+-- El contador ingresos_portal_count es solo informativo (sin bloqueo TI).
 -- =====================================================================
 
 -- 1. Genero: ampliar CHECK para valores del portal (M, F, NB)
@@ -19,7 +19,7 @@ ALTER TABLE public.trabajadores
         )
     );
 
--- 2. Contador de ingresos al portal y autorizacion TI
+-- 2. Contador de ingresos al portal (informativo; sin bloqueo automatico)
 ALTER TABLE public.trabajadores
     ADD COLUMN IF NOT EXISTS ingresos_portal_count      integer NOT NULL DEFAULT 0,
     ADD COLUMN IF NOT EXISTS portal_requiere_autorizacion_ti boolean NOT NULL DEFAULT false,
@@ -27,7 +27,10 @@ ALTER TABLE public.trabajadores
     ADD COLUMN IF NOT EXISTS fecha_autorizacion_ti      timestamptz,
     ADD COLUMN IF NOT EXISTS autorizado_por_email       varchar;
 
--- 3. Solicitudes de autorizacion TI (3er ingreso)
+COMMENT ON COLUMN public.trabajadores.ingresos_portal_count IS
+    'Numero de ingresos al portal. Solo informativo para el trabajador.';
+
+-- 3. Solicitudes autorizacion TI (legacy — portal ya no bloquea ingresos)
 CREATE TABLE IF NOT EXISTS public.solicitudes_autorizacion_portal (
     id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     trabajador_id         uuid NOT NULL REFERENCES public.trabajadores(id_trabajador) ON DELETE CASCADE,

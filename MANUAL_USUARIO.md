@@ -127,7 +127,11 @@ Puedes actualizar, entre otros:
 
 ### 7. Tallas EPP
 
-- Tallas de polera, camisa, chaqueta, calzado, guantes, casco, chaleco, buzo, respirador, etc.
+- Polera, camisa, chaqueta, chaleco, buzo: tallas en letra (S–XXL).
+- **Guantes:** numeros **7 a 11**.
+- **Casco:** **Si** o **No** (no es talla).
+- **Respirador:** **S**, **M** o **L**.
+- Calzado: numeros 36–47.
 
 ### 8. Información opcional
 
@@ -135,13 +139,17 @@ Puedes actualizar, entre otros:
 - Pase Codelco (activar/desactivar y número si aplica).
 - Enfermedades crónicas (texto libre).
 
-### 9. Activos entregados por la empresa
+### 9. Equipo de trabajo (notebook)
 
-Lista de equipos asignados (notebook, celular, etc.). Puedes:
+Declaracion **opcional y referencial** del equipo que usas:
 
-- **Validar** un activo si los datos coinciden.
-- **Reportar inconsistencia** si algo no cuadra (marca, modelo, serie, etc.).
-- **Agregar** un activo que tengas y no aparezca en la lista.
+- **Notebook de Monitoring** o **computador propio**.
+- Puedes indicar solo lo que sepas (marca, modelo, serie, RAM, disco, etc.).
+- **No hay boton de guardar en esta seccion**: lo que completes se registra al **Confirmar y enviar** al final del formulario (seccion 11).
+- Si ya tienes declaraciones anteriores, aparecen arriba en **solo lectura**.
+- Quedan **pendientes de validacion por TI**; el portal no modifica inventario oficial.
+
+Si no usas equipo o no quieres declarar nada, puedes omitir esta seccion y confirmar igual.
 
 ### 10. Bases legales del tratamiento de datos
 

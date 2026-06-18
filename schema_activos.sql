@@ -17,15 +17,19 @@ CREATE TABLE IF NOT EXISTS public.cat_tipo_activo (
     orden     smallint NOT NULL DEFAULT 0
 );
 
-INSERT INTO public.cat_tipo_activo (codigo, nombre, orden) VALUES
-    ('Notebook',   'Notebook',   1),
-    ('Computador', 'Computador', 2),
-    ('Celular',    'Celular',    3),
-    ('Monitor',    'Monitor',    4),
-    ('Tablet',     'Tablet',     5),
-    ('Radio',      'Radio',      6),
-    ('Otro',       'Otro',       7)
-ON CONFLICT (codigo) DO NOTHING;
+INSERT INTO public.cat_tipo_activo (codigo, nombre, orden, activo) VALUES
+    ('Notebook',          'Notebook (empresa)',     1, true),
+    ('Computador propio', 'Computador propio',      2, true),
+    ('Computador',        'Computador (legado)',    10, false),
+    ('Celular',           'Celular (legado)',       11, false),
+    ('Monitor',           'Monitor (legado)',       12, false),
+    ('Tablet',            'Tablet (legado)',        13, false),
+    ('Radio',             'Radio (legado)',         14, false),
+    ('Otro',              'Otro (legado)',          15, false)
+ON CONFLICT (codigo) DO UPDATE SET
+    nombre = EXCLUDED.nombre,
+    orden  = EXCLUDED.orden,
+    activo = EXCLUDED.activo;
 
 CREATE TABLE IF NOT EXISTS public.cat_estado_activo (
     codigo    varchar(20) PRIMARY KEY,
@@ -42,6 +46,61 @@ INSERT INTO public.cat_estado_activo (codigo, nombre, es_final, orden) VALUES
     ('devolucion_pendiente', 'Devolucion pendiente',        false, 5),
     ('dado_baja',            'Dado de baja',                true,  6)
 ON CONFLICT (codigo) DO NOTHING;
+
+ALTER TABLE public.activos DROP CONSTRAINT IF EXISTS activos_estado_check;
+
+UPDATE public.activos
+SET estado = CASE lower(trim(estado))
+    WHEN 'disponible'            THEN 'disponible'
+    WHEN 'pendiente_validacion'    THEN 'pendiente_validacion'
+    WHEN 'pendiente validacion'    THEN 'pendiente_validacion'
+    WHEN 'pendiente'               THEN 'pendiente_validacion'
+    WHEN 'asignado'                THEN 'asignado'
+    WHEN 'activo'                  THEN 'asignado'
+    WHEN 'entregado'               THEN 'asignado'
+    WHEN 'en uso'                  THEN 'asignado'
+    WHEN 'en_reparacion'           THEN 'en_reparacion'
+    WHEN 'reparacion'              THEN 'en_reparacion'
+    WHEN 'devolucion_pendiente'    THEN 'devolucion_pendiente'
+    WHEN 'devolucion pendiente'    THEN 'devolucion_pendiente'
+    WHEN 'dado_baja'               THEN 'dado_baja'
+    WHEN 'baja'                    THEN 'dado_baja'
+    WHEN 'inactivo'                THEN 'dado_baja'
+    ELSE estado
+END
+WHERE estado IS NOT NULL;
+
+UPDATE public.activos
+SET estado = CASE
+    WHEN id_trabajador_asignado IS NOT NULL THEN 'asignado'
+    ELSE 'disponible'
+END
+WHERE estado IS NULL
+   OR estado NOT IN (
+        'disponible', 'pendiente_validacion', 'asignado',
+        'en_reparacion', 'devolucion_pendiente', 'dado_baja'
+    );
+
+ALTER TABLE public.activos
+    ADD CONSTRAINT activos_estado_check
+    CHECK (estado IN (
+        'disponible',
+        'pendiente_validacion',
+        'asignado',
+        'en_reparacion',
+        'devolucion_pendiente',
+        'dado_baja'
+    ));
+
+-- Indices y reglas de negocio en activos (portal)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_activos_identificador_unico
+    ON public.activos (identificador_unico);
+
+CREATE INDEX IF NOT EXISTS idx_activos_trabajador_asignado
+    ON public.activos (id_trabajador_asignado);
+
+-- Declaraciones referenciales: sin limite de equipos propios por trabajador.
+DROP INDEX IF EXISTS idx_activos_un_equipo_propio_por_trabajador;
 
 -- ---------------------------------------------------------------------
 -- 1. Proveedores del activo (compra, arriendo, leasing, mantencion)
@@ -307,6 +366,7 @@ CREATE POLICY activos_insert_portal
     ON public.activos FOR INSERT TO authenticated
     WITH CHECK (
         estado = 'pendiente_validacion'
+        AND tipo IN ('Notebook', 'Computador propio')
         AND id_trabajador_asignado IN (
             SELECT id_trabajador FROM public.trabajadores
             WHERE lower(email_corporativo) = lower(auth.jwt() ->> 'email')
