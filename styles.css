@@ -174,17 +174,20 @@ a:hover { text-decoration: underline; }
 
 .monitoring-logo .logo-img {
     display: block;
-    max-width: 200px;
-    width: min(200px, 72vw);
+    max-width: 128px;
+    width: min(128px, 40vw);
     height: auto;
+    aspect-ratio: 1;
+    object-fit: contain;
 }
 
 .monitoring-logo .logo-img-brand {
-    max-width: none;
+    max-width: 44px;
     max-height: 44px;
-    width: auto;
+    width: 44px;
+    height: 44px;
     object-fit: contain;
-    object-position: left center;
+    object-position: center;
 }
 
 .monitoring-logo.brand.monitoring-logo--image {
