@@ -112,6 +112,41 @@ SET detalles_adicionales = COALESCE(detalles_adicionales, '{}'::jsonb)
 WHERE tipo = 'Notebook'
   AND (detalles_adicionales->>'origen_equipo') IS NULL;
 
+-- CHECK tipo: portal (Notebook / Computador propio) + legado TI
+ALTER TABLE public.activos DROP CONSTRAINT IF EXISTS activos_tipo_check;
+
+UPDATE public.activos
+SET tipo = CASE lower(trim(tipo))
+    WHEN 'notebook'           THEN 'Notebook'
+    WHEN 'laptop'             THEN 'Notebook'
+    WHEN 'computador propio'  THEN 'Computador propio'
+    WHEN 'equipo propio'      THEN 'Computador propio'
+    WHEN 'propio'             THEN 'Computador propio'
+    WHEN 'computador'         THEN 'Computador'
+    WHEN 'celular'            THEN 'Celular'
+    WHEN 'monitor'            THEN 'Monitor'
+    WHEN 'tablet'             THEN 'Tablet'
+    WHEN 'radio'              THEN 'Radio'
+    WHEN 'otro'               THEN 'Otro'
+    ELSE tipo
+END
+WHERE tipo IS NOT NULL;
+
+UPDATE public.activos
+SET tipo = 'Otro'
+WHERE tipo IS NULL
+   OR tipo NOT IN (
+        'Notebook', 'Computador propio', 'Computador',
+        'Celular', 'Monitor', 'Tablet', 'Radio', 'Otro'
+    );
+
+ALTER TABLE public.activos
+    ADD CONSTRAINT activos_tipo_check
+    CHECK (tipo IN (
+        'Notebook', 'Computador propio', 'Computador',
+        'Celular', 'Monitor', 'Tablet', 'Radio', 'Otro'
+    ));
+
 -- ---------------------------------------------------------------------
 -- 5. Estados de activo
 -- ---------------------------------------------------------------------

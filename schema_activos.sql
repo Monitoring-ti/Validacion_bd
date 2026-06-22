@@ -31,6 +31,40 @@ ON CONFLICT (codigo) DO UPDATE SET
     orden  = EXCLUDED.orden,
     activo = EXCLUDED.activo;
 
+ALTER TABLE public.activos DROP CONSTRAINT IF EXISTS activos_tipo_check;
+
+UPDATE public.activos
+SET tipo = CASE lower(trim(tipo))
+    WHEN 'notebook'           THEN 'Notebook'
+    WHEN 'laptop'             THEN 'Notebook'
+    WHEN 'computador propio'  THEN 'Computador propio'
+    WHEN 'equipo propio'      THEN 'Computador propio'
+    WHEN 'propio'             THEN 'Computador propio'
+    WHEN 'computador'         THEN 'Computador'
+    WHEN 'celular'            THEN 'Celular'
+    WHEN 'monitor'            THEN 'Monitor'
+    WHEN 'tablet'             THEN 'Tablet'
+    WHEN 'radio'              THEN 'Radio'
+    WHEN 'otro'               THEN 'Otro'
+    ELSE tipo
+END
+WHERE tipo IS NOT NULL;
+
+UPDATE public.activos
+SET tipo = 'Otro'
+WHERE tipo IS NULL
+   OR tipo NOT IN (
+        'Notebook', 'Computador propio', 'Computador',
+        'Celular', 'Monitor', 'Tablet', 'Radio', 'Otro'
+    );
+
+ALTER TABLE public.activos
+    ADD CONSTRAINT activos_tipo_check
+    CHECK (tipo IN (
+        'Notebook', 'Computador propio', 'Computador',
+        'Celular', 'Monitor', 'Tablet', 'Radio', 'Otro'
+    ));
+
 CREATE TABLE IF NOT EXISTS public.cat_estado_activo (
     codigo    varchar(20) PRIMARY KEY,
     nombre    varchar(50) NOT NULL,

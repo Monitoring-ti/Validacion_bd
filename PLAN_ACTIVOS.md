@@ -169,9 +169,10 @@ ORDER BY a.created_at DESC;
 1. `identificador_unico` es **unico** (el portal agrega sufijo si repite serie).
 2. `marca` y `modelo` son **NOT NULL** en BD; el portal envia defaults `Sin indicar` / `Equipo personal`.
 3. `estado` debe cumplir `activos_estado_check` (incluye `pendiente_validacion`). Si falla, ejecutar `schema_activos_estado_fix.sql`.
-4. **Sin limite** de declaraciones por trabajador (dato referencial; pueden coexistir varias filas).
-5. RLS: el trabajador solo ve e inserta activos con su `email` de sesion.
-6. El trabajador **no elimina ni actualiza** activos desde el portal (salvo politicas futuras explicitas).
+4. `tipo` debe cumplir `activos_tipo_check` (incluye `Notebook` y `Computador propio`). Si falla, ejecutar `schema_activos_tipo_fix.sql`.
+5. **Sin limite** de declaraciones por trabajador (dato referencial; pueden coexistir varias filas).
+6. RLS: el trabajador solo ve e inserta activos con su `email` de sesion.
+7. El trabajador **no elimina ni actualiza** activos desde el portal (salvo politicas futuras explicitas).
 
 ---
 
@@ -188,9 +189,12 @@ Ejecutar en este orden (idempotentes salvo datos legacy):
 | 5 | `schema_revision_portal.sql` | Revision consolidada portal |
 | 6 | `schema_activos_referencial.sql` | Sin indice unico equipo propio |
 | 7 | `schema_activos_estado_fix.sql` | CHECK estado + normalizar filas legacy |
-| 8 | `schema_solicitud_documento.sql` | Solicitudes correccion documento (otro modulo) |
+| 8 | `schema_activos_tipo_fix.sql` | CHECK tipo + permitir Notebook / Computador propio |
+| 9 | `schema_solicitud_documento.sql` | Solicitudes correccion documento (otro modulo) |
 
 **Error frecuente:** `activos_estado_check` → ejecutar `schema_activos_estado_fix.sql` completo (normaliza filas antes de recrear constraint).
+
+**Error frecuente:** `activos_tipo_check` → ejecutar `schema_activos_tipo_fix.sql` completo (el CHECK antiguo no incluye `Notebook` ni `Computador propio`).
 
 ---
 

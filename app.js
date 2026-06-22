@@ -2229,6 +2229,11 @@ async function guardarActivoDesdeFormulario() {
                 'La base de datos no acepta el estado pendiente_validacion. TI debe ejecutar schema_activos_estado_fix.sql en Supabase.'
             );
         }
+        if (msg.includes('activos_tipo_check')) {
+            throw new Error(
+                'La base de datos no acepta el tipo de equipo (Notebook / Computador propio). TI debe ejecutar schema_activos_tipo_fix.sql en Supabase.'
+            );
+        }
         throw error;
     }
 

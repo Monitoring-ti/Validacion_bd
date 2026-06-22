@@ -157,6 +157,41 @@ a:hover { text-decoration: underline; }
     opacity: 1;
 }
 
+.monitoring-logo--image {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.monitoring-logo--image.login-logo {
+    border: none;
+    padding: 0;
+    margin-bottom: 12px;
+    letter-spacing: normal;
+    font-size: inherit;
+    color: inherit;
+}
+
+.monitoring-logo .logo-img {
+    display: block;
+    max-width: 200px;
+    width: min(200px, 72vw);
+    height: auto;
+}
+
+.monitoring-logo .logo-img-brand {
+    max-width: none;
+    max-height: 44px;
+    width: auto;
+    object-fit: contain;
+    object-position: left center;
+}
+
+.monitoring-logo.brand.monitoring-logo--image {
+    flex-direction: row;
+    align-items: center;
+}
+
 .monitoring-logo.brand:hover .logo-word {
     color: #fff;
     text-shadow: 0 0 14px rgba(251, 146, 60, 0.55);

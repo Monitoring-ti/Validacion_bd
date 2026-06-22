@@ -8,7 +8,7 @@
 
 window.CONFIG = {
     // --- Version del portal ---
-    APP_VERSION: '1.0.1.2',
+    APP_VERSION: '1.1.0',
     PRODUCTION_ACTIVE: true,
 
     // --- Supabase ---
